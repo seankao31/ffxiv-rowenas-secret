@@ -1,2 +1,8 @@
 # Claude Code local settings (machine-specific)
 .claude/settings.local.json
+
+# Dependencies
+node_modules/
+
+# Built frontend (regenerated via `bun run build:client`)
+dist/
