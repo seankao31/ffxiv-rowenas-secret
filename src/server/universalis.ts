@@ -6,6 +6,17 @@ const BATCH_SIZE = 100
 const REQUEST_TIMEOUT_MS = 10_000
 const MAX_RETRIES = 3
 
+export const DC_WORLDS: { id: number; name: string }[] = [
+  { id: 4028, name: '伊弗利特' },
+  { id: 4029, name: '迦樓羅' },
+  { id: 4030, name: '利維坦' },
+  { id: 4031, name: '鳳凰' },
+  { id: 4032, name: '奧汀' },
+  { id: 4033, name: '巴哈姆特' },
+  { id: 4034, name: '拉姆' },
+  { id: 4035, name: '泰坦' },
+]
+
 export class Semaphore {
   private count: number
   private readonly queue: (() => void)[] = []
@@ -197,6 +208,51 @@ export async function fetchDCListings(
           quantity: l.quantity,
           worldID: l.worldID,
           worldName: l.worldName,
+          hq: l.hq,
+        })),
+        lastUploadTime: item.lastUploadTime ?? 0,
+      }))
+    })
+  )
+  return results.flat()
+}
+
+export async function fetchWorldListings(
+  world: { id: number; name: string },
+  itemIds: number[],
+  onBatchDone?: ProgressCallback,
+): Promise<DCBatchResult[]> {
+  const batches = chunk(itemIds, BATCH_SIZE)
+  let completed = 0
+  const results = await Promise.all(
+    batches.map(async batch => {
+      const ids = batch.join(',')
+      const data = await fetchWithRetry(
+        `${BASE_URL}/${encodeURIComponent(world.name)}/${ids}`
+      ) as {
+        items?: Record<string, {
+          itemID: number
+          lastUploadTime: number
+          listings: Array<{
+            lastReviewTime: number
+            pricePerUnit: number
+            quantity: number
+            hq: boolean
+          }>
+        }>
+      } | null
+      completed++
+      onBatchDone?.(completed, batches.length)
+      if (!data?.items) return []
+      return Object.values(data.items).map(item => ({
+        itemID: item.itemID,
+        worldUploadTimes: { [world.id]: item.lastUploadTime ?? 0 },
+        listings: (item.listings ?? []).map(l => ({
+          lastReviewTime: l.lastReviewTime * 1000,
+          pricePerUnit: l.pricePerUnit,
+          quantity: l.quantity,
+          worldID: world.id,
+          worldName: world.name,
           hq: l.hq,
         })),
         lastUploadTime: item.lastUploadTime ?? 0,
