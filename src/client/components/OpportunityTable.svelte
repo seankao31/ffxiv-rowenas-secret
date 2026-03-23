@@ -8,6 +8,8 @@
   let expanded = $state(new Set<number>())
 
   function toggle(id: number) {
+    // Reassign to a new Set — Svelte 5 $state tracks object identity, not contents.
+    // In-place mutation (expanded.add/delete) won't trigger reactivity.
     const next = new Set(expanded)
     if (next.has(id)) next.delete(id)
     else next.add(id)
