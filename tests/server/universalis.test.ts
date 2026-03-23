@@ -1,6 +1,6 @@
 // tests/server/universalis.test.ts
 import { test, expect, describe, mock, afterEach } from 'bun:test'
-import { RateLimiter, Semaphore, fetchMarketableItems, fetchDCListings, fetchItemName } from '../../src/server/universalis.ts'
+import { RateLimiter, Semaphore, fetchMarketableItems, fetchDCListings, fetchWorldListings, fetchItemName } from '../../src/server/universalis.ts'
 
 describe('fetchMarketableItems', () => {
   const originalFetch = globalThis.fetch
@@ -100,6 +100,104 @@ describe('fetchDCListings', () => {
     ) as unknown as typeof fetch
 
     const result = await fetchDCListings([2])
+
+    expect(result).toEqual([])
+  })
+})
+
+// Helper: build a minimal single-world batch response (no worldID/worldName —
+// the single-world API omits them; fetchWorldListings injects them)
+function worldResponse(items: Record<number, Record<string, unknown>>) {
+  const ids = Object.keys(items).map(Number)
+  const entries: Record<string, unknown> = {}
+  for (const [id, extra] of Object.entries(items)) {
+    entries[id] = {
+      itemID: Number(id),
+      lastUploadTime: 1_774_271_896_711,
+      listings: [],
+      recentHistory: [],
+      ...extra,
+    }
+  }
+  return JSON.stringify({ itemIDs: ids, items: entries, unresolvedItems: [] })
+}
+
+describe('fetchWorldListings', () => {
+  const originalFetch = globalThis.fetch
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch
+  })
+
+  test('returns listings with worldID and worldName injected', async () => {
+    globalThis.fetch = mock(async () =>
+      new Response(worldResponse({
+        2: {
+          listings: [{
+            lastReviewTime: 1_774_271_895,
+            pricePerUnit: 500, quantity: 3,
+            hq: false,
+          }],
+        },
+      }), { status: 200 })
+    ) as unknown as typeof fetch
+
+    const result = await fetchWorldListings(
+      { id: 4028, name: '伊弗利特' },
+      [2],
+    )
+
+    expect(result.length).toBe(1)
+    expect(result[0].itemID).toBe(2)
+    expect(result[0].listings[0].worldID).toBe(4028)
+    expect(result[0].listings[0].worldName).toBe('伊弗利特')
+    expect(result[0].listings[0].lastReviewTime).toBe(1_774_271_895 * 1000)
+  })
+
+  test('populates worldUploadTimes from item lastUploadTime', async () => {
+    globalThis.fetch = mock(async () =>
+      new Response(worldResponse({ 2: {} }), { status: 200 })
+    ) as unknown as typeof fetch
+
+    const result = await fetchWorldListings(
+      { id: 4028, name: '伊弗利特' },
+      [2],
+    )
+
+    expect(result[0].worldUploadTimes).toEqual({ 4028: 1_774_271_896_711 })
+  })
+
+  test('handles multi-item batch with correct per-item results', async () => {
+    globalThis.fetch = mock(async () =>
+      new Response(worldResponse({
+        2: { listings: [{ lastReviewTime: 100, pricePerUnit: 10, quantity: 1, hq: false }] },
+        3: { listings: [{ lastReviewTime: 200, pricePerUnit: 20, quantity: 5, hq: true }] },
+      }), { status: 200 })
+    ) as unknown as typeof fetch
+
+    const result = await fetchWorldListings(
+      { id: 4034, name: '拉姆' },
+      [2, 3],
+    )
+
+    expect(result.length).toBe(2)
+    const item2 = result.find(r => r.itemID === 2)!
+    const item3 = result.find(r => r.itemID === 3)!
+    expect(item2.listings[0].worldID).toBe(4034)
+    expect(item2.listings[0].worldName).toBe('拉姆')
+    expect(item3.listings[0].worldID).toBe(4034)
+    expect(item3.listings[0].hq).toBe(true)
+  })
+
+  test('returns empty array when API returns HTTP error', async () => {
+    globalThis.fetch = mock(async () =>
+      new Response('', { status: 500 })
+    ) as unknown as typeof fetch
+
+    const result = await fetchWorldListings(
+      { id: 4028, name: '伊弗利特' },
+      [2],
+    )
 
     expect(result).toEqual([])
   })
