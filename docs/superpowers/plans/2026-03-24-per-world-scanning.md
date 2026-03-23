@@ -44,6 +44,38 @@ Teamcraft uses 5 concurrent / 8 req/s — more conservative than our 8 concurren
 - Even with 8× more requests (168 × 8 = 1,344), at 20 req/s → theoretical minimum ~67s
 - Actual will be higher due to response time, but likely 2-4× faster than DC endpoint
 
+### Actual benchmark results (2026-03-24, post-implementation)
+
+**DC strategy (500 items, 5 batches):**
+
+| Phase | Time | Rate |
+|-------|------|------|
+| Phase 1 (DC) | 21.4s | 0.2 batch/s, 23 items/s |
+| Phase 2 (Home) | 3.2s | 1.6 batch/s, 157 items/s |
+| **Total** | **25.6s** | **19 items/s** |
+
+**Per-world strategy (500 items, 5 batches × 8 worlds):**
+
+| World | Time | Items | Listings |
+|-------|------|-------|----------|
+| 伊弗利特 | 2.8s | 500 | 1,856 |
+| 迦樓羅 | 2.3s | 500 | 1,784 |
+| 利維坦 | 2.2s | 500 | 1,795 |
+| 鳳凰 | 2.3s | 500 | 1,647 |
+| 奧汀 | 1.8s | 500 | 1,675 |
+| 巴哈姆特 | 2.0s | 500 | 1,684 |
+| 拉姆 | 0.4s | 500 | 0 |
+| 泰坦 | 1.5s | 500 | 415 |
+| **Phase 1 total** | **15.4s** | | **10,856** |
+
+| Phase | Time | Rate |
+|-------|------|------|
+| Phase 1 (per-world) | 15.4s | 1.8–2.8 batch/s per world |
+| Phase 2 (Home) | 2.2s | 2.3 batch/s, 232 items/s |
+| **Total** | **19.0s** | **26 items/s** |
+
+**Result: Per-world is ~28% faster on Phase 1 (15.4s vs 21.4s) and ~26% faster overall (19.0s vs 25.6s).** Default set to `per-world`.
+
 ### DC worlds (陸行鳥, 繁中服 region)
 
 | ID | Name | Notes |
