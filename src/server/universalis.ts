@@ -115,25 +115,30 @@ function chunk<T>(arr: T[], size: number): T[][] {
 }
 
 export async function fetchMarketableItems(): Promise<number[]> {
-  const data = await fetchWithRetry(`${BASE_URL}/marketable`) as number[] | null
-  return data ?? []
+  const data = await fetchWithRetry(`${BASE_URL}/marketable`)
+  if (!Array.isArray(data)) {
+    if (data !== null) console.warn('[universalis] /marketable returned unexpected shape:', typeof data)
+    return []
+  }
+  return data as number[]
 }
 
 export async function fetchItemName(itemID: number): Promise<string | null> {
   const data = await fetchWithRetry(
-    `${BASE_URL}/extra/content/item/${itemID}`
-  ) as { name?: string } | null
-  return data?.name ?? null
+    `https://xivapi.com/item/${itemID}?columns=Name`
+  ) as { Name?: string } | null
+  return data?.Name ?? null
 }
 
 export type DCBatchResult = {
   itemID: number
+  worldUploadTimes: Record<number, number>  // per-world last upload time, unix ms (from API)
   listings: Array<{
     pricePerUnit: number
     quantity: number
     worldID: number
     worldName: string
-    lastReviewTime: number
+    lastReviewTime: number  // unix ms (converted from API's seconds on ingestion)
     hq: boolean
   }>
   lastUploadTime: number
@@ -162,14 +167,30 @@ export async function fetchDCListings(itemIds: number[]): Promise<DCBatchResult[
       ) as {
         items?: Record<string, {
           itemID: number
-          listings: DCBatchResult['listings']
+          worldUploadTimes?: Record<string, number>
+          listings: Array<{
+            lastReviewTime: number   // seconds from API
+            pricePerUnit: number
+            quantity: number
+            worldID: number
+            worldName: string
+            hq: boolean
+          }>
           lastUploadTime: number
         }>
       } | null
       if (!data?.items) return []
       return Object.values(data.items).map(item => ({
         itemID: item.itemID,
-        listings: item.listings ?? [],
+        worldUploadTimes: item.worldUploadTimes ?? {},
+        listings: (item.listings ?? []).map(l => ({
+          lastReviewTime: l.lastReviewTime * 1000,  // seconds → ms
+          pricePerUnit: l.pricePerUnit,
+          quantity: l.quantity,
+          worldID: l.worldID,
+          worldName: l.worldName,
+          hq: l.hq,
+        })),
         lastUploadTime: item.lastUploadTime ?? 0,
       }))
     })
