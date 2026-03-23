@@ -32,4 +32,4 @@ Main thread handles HTTP and in-memory cache; a Worker Thread runs the scan loop
 ## Consequences
 
 - In-memory cache is lost on process restart. First results appear ~25s after startup (per ADR-005 scan timing calculation).
-- Simpler deployment: one process, one `npm start`.
+- Simpler deployment: one process, one `bun start`.
