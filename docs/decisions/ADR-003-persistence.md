@@ -5,7 +5,7 @@
 
 ## Context
 
-The scanner produces a raw dataset of ~10,000 items (~50MB) each scan cycle. This data needs to be accessible to the scoring endpoint. SQLite and Redis were considered as persistence layers.
+The scanner produces a raw dataset of ~20,000 items (~100MB) each scan cycle (infrastructure sizing baseline — see ADR-005). This data needs to be accessible to the scoring endpoint. SQLite and Redis were considered as persistence layers.
 
 ## Alternatives Considered
 

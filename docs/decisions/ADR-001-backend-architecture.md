@@ -5,7 +5,7 @@
 
 ## Context
 
-The scanner needs to continuously poll the Universalis API across ~10,000 items, cache results, and serve them to a Svelte frontend. Three architectural patterns were considered.
+The scanner needs to continuously poll the Universalis API across ~20,000 items (infrastructure sizing baseline — see ADR-005), cache results, and serve them to a Svelte frontend. Three architectural patterns were considered.
 
 ## Alternatives Considered
 

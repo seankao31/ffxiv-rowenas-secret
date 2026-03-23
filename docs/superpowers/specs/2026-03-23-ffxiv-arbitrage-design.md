@@ -170,7 +170,8 @@ type ItemData = {
   homeLastUploadTime: number
 
   listings: Listing[]           // all worlds in DC (from Phase 1)
-  regularSaleVelocity: number   // 利維坦-specific (from Phase 2)
+  regularSaleVelocity: number   // 利維坦-specific, HQ + NQ combined (from Phase 2)
+  hqSaleVelocity: number        // 利維坦-specific, HQ only — used when hq=true (from Phase 2)
   recentHistory: SaleRecord[]   // 利維坦-specific (from Phase 2)
 }
 
