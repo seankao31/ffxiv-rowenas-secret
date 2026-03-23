@@ -65,3 +65,29 @@ On HTTP 429 response: exponential backoff (1s → 2s → 4s → ...), max 3 retr
 
 - The 8-connection cap means Phase 1 and Phase 2 share the same pool — they run sequentially (Phase 1 completes, then Phase 2 begins) to avoid exceeding the connection limit.
 - The rate limiter and semaphore are shared across all fetch functions regardless of scan strategy (see [ADR-006](ADR-006-per-world-scan-strategy.md)).
+
+## Empirical Validation (2026-03-24)
+
+Real scan of 16,736 marketable items using the per-world strategy (168 batches × 100 items):
+
+### Observed request rates
+
+| Phase | Batches | Time (s) | Avg req/s |
+|-------|---------|----------|-----------|
+| Phase 1: 伊弗利特 | 168 | 36.0 | 4.67 |
+| Phase 1: 迦樓羅 | 168 | 33.8 | 4.97 |
+| Phase 1: 利維坦 | 168 | 37.7 | 4.46 |
+| Phase 1: 鳳凰 | 168 | 41.0 | 4.10 |
+| Phase 1: 奧汀 | 168 | 40.6 | 4.14 |
+| Phase 1: 巴哈姆特 | 168 | 46.1 | 3.64 |
+| Phase 1: 拉姆 | 168 | 8.9 | **18.88** |
+| Phase 1: 泰坦 | 168 | 19.9 | 8.44 |
+| Phase 2 (home) | 168 | 35.6 | 4.72 |
+| **Total** | **1,512** | **299.7** | **5.04** |
+
+### Findings
+
+- **Response latency, not the rate limiter, is the dominant bottleneck** for most worlds. With 8 connections and ~2s response times, throughput settles around 4–5 req/s — well below the 20 req/s cap.
+- **拉姆 (18.88 req/s)** is the exception: the API responded fast enough (likely cache-warm or lower listing volume) that the 20 req/s token bucket became the actual constraint. Even at this peak, we remain under the 25 req/s sustained limit with 6 req/s headroom.
+- **Burst safety:** The worst-case burst (~20 req/s from the token bucket) is well under the 50 req/s burst cap.
+- **Total cycle time (299.7s)** came in significantly under the 20,000-item theoretical estimate of 649s, because the 16,736 actual item count is smaller and most worlds' response latency keeps throughput below the rate cap.
