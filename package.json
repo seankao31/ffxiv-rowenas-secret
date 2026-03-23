@@ -1,0 +1,22 @@
+{
+  "name": "ffxiv-arbitrage",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun src/server/index.ts",
+    "dev:server": "bun --watch src/server/index.ts",
+    "dev:client": "vite",
+    "build:client": "vite build",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "express": "^5.0.0"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "svelte": "^5.0.0",
+    "vite": "^6.0.0",
+    "@types/express": "^5.0.0",
+    "typescript": "^5.7.0"
+  }
+}
