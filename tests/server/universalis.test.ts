@@ -1,6 +1,6 @@
 // tests/server/universalis.test.ts
 import { test, expect, describe, mock, afterEach } from 'bun:test'
-import { RateLimiter, Semaphore, fetchMarketableItems, fetchDCListings, fetchWorldListings, fetchItemName } from '../../src/server/universalis.ts'
+import { RateLimiter, Semaphore, fetchMarketableItems, fetchDCListings, fetchWorldListings, fetchItemNames } from '../../src/server/universalis.ts'
 
 describe('fetchMarketableItems', () => {
   const originalFetch = globalThis.fetch
@@ -203,31 +203,37 @@ describe('fetchWorldListings', () => {
   })
 })
 
-describe('fetchItemName', () => {
+describe('fetchItemNames', () => {
   const originalFetch = globalThis.fetch
 
   afterEach(() => {
     globalThis.fetch = originalFetch
   })
 
-  test('returns Name field from XIVAPI response', async () => {
+  test('parses mogboard items.json into id→name map', async () => {
+    const mockData = {
+      '2': { name: '火之碎晶' },
+      '7': { name: '水之碎晶' },
+    }
     globalThis.fetch = mock(async () =>
-      new Response(JSON.stringify({ Name: 'Fire Shard' }), { status: 200 })
+      new Response(JSON.stringify(mockData), { status: 200 })
     ) as unknown as typeof fetch
 
-    const result = await fetchItemName(2)
+    const result = await fetchItemNames()
 
-    expect(result).toBe('Fire Shard')
+    expect(result.size).toBe(2)
+    expect(result.get(2)).toBe('火之碎晶')
+    expect(result.get(7)).toBe('水之碎晶')
   })
 
-  test('returns null when API returns 404', async () => {
+  test('returns empty map on HTTP error', async () => {
     globalThis.fetch = mock(async () =>
-      new Response('', { status: 404 })
+      new Response('', { status: 500 })
     ) as unknown as typeof fetch
 
-    const result = await fetchItemName(2)
+    const result = await fetchItemNames()
 
-    expect(result).toBeNull()
+    expect(result.size).toBe(0)
   })
 })
 

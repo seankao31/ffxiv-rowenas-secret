@@ -1,6 +1,6 @@
 // src/server/scanner.ts
-import { fetchMarketableItems, fetchDCListings, fetchHomeListings, fetchWorldListings, fetchItemName, DC_WORLDS } from './universalis.ts'
-import { setItem, setItemName, setScanMeta, getScanMeta } from './cache.ts'
+import { fetchMarketableItems, fetchDCListings, fetchHomeListings, fetchWorldListings, fetchItemNames, DC_WORLDS } from './universalis.ts'
+import { setItem, setNameMap, setScanMeta, getScanMeta } from './cache.ts'
 import type { ItemData, Listing, SaleRecord } from '../shared/types.ts'
 
 const HOME_WORLD_ID = 4030
@@ -8,18 +8,6 @@ const SCAN_COOLDOWN_MS = 60_000
 
 type ScanStrategy = 'dc' | 'per-world'
 const SCAN_STRATEGY: ScanStrategy = (process.env['SCAN_STRATEGY'] as ScanStrategy) || 'per-world'
-
-async function hydrateNames(itemIds: number[]): Promise<void> {
-  for (const id of itemIds) {
-    try {
-      const name = await fetchItemName(id)
-      if (name) setItemName(id, name)
-    } catch {
-      // non-fatal — name resolution is best-effort
-    }
-    await new Promise(r => setTimeout(r, 50))  // ~20 names/s
-  }
-}
 
 function buildItemData(
   itemID: number,
@@ -201,8 +189,9 @@ export async function startScanner(): Promise<void> {
   console.log(`[scanner] Found ${itemIds.length} marketable items`)
   console.log(`[scanner] Using "${SCAN_STRATEGY}" scan strategy`)
 
-  // Background name hydration — does not block first scan
-  hydrateNames(itemIds).catch(err => console.error('[scanner] Name hydration error:', err))
+  // Fetch all item names in one shot from mogboard's TC data
+  const names = await fetchItemNames()
+  if (names.size > 0) setNameMap(names)
 
   while (true) {
     try {

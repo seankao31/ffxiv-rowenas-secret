@@ -19,8 +19,11 @@ export function getAllItems(): Map<number, ItemData> {
   return itemCache
 }
 
-export function setItemName(itemID: number, name: string): void {
-  nameCache.set(itemID, name)
+export function setNameMap(names: Map<number, string>): void {
+  nameCache.clear()
+  for (const [id, name] of names) {
+    nameCache.set(id, name)
+  }
 }
 
 export function getNameMap(): Map<number, string> {
