@@ -1129,7 +1129,7 @@ git commit -m "feat: add scoring engine with confidence-weighted multi-world ran
 **Files:**
 - Create: `src/server/api.ts`
 
-- [ ] **Step 1: Write api.ts**
+- [x] **Step 1: Write api.ts**
 
 ```typescript
 // src/server/api.ts
@@ -1189,7 +1189,7 @@ router.get('/opportunities', (req, res) => {
 })
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add src/server/api.ts
@@ -1203,7 +1203,7 @@ git commit -m "feat: add REST API route for opportunities with threshold validat
 **Files:**
 - Create: `src/server/index.ts`
 
-- [ ] **Step 1: Write index.ts**
+- [x] **Step 1: Write index.ts**
 
 ```typescript
 // src/server/index.ts
@@ -1222,8 +1222,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const clientDist = path.resolve(__dirname, '../../dist/client')
 app.use(express.static(clientDist))
 
-// SPA fallback for client-side routing
-app.get('*', (_req, res) => {
+// SPA fallback for client-side routing (Express 5 requires named wildcard)
+app.get('/{*splat}', (_req, res) => {
   res.sendFile(path.join(clientDist, 'index.html'))
 })
 
@@ -1237,7 +1237,7 @@ startScanner().catch(err => {
 })
 ```
 
-- [ ] **Step 2: Verify backend boots**
+- [x] **Step 2: Verify backend boots**
 
 Create stub client dist so the server can start without a real build:
 ```bash
@@ -1255,7 +1255,7 @@ Expected output (first 5s):
 ```
 Stop with Ctrl+C.
 
-- [ ] **Step 3: Verify API returns 202 before first scan**
+- [x] **Step 3: Verify API returns 202 before first scan**
 
 While the server is starting (within first ~25s), run:
 ```bash
@@ -1263,7 +1263,7 @@ curl http://localhost:3000/api/opportunities
 ```
 Expected: `{"ready":false,"message":"Scan in progress..."}`
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/server/index.ts
