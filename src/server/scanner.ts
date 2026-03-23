@@ -45,13 +45,25 @@ function buildItemData(
   }
 }
 
+function makeProgressLogger(phase: string): (completed: number, total: number) => void {
+  const LOG_INTERVAL = 10  // log every N batches
+  return (completed: number, total: number) => {
+    if (completed === total || completed % LOG_INTERVAL === 0) {
+      console.log(`[scanner] ${phase}: ${completed}/${total} batches`)
+    }
+  }
+}
+
 async function runScanCycle(itemIds: number[]): Promise<void> {
   const cycleStart = Date.now()
   console.log(`[scanner] Starting scan of ${itemIds.length} items`)
 
   // Phase 1: DC-level listings (all worlds)
   console.log('[scanner] Phase 1: DC listings...')
-  const dcResults = await fetchDCListings(itemIds)
+  const p1Start = Date.now()
+  const dcResults = await fetchDCListings(itemIds, makeProgressLogger('Phase 1'))
+  const p1Elapsed = ((Date.now() - p1Start) / 1000).toFixed(1)
+  console.log(`[scanner] Phase 1 done: ${dcResults.length} items in ${p1Elapsed}s`)
 
   const dcByItemId = new Map<number, { listings: Listing[], worldUploadTimes: Record<number, number> }>()
   for (const r of dcResults) {
@@ -60,7 +72,10 @@ async function runScanCycle(itemIds: number[]): Promise<void> {
 
   // Phase 2: Home world (velocity + history)
   console.log('[scanner] Phase 2: home world data...')
-  const homeResults = await fetchHomeListings(itemIds)
+  const p2Start = Date.now()
+  const homeResults = await fetchHomeListings(itemIds, makeProgressLogger('Phase 2'))
+  const p2Elapsed = ((Date.now() - p2Start) / 1000).toFixed(1)
+  console.log(`[scanner] Phase 2 done: ${homeResults.length} items in ${p2Elapsed}s`)
 
   let updated = 0
   for (const home of homeResults) {

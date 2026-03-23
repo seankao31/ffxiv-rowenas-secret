@@ -157,8 +157,14 @@ export type HomeBatchResult = {
   lastUploadTime: number
 }
 
-export async function fetchDCListings(itemIds: number[]): Promise<DCBatchResult[]> {
+export type ProgressCallback = (completed: number, total: number) => void
+
+export async function fetchDCListings(
+  itemIds: number[],
+  onBatchDone?: ProgressCallback,
+): Promise<DCBatchResult[]> {
   const batches = chunk(itemIds, BATCH_SIZE)
+  let completed = 0
   const results = await Promise.all(
     batches.map(async batch => {
       const ids = batch.join(',')
@@ -179,6 +185,8 @@ export async function fetchDCListings(itemIds: number[]): Promise<DCBatchResult[
           lastUploadTime: number
         }>
       } | null
+      completed++
+      onBatchDone?.(completed, batches.length)
       if (!data?.items) return []
       return Object.values(data.items).map(item => ({
         itemID: item.itemID,
@@ -198,8 +206,12 @@ export async function fetchDCListings(itemIds: number[]): Promise<DCBatchResult[
   return results.flat()
 }
 
-export async function fetchHomeListings(itemIds: number[]): Promise<HomeBatchResult[]> {
+export async function fetchHomeListings(
+  itemIds: number[],
+  onBatchDone?: ProgressCallback,
+): Promise<HomeBatchResult[]> {
   const batches = chunk(itemIds, BATCH_SIZE)
+  let completed = 0
   const results = await Promise.all(
     batches.map(async batch => {
       const ids = batch.join(',')
@@ -214,6 +226,8 @@ export async function fetchHomeListings(itemIds: number[]): Promise<HomeBatchRes
           lastUploadTime: number
         }>
       } | null
+      completed++
+      onBatchDone?.(completed, batches.length)
       if (!data?.items) return []
       return Object.values(data.items).map(item => ({
         itemID: item.itemID,
