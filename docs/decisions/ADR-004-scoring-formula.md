@@ -164,7 +164,9 @@ Multi-world scoring requires per-world upload times, not a single top-level `las
 type ItemData = {
   itemID: number
   worldUploadTimes: Record<number, number>  // worldID → unix ms (derived from max lastReviewTime per world)
-  homeLastUploadTime: number                // convenience alias for worldUploadTimes[4030]
+  homeLastUploadTime: number                // authoritative from Phase 2 item-level lastUploadTime;
+                                            // falls back to worldUploadTimes[4030] if Phase 2 has no value
+                                            // (important for sold-out home boards)
   listings: Listing[]                       // all worlds in DC
   regularSaleVelocity: number              // 利維坦-specific (from home world query)
   recentHistory: SaleRecord[]              // 利維坦-specific

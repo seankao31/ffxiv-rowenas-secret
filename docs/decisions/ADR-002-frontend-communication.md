@@ -24,7 +24,7 @@ A persistent one-way connection from server to client. Server pushes updates; cl
 
 ## Rationale
 
-- The backend produces a complete updated ranked list only once per full scan cycle (~20s for ~100 API calls at 5 req/s). There are no meaningful partial updates between cycles to stream.
+- The backend produces a complete updated ranked list only once per full scan cycle (~25s for ~400 API calls at 20 req/s — see ADR-005). There are no meaningful partial updates between cycles to stream.
 - Polling at the scan cycle interval is functionally equivalent to streaming: results are fresh as soon as they are available.
 - Data payloads are small (a Top-N JSON list, likely <50KB). Even polling every 10 seconds, monthly transfer is well within the AWS EC2 100GB free egress tier.
 - SSE and WebSocket add implementation complexity with no benefit here — data only flows server → client, and only updates once per scan cycle anyway.

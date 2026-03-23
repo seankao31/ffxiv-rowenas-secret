@@ -28,7 +28,7 @@ SQLite is identified as a natural v2 upgrade.
 
 - **Redis** is eliminated: its primary strengths are multi-process state sharing (not needed in the monolith) and pub/sub messaging (not needed with REST polling).
 - **SQLite** has genuine future value for: (1) historical price trend analysis — "this item has been cheap on 巴哈姆特 for 3 hours" is a stronger signal than a single scan; (2) item metadata caching (item names, categories) that doesn't need re-fetching on restart. However, implementing it before the core scanner works would be premature.
-- The ~20s cold-start repopulation time on restart is acceptable for a personal tool.
+- The ~25s cold-start repopulation time on restart is acceptable for a personal tool (per ADR-005 scan timing calculation).
 
 ## Consequences
 
