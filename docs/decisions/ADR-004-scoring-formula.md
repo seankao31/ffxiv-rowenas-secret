@@ -168,7 +168,8 @@ type ItemData = {
                                             // falls back to worldUploadTimes[4030] if Phase 2 has no value
                                             // (important for sold-out home boards)
   listings: Listing[]                       // all worlds in DC
-  regularSaleVelocity: number              // 利維坦-specific (from home world query)
+  regularSaleVelocity: number              // 利維坦-specific, HQ + NQ combined (from home world query)
+  hqSaleVelocity: number                   // 利維坦-specific, HQ only — used when hq=true (from Phase 2)
   recentHistory: SaleRecord[]              // 利維坦-specific
 }
 ```
