@@ -21,6 +21,7 @@ async function hydrateNames(itemIds: number[]): Promise<void> {
 function buildItemData(
   itemID: number,
   dcListings: Listing[],
+  worldUploadTimes: Record<number, number>,  // from DC API response, unix ms
   homeResult: {
     regularSaleVelocity: number
     hqSaleVelocity: number
@@ -28,16 +29,7 @@ function buildItemData(
     lastUploadTime: number
   }
 ): ItemData {
-  // Derive worldUploadTimes: max(lastReviewTime) per worldID across all DC listings
-  const worldUploadTimes: Record<number, number> = {}
-  for (const listing of dcListings) {
-    const current = worldUploadTimes[listing.worldID] ?? 0
-    if (listing.lastReviewTime > current) {
-      worldUploadTimes[listing.worldID] = listing.lastReviewTime
-    }
-  }
-
-  // homeLastUploadTime: authoritative from Phase 2; fallback for sold-out home boards
+  // homeLastUploadTime: authoritative from Phase 2; fallback to DC worldUploadTimes for home world
   const homeLastUploadTime = homeResult.lastUploadTime > 0
     ? homeResult.lastUploadTime
     : (worldUploadTimes[HOME_WORLD_ID] ?? 0)
@@ -61,9 +53,9 @@ async function runScanCycle(itemIds: number[]): Promise<void> {
   console.log('[scanner] Phase 1: DC listings...')
   const dcResults = await fetchDCListings(itemIds)
 
-  const dcByItemId = new Map<number, { listings: Listing[] }>()
+  const dcByItemId = new Map<number, { listings: Listing[], worldUploadTimes: Record<number, number> }>()
   for (const r of dcResults) {
-    dcByItemId.set(r.itemID, { listings: r.listings as Listing[] })
+    dcByItemId.set(r.itemID, { listings: r.listings as Listing[], worldUploadTimes: r.worldUploadTimes })
   }
 
   // Phase 2: Home world (velocity + history)
@@ -78,6 +70,7 @@ async function runScanCycle(itemIds: number[]): Promise<void> {
     const itemData = buildItemData(
       home.itemID,
       dc.listings,
+      dc.worldUploadTimes,
       {
         regularSaleVelocity: home.regularSaleVelocity,
         hqSaleVelocity: home.hqSaleVelocity,

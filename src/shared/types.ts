@@ -5,7 +5,7 @@ export type Listing = {
   quantity: number
   worldID: number
   worldName: string
-  lastReviewTime: number  // unix ms — per-listing, when Universalis last saw this retainer
+  lastReviewTime: number  // unix ms — converted from API's seconds on ingestion in fetchDCListings
   hq: boolean
 }
 
