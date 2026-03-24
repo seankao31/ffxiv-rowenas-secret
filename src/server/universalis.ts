@@ -134,7 +134,17 @@ const MOGBOARD_ITEMS_URL =
   'https://raw.githubusercontent.com/Universalis-FFXIV/mogboard-next/main/data/game/tc/items.json'
 
 export async function fetchItemNames(): Promise<Map<number, string>> {
-  const res = await fetch(MOGBOARD_ITEMS_URL)
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 15_000)
+  let res: Response
+  try {
+    res = await fetch(MOGBOARD_ITEMS_URL, { signal: controller.signal })
+  } catch (err) {
+    console.warn(`[universalis] Failed to fetch item names: ${err instanceof Error ? err.message : err}`)
+    return new Map()
+  } finally {
+    clearTimeout(timeout)
+  }
   if (!res.ok) {
     console.warn(`[universalis] Failed to fetch item names: HTTP ${res.status}`)
     return new Map()
@@ -267,6 +277,78 @@ export async function fetchWorldListings(
     })
   )
   return results.flat()
+}
+
+export const HOME_WORLD_ID = 4030
+
+export type HomeWorldCombinedResult = {
+  dcResults: DCBatchResult[]
+  homeResults: HomeBatchResult[]
+}
+
+export async function fetchHomeWorldCombined(
+  itemIds: number[],
+  onBatchDone?: ProgressCallback,
+): Promise<HomeWorldCombinedResult> {
+  const batches = chunk(itemIds, BATCH_SIZE)
+  let completed = 0
+  const dcAll: DCBatchResult[][] = []
+  const homeAll: HomeBatchResult[][] = []
+
+  await Promise.all(
+    batches.map(async batch => {
+      const ids = batch.join(',')
+      const data = await fetchWithRetry(
+        `${BASE_URL}/${encodeURIComponent(HOME_WORLD)}/${ids}`
+      ) as {
+        items?: Record<string, {
+          itemID: number
+          lastUploadTime: number
+          listings: Array<{
+            lastReviewTime: number
+            pricePerUnit: number
+            quantity: number
+            hq: boolean
+          }>
+          regularSaleVelocity: number
+          hqSaleVelocity: number
+          recentHistory: HomeBatchResult['recentHistory']
+        }>
+      } | null
+      completed++
+      onBatchDone?.(completed, batches.length)
+      if (!data?.items) return
+
+      const dcBatch: DCBatchResult[] = []
+      const homeBatch: HomeBatchResult[] = []
+      for (const item of Object.values(data.items)) {
+        dcBatch.push({
+          itemID: item.itemID,
+          worldUploadTimes: { [HOME_WORLD_ID]: item.lastUploadTime ?? 0 },
+          listings: (item.listings ?? []).map(l => ({
+            lastReviewTime: l.lastReviewTime * 1000,
+            pricePerUnit: l.pricePerUnit,
+            quantity: l.quantity,
+            worldID: HOME_WORLD_ID,
+            worldName: HOME_WORLD,
+            hq: l.hq,
+          })),
+          lastUploadTime: item.lastUploadTime ?? 0,
+        })
+        homeBatch.push({
+          itemID: item.itemID,
+          regularSaleVelocity: item.regularSaleVelocity ?? 0,
+          hqSaleVelocity: item.hqSaleVelocity ?? 0,
+          recentHistory: item.recentHistory ?? [],
+          lastUploadTime: item.lastUploadTime ?? 0,
+        })
+      }
+      dcAll.push(dcBatch)
+      homeAll.push(homeBatch)
+    })
+  )
+
+  return { dcResults: dcAll.flat(), homeResults: homeAll.flat() }
 }
 
 export async function fetchHomeListings(
