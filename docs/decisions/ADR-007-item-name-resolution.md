@@ -40,8 +40,23 @@ This is a ~5MB JSON file mapping item IDs to structured item data (name, icon, c
 
 Vendoring would eliminate the GitHub network dependency but require manual updates when mogboard's data changes. Given the TC server updates very infrequently (months between patches), the maintenance cost outweighs the reliability benefit for a personal tool.
 
+## Client-Side English Fallback
+
+Items without a TC name (e.g., from newer patches or if the mogboard fetch failed) display as `Item #12345` on the server side. The client lazily resolves English names for these items via xivapi:
+
+```
+GET https://xivapi.com/item/{id}?columns=Name
+```
+
+- **On-demand only:** Fetches are triggered during rendering, not at startup — most items have TC names and never hit xivapi.
+- **Cached:** An in-memory `Map` prevents re-fetching the same item across re-renders and filter changes.
+- **Non-blocking:** The table renders immediately with `Item #12345`, then swaps in the English name once the fetch resolves.
+
+This keeps the original xivapi approach for the small number of items that actually need it, without the startup cost or rate limit contention of resolving all ~16,700 items.
+
 ## Consequences
 
 - All item names are available **before the first scan starts** — no more incremental hydration.
 - If GitHub is unreachable at startup, names fall back to `Item #${id}` (non-fatal).
+- Items missing TC names get their English name resolved lazily on the client via xivapi.
 - Names are in TC Chinese, matching the in-game locale for 陸行鳥 players.
