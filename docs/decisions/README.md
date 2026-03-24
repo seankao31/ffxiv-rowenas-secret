@@ -11,3 +11,4 @@ This directory contains ADRs documenting significant design decisions made durin
 | [ADR-005](./ADR-005-scan-rate-limiting.md) | Universalis API Rate Limiting & Scan Concurrency | Accepted |
 | [ADR-006](./ADR-006-per-world-scan-strategy.md) | Per-World Scan Strategy | Accepted |
 | [ADR-007](./ADR-007-item-name-resolution.md) | Item Name Resolution — Mogboard TC Static Data | Accepted |
+| [ADR-008](./ADR-008-merge-home-world-phases.md) | Merge Home World Fetch — Eliminate Redundant Phase 2 | Accepted |
