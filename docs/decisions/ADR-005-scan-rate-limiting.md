@@ -99,3 +99,25 @@ Universalis provides a public Grafana dashboard for monitoring per-User-Agent AP
 To see our scanner's traffic on the dashboard, all Universalis API requests should include a custom `User-Agent` header. This allows us to verify actual request rates and diagnose rate-limiting issues in production.
 
 Source: Universalis community Discord (2026-03-24).
+
+## Runtime Configuration
+
+The rate limit can be adjusted without restarting the server via an admin API endpoint.
+
+### Setup
+
+Set the `ADMIN_SECRET` environment variable. If unset, the endpoint is disabled (returns 404).
+
+### Usage
+
+```bash
+# View is implicit — check the Grafana dashboard or server logs.
+
+# Update rate limit (1–25 req/s):
+curl -X PUT http://localhost:3000/api/admin/rate-limit \
+  -H "Authorization: Bearer $ADMIN_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"ratePerSecond": 3}'
+```
+
+The change takes effect immediately on the next token acquisition — no in-flight requests are disrupted.

@@ -53,14 +53,24 @@ export class Semaphore {
 export class RateLimiter {
   private tokens: number
   private lastRefill: number
-  private readonly maxTokens: number
-  private readonly msPerToken: number
+  private maxTokens: number
+  private msPerToken: number
 
   constructor(ratePerSecond: number) {
     this.maxTokens = ratePerSecond
     this.tokens = ratePerSecond
     this.lastRefill = Date.now()
     this.msPerToken = 1000 / ratePerSecond
+  }
+
+  setRate(ratePerSecond: number): void {
+    this.maxTokens = ratePerSecond
+    this.msPerToken = 1000 / ratePerSecond
+    this.tokens = Math.min(this.tokens, this.maxTokens)
+  }
+
+  getRate(): number {
+    return this.maxTokens
   }
 
   async acquire(): Promise<void> {
@@ -82,7 +92,7 @@ export class RateLimiter {
 }
 
 const semaphore = new Semaphore(4)
-const rateLimiter = new RateLimiter(5)
+export const rateLimiter = new RateLimiter(5)
 
 const RETRY = Symbol('retry')
 
