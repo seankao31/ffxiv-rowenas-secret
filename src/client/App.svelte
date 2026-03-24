@@ -66,7 +66,7 @@
 
   <main>
     {#if coldStart}
-      <p class="msg">⏳ Initial scan in progress — first results in ~5 min…</p>
+      <p class="msg">⏳ Initial scan in progress — first results in ~2 min…</p>
     {:else if loading}
       <p class="msg">Loading…</p>
     {:else if error}

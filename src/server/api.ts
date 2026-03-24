@@ -30,7 +30,7 @@ function parseThresholds(query: Record<string, unknown>): ThresholdParams | { er
 
 router.get('/opportunities', (req, res) => {
   if (!isCacheReady()) {
-    res.status(202).json({ ready: false, message: 'Scan in progress, results available in ~5 min' })
+    res.status(202).json({ ready: false, message: 'Scan in progress, results available in ~2 min' })
     return
   }
 

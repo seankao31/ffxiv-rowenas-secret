@@ -2,7 +2,7 @@
 
 A personal dashboard for cross-world market board arbitrage in Final Fantasy XIV. It scans all worlds in the 陸行鳥 Data Center, finds items cheaper elsewhere than on 利維坦 (home world), and ranks them by expected daily profit.
 
-Data is sourced from the [Universalis](https://universalis.app) API and refreshed continuously (each full scan cycle takes ~5 minutes).
+Data is sourced from the [Universalis](https://universalis.app) API and refreshed continuously (each full scan cycle takes ~2.5 minutes).
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ bun run build:client
 bun start
 ```
 
-Then open `http://localhost:3000` in your browser. The first scan takes about 5 minutes before results appear (the per-world strategy scans all 8 worlds sequentially — see [ADR-005](docs/decisions/ADR-005-scan-rate-limiting.md)).
+Then open `http://localhost:3000` in your browser. The first scan takes about 1.5 minutes before results appear (the per-world strategy scans all 8 worlds sequentially — see [ADR-005](docs/decisions/ADR-005-scan-rate-limiting.md)).
 
 ## Development
 

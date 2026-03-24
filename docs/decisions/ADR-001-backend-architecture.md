@@ -26,10 +26,10 @@ Main thread handles HTTP and in-memory cache; a Worker Thread runs the scan loop
 
 - The scan loop is entirely I/O-bound (just `await fetch(...)` calls to Universalis). It never blocks the Node.js event loop, so the "shared event loop" concern that would justify B or C does not apply here.
 - This is a personal single-user tool. The added resilience of B (independent restart of scanner vs. API) is not worth the operational complexity.
-- On a cold start (e.g., after a server restart), the first scan completes in ~5 minutes with the per-world strategy — an acceptable delay for a personal tool (per ADR-005 scan timing calculation).
+- On a cold start (e.g., after a server restart), the first scan completes in ~1.5 minutes with the per-world strategy (per ADR-005 empirical validation).
 - Option A can graduate to B later if a real reason emerges.
 
 ## Consequences
 
-- In-memory cache is lost on process restart. First results appear ~5 min after startup (per ADR-005 scan timing calculation).
+- In-memory cache is lost on process restart. First results appear ~1.5 min after startup (per ADR-005 empirical validation).
 - Simpler deployment: one process, one `bun start`.

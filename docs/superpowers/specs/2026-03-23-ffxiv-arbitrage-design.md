@@ -125,6 +125,17 @@ Returns 利維坦-specific data. Extracted data:
 
 ### Scan Cycle Timing (20,000-item baseline)
 
+> **Note:** The original estimates below assumed the DC-endpoint approach. The project now uses the per-world strategy (see [ADR-006](../../decisions/ADR-006-per-world-scan-strategy.md)). Empirical timing with 16,736 items (direct connection):
+>
+> ```
+> Phase 1 (8 worlds sequential): ~84s
+> Phase 2 (home world):          ~12s
+> Cooldown (configurable):       = 60s
+> ─────────────────────────────────────
+> Total cycle interval:          ≈ 156s (~2.6 min)
+> ```
+
+~~Original DC-endpoint estimate (superseded):~~
 ```
 Phase 1: ~200 calls at 20 req/s  ≈ 10s
 Phase 2: ~200 calls at 20 req/s  ≈ 10s
@@ -134,7 +145,7 @@ Cooldown (configurable)         = 60s
 Total cycle interval:           ≈ 85s
 ```
 
-Cold start: first results appear ~25 seconds after process startup.
+Cold start: first results appear ~1.5 minutes after process startup (full per-world scan must complete).
 
 ### In-Memory Cache Shape
 
@@ -449,7 +460,7 @@ App.svelte
 
 | Scenario | Response |
 |---|---|
-| Cache empty (cold start, ~25s) | `202 Accepted` — `{ ready: false, message: "Scan in progress" }` |
+| Cache empty (cold start, ~1.5 min) | `202 Accepted` — `{ ready: false, message: "Scan in progress" }` |
 | Invalid threshold params | `400 Bad Request` with field-level errors |
 | Scoring throws unexpectedly | `500`, error logged server-side |
 
@@ -457,7 +468,7 @@ App.svelte
 
 | Scenario | UI behaviour |
 |---|---|
-| 202 on cold start | Show "Initial scan in progress, results in ~25s" loading state |
+| 202 on cold start | Show "Initial scan in progress, results in ~2 min" loading state |
 | `scanCompletedAt` > 10min ago | Banner: "Data may be outdated — last scan Xmin ago" |
 | `scanCompletedAt` > 30min ago | Warning banner (escalated colour) |
 
