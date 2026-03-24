@@ -2,10 +2,13 @@
 <script lang="ts">
   import StaleBadge from './StaleBadge.svelte'
   import type { Opportunity } from '../lib/api.ts'
+  import { resolveItemName, setOnChange } from '../lib/item-names.ts'
 
   const { opportunities }: { opportunities: Opportunity[] } = $props()
 
   let expanded = $state(new Set<number>())
+  let nameGeneration = $state(0)
+  setOnChange(() => nameGeneration++)
 
   function toggle(id: number) {
     // Reassign to a new Set — Svelte 5 $state tracks object identity, not contents.
@@ -17,6 +20,7 @@
   }
 
   const fmt = (n: number) => n.toLocaleString()
+  const name = (opp: Opportunity) => { void nameGeneration; return resolveItemName(opp.itemID, opp.itemName) }
 </script>
 
 <table>
@@ -39,7 +43,7 @@
         <td>
           <a href="https://universalis.app/market/{opp.itemID}" target="_blank" rel="noopener"
             onclick={(e) => e.stopPropagation()}>
-            {opp.itemName}
+            {name(opp)}
           </a>
         </td>
         <td>{opp.sourceWorld}</td>
