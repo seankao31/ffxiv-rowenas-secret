@@ -48,18 +48,20 @@ Memory at baseline: 20,000 items × ~5KB ≈ **100MB** — comfortable on any EC
 
 ## Implementation
 
-A simple async semaphore controls concurrency; a token bucket controls rate:
+A simple async semaphore controls concurrency; the [`limiter`](https://www.npmjs.com/package/limiter) library provides a queue-based token bucket for rate limiting:
 
 ```typescript
 // Pseudocode
 const pool = new Semaphore(4)         // max 4 concurrent
-const limiter = new RateLimiter(5)    // max 5 req/s
+const limiter = new RateLimiter(5)    // max 5 req/s (limiter library)
 
 async function fetchBatch(itemIds: number[]) {
   await limiter.acquire()
   return pool.run(() => fetch(...))
 }
 ```
+
+> **History:** An initial hand-rolled token bucket had a concurrency bug: all concurrent callers computed the same wait duration independently, then woke up and proceeded simultaneously — effectively bypassing the rate limit. Replaced with the `limiter` library (2026-03-24), which uses a proper internal queue where each caller waits relative to the previous one.
 
 On HTTP 429 response: exponential backoff (1s → 2s → 4s → ...), max 3 retries before skipping the batch and logging a warning.
 
