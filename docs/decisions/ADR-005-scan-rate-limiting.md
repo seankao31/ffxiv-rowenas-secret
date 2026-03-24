@@ -99,3 +99,14 @@ Real scan of 16,736 marketable items using the per-world strategy (168 batches �
 - **Burst safety:** Even 拉姆's peak burst stays under the 50 req/s burst cap by a wide margin.
 - **Total scan time (95.8s)** is well under the theoretical upper bound of 649s. With the 60s cooldown, cycle interval is ~156s (~2.6 min).
 - **The rate limiter is now load-bearing** — without it, throughput would likely hit the 25 req/s hard limit on low-volume worlds. The 5 req/s headroom below the hard limit provides the intended safety buffer.
+
+## Monitoring
+
+Universalis provides a public Grafana dashboard for monitoring per-User-Agent API request rates:
+
+- **URL:** https://monitor.universalis.app/d/3PpqjXv4k/universalis?orgId=1&refresh=30s&var-Job=All&var-Controller=All&from=now-1h&to=now&viewPanel=69
+- **Credentials:** guest / guest
+
+To see our scanner's traffic on the dashboard, all Universalis API requests should include a custom `User-Agent` header. This allows us to verify actual request rates and diagnose rate-limiting issues in production.
+
+Source: Universalis community Discord (2026-03-24).

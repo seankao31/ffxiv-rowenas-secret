@@ -5,6 +5,7 @@ const BASE_URL = 'https://universalis.app/api/v2'
 const BATCH_SIZE = 100
 const REQUEST_TIMEOUT_MS = 10_000
 const MAX_RETRIES = 3
+const USER_AGENT = 'FFXIV-Arbitrage-TC/1.0'
 
 export const DC_WORLDS: { id: number; name: string }[] = [
   { id: 4028, name: '伊弗利特' },
@@ -92,7 +93,10 @@ async function fetchWithRetry(url: string): Promise<unknown> {
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
       try {
-        const res = await fetch(url, { signal: controller.signal })
+        const res = await fetch(url, {
+          signal: controller.signal,
+          headers: { 'User-Agent': USER_AGENT },
+        })
         if (res.status === 429) return RETRY
         if (!res.ok) {
           console.warn(`[universalis] HTTP ${res.status}, skipping: ${url}`)
@@ -138,7 +142,10 @@ export async function fetchItemNames(): Promise<Map<number, string>> {
   const timeout = setTimeout(() => controller.abort(), 15_000)
   let res: Response
   try {
-    res = await fetch(MOGBOARD_ITEMS_URL, { signal: controller.signal })
+    res = await fetch(MOGBOARD_ITEMS_URL, {
+      signal: controller.signal,
+      headers: { 'User-Agent': USER_AGENT },
+    })
   } catch (err) {
     console.warn(`[universalis] Failed to fetch item names: ${err instanceof Error ? err.message : err}`)
     return new Map()
