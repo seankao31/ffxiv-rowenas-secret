@@ -11,7 +11,8 @@
     "benchmark": "bun scripts/benchmark-scan.ts"
   },
   "dependencies": {
-    "express": "^5.0.0"
+    "express": "^5.0.0",
+    "limiter": "^3.0.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^5.0.0",

@@ -2,9 +2,32 @@
 import { Router } from 'express'
 import { getAllItems, getNameMap, isCacheReady, getScanMeta, setScanMeta, getScanProgress } from './cache.ts'
 import { scoreOpportunities } from './scoring.ts'
+import { rateLimiter } from './universalis.ts'
 import type { ThresholdParams } from '../shared/types.ts'
 
 export const router = Router()
+
+const ADMIN_SECRET = process.env['ADMIN_SECRET']
+
+router.put('/admin/rate-limit', (req, res) => {
+  if (!ADMIN_SECRET) {
+    res.status(404).end()
+    return
+  }
+  if (req.headers['authorization'] !== `Bearer ${ADMIN_SECRET}`) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return
+  }
+  const { ratePerSecond } = req.body as { ratePerSecond?: number }
+  if (typeof ratePerSecond !== 'number' || ratePerSecond < 1 || ratePerSecond > 25) {
+    res.status(400).json({ error: 'ratePerSecond must be between 1 and 25' })
+    return
+  }
+  const previous = rateLimiter.getRate()
+  rateLimiter.setRate(ratePerSecond)
+  console.log(`[admin] Rate limit changed: ${previous} → ${ratePerSecond} req/s`)
+  res.json({ previous, current: ratePerSecond })
+})
 
 function parseThresholds(query: Record<string, unknown>): ThresholdParams | { error: string } {
   const price_threshold = query['price_threshold'] !== undefined

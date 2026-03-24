@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-03-23
-**Updated:** 2026-03-24 — realistic sell price, adaptive history window, competitor recount, turnover discount
+**Updated:** 2026-03-24 — realistic sell price, competitor recount, turnover discount
 
 ## Context
 
@@ -98,28 +98,15 @@ This is a one-sided cap: if listings are *cheaper* than historical sales, the li
 
 **Why median over mean:** Median is robust to outliers. A single panic sale at 1 gil or a lucky sale at 10M won't distort it. For thin markets with few sales, this matters most.
 
-### Adaptive History Window
+### History Window
 
-The recent sales used for the median must be filtered by recency — otherwise, for slow items, "recent" history spans months and may reflect a market that no longer exists.
+All available sale history from the Universalis API is used — no time-window filter is applied.
 
-The window adapts to the item's velocity: fast items use short windows (fresh data is plentiful), slow items use longer windows (enough data points for a stable median).
+The API already returns a bounded set of recent sales (~20 entries), which provides natural recency bias: for fast-moving items those entries span hours; for slow-moving items they span weeks or months.
 
-```
-window_days = clamp(TARGET_SALES / velocity, MIN_DAYS, MAX_DAYS)
+**Why no adaptive window:** An earlier design used a velocity-based time window (`clamp(TARGET_SALES / velocity, 1, 30)` days) to filter for "fresh" data. This was removed because the tight window for medium-to-high velocity items could exclude recent sales that fell just outside the cutoff, causing the system to fall back to the listing price — exactly the failure mode the realistic sell price was designed to prevent.
 
-TARGET_SALES = 10    ← want ~10 data points for a reliable median
-MIN_DAYS     = 1     ← even fast items use at least 1 day of history
-MAX_DAYS     = 30    ← never use data older than 1 month
-```
-
-| Velocity | Window | Approximate data points |
-|---|---|---|
-| 10,000/day | 1 day (floor) | 10,000 |
-| 10/day | 1 day | 10 |
-| 1/day | 10 days | 10 |
-| 0.14/day (1/wk) | 30 days (cap) | ~4 |
-
-When no sales fall within the window, the system falls back to the listing price (original behaviour).
+Low-velocity items with stale or absent history are not a concern: their low velocity already suppresses their score via `fair_share_velocity` and the turnover discount. The listing-price fallback only activates for items with genuinely no sale history, which by definition have near-zero velocity and won't surface in rankings.
 
 ### UI Impact
 

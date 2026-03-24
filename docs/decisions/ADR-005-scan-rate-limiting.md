@@ -16,47 +16,44 @@ Universalis imposes the following limits:
 
 ## Decision
 
-Use a **concurrent request pool capped at 8 connections**, rate-limited to **20 req/s** (leaving headroom below the 25 req/s hard limit to be a good API citizen and absorb latency variance).
+Use a **concurrent request pool capped at 4 connections**, rate-limited to **5 req/s**.
 
 ## Rationale
 
-### Why not sequential (1 request at a time)?
+### Why 5 req/s?
 
-At 1 req/s with artificial 200ms delays (our initial estimate before knowing the actual limits), a full scan would take ~40 seconds. With the real 25 req/s limit and 8 concurrent connections available, we can do far better.
+The Universalis hard limit is 25 req/s (burst: 50), but the API is a crowdsourced public service. Monitoring the [Grafana dashboard](#monitoring) shows most well-behaved clients (ffxiv-flip-research, Expedition-Bot, saddlebag-datapop, universalis-store) operate at 3–5 req/s. We target 5 req/s to:
 
-### Why cap at 20 req/s rather than 25?
+- Stay in line with community norms rather than exploiting the technical limit.
+- Leave massive headroom for burst retries on 429 responses.
+- Be sustainable for long-running continuous scans.
 
-- Leaves buffer for burst retries on 429 responses without immediately re-hitting the hard limit.
-- Network latency means actual throughput is naturally below the theoretical maximum.
-- Avoids being an aggressive API consumer on a crowdsourced public service.
+> **History:** Initially set to 20 req/s / 8 concurrent (2026-03-23), reduced to 5 req/s / 4 concurrent (2026-03-24) after observing community traffic patterns on the Grafana dashboard.
 
 ### Scan cycle timing (at 20,000-item baseline)
 
 See [ADR-006](ADR-006-per-world-scan-strategy.md) for the per-world vs DC strategy decision. With the per-world default:
 
 ```
-Theoretical upper bound (if rate limiter were the sole bottleneck):
-Phase 1: ~168 batches × 8 worlds ÷ 20 req/s ≈ 515s (~8.6 min)
-Phase 2: ~168 batches ÷ 20 req/s             ≈  74s (~1.2 min)
+Theoretical (rate limiter as sole bottleneck):
+~168 batches × 8 worlds ÷ 5 req/s            ≈ 269s (~4.5 min)
 
-Empirical (16,736 items, direct connection):
-Phase 1: ~84s (8 worlds sequential, ~11s each)
-Phase 2: ~12s
+Expected scan time:                           ≈ 6–7 min
 Cooldown (default):                           =  60s
 ──────────────────────────────────────────────────────
-Total cycle interval:                         ≈ 156s (~2.6 min)
+Total cycle interval:                         ≈ 8 min
 ```
 
 Memory at baseline: 20,000 items × ~5KB ≈ **100MB** — comfortable on any EC2 instance.
 
 ## Implementation
 
-A simple async semaphore controls concurrency; a token bucket controls rate:
+A simple async semaphore controls concurrency; the [`limiter`](https://www.npmjs.com/package/limiter) library provides a queue-based token bucket for rate limiting:
 
 ```typescript
 // Pseudocode
-const pool = new Semaphore(8)         // max 8 concurrent
-const limiter = new RateLimiter(20)   // max 20 req/s
+const pool = new Semaphore(4)         // max 4 concurrent
+const limiter = new RateLimiter(5)    // max 5 req/s (limiter library)
 
 async function fetchBatch(itemIds: number[]) {
   await limiter.acquire()
@@ -64,20 +61,20 @@ async function fetchBatch(itemIds: number[]) {
 }
 ```
 
+> **History:** An initial hand-rolled token bucket had a concurrency bug: all concurrent callers computed the same wait duration independently, then woke up and proceeded simultaneously — effectively bypassing the rate limit. Replaced with the `limiter` library (2026-03-24), which uses a proper internal queue where each caller waits relative to the previous one.
+
 On HTTP 429 response: exponential backoff (1s → 2s → 4s → ...), max 3 retries before skipping the batch and logging a warning.
 
 ## Consequences
 
-- The 8-connection cap means Phase 1 and Phase 2 share the same pool — they run sequentially (Phase 1 completes, then Phase 2 begins) to avoid exceeding the connection limit.
+- The 4-connection cap means Phase 1 and Phase 2 share the same pool — they run sequentially (Phase 1 completes, then Phase 2 begins) to avoid exceeding the connection limit.
 - The rate limiter and semaphore are shared across all fetch functions regardless of scan strategy (see [ADR-006](ADR-006-per-world-scan-strategy.md)).
 
-## Empirical Validation (2026-03-24, revised)
+## Empirical Validation
+
+### At 20 req/s (original, 2026-03-24)
 
 Real scan of 16,736 marketable items using the per-world strategy (168 batches × 100 items).
-
-> **Note:** An earlier measurement (299.7s total, ~5 req/s average) was conducted through a VPN, which inflated response latency by ~3×. The data below reflects a direct connection — the authoritative baseline.
-
-### Observed request rates (direct connection)
 
 | Phase | Batches | Time (s) | Avg batch/s |
 |-------|---------|----------|-------------|
@@ -92,10 +89,38 @@ Real scan of 16,736 marketable items using the per-world strategy (168 batches �
 | Phase 2 (home) | 168 | 11.6 | 14.5 |
 | **Total** | **1,512** | **95.8** | **15.8** |
 
-### Findings
+This rate was too aggressive relative to community norms observed on the Grafana dashboard. Reduced to 5 req/s — see [Monitoring](#monitoring).
 
-- **Throughput is ~14–15 batch/s for most worlds**, close to the 20 req/s rate limiter cap. With 8 concurrent connections and ~500ms average response time, the pipeline stays well-fed.
-- **拉姆 (25.5 batch/s)** and **泰坦 (19.5 batch/s)** are faster because their responses are smaller (fewer or no listings). 拉姆 exceeds the 20 req/s steady-state rate via the token bucket's burst allowance — tokens accumulate during the brief pause between worlds.
-- **Burst safety:** Even 拉姆's peak burst stays under the 50 req/s burst cap by a wide margin.
-- **Total scan time (95.8s)** is well under the theoretical upper bound of 649s. With the 60s cooldown, cycle interval is ~156s (~2.6 min).
-- **The rate limiter is now load-bearing** — without it, throughput would likely hit the 25 req/s hard limit on low-volume worlds. The 5 req/s headroom below the hard limit provides the intended safety buffer.
+## Monitoring
+
+Universalis provides a public Grafana dashboard for monitoring per-User-Agent API request rates:
+
+- **URL:** https://monitor.universalis.app/d/3PpqjXv4k/universalis?orgId=1&refresh=30s&var-Job=All&var-Controller=All&from=now-1h&to=now&viewPanel=69
+- **Credentials:** guest / guest
+
+To see our scanner's traffic on the dashboard, all Universalis API requests should include a custom `User-Agent` header. This allows us to verify actual request rates and diagnose rate-limiting issues in production.
+
+Source: Universalis community Discord (2026-03-24).
+
+## Configuration
+
+### At startup
+
+```bash
+bun run src/server/index.ts --rate-limit 3   # or -r 3
+```
+
+Overrides the default 5 req/s before the scanner starts. Must be between 1 and 25.
+
+### At runtime
+
+The rate limit can be adjusted without restarting via an admin API endpoint, protected by the `ADMIN_SECRET` environment variable. If unset, the endpoint is disabled (returns 404).
+
+```bash
+curl -X PUT http://localhost:3000/api/admin/rate-limit \
+  -H "Authorization: Bearer $ADMIN_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"ratePerSecond": 3}'
+```
+
+The change takes effect immediately on the next token acquisition — no in-flight requests are disrupted.
