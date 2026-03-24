@@ -1,9 +1,28 @@
 // src/server/index.ts
+import { parseArgs } from 'util'
 import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { router } from './api.ts'
 import { startScanner } from './scanner.ts'
+import { rateLimiter } from './universalis.ts'
+
+const { values } = parseArgs({
+  options: {
+    'rate-limit': { type: 'string', short: 'r' },
+  },
+  strict: false,
+})
+
+if (values['rate-limit']) {
+  const rate = Number(values['rate-limit'])
+  if (isNaN(rate) || rate < 1 || rate > 25) {
+    console.error('[server] --rate-limit must be between 1 and 25')
+    process.exit(1)
+  }
+  rateLimiter.setRate(rate)
+  console.log(`[server] Rate limit set to ${rate} req/s`)
+}
 
 const app = express()
 const PORT = process.env['PORT'] ?? 3000
