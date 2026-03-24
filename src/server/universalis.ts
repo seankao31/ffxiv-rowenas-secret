@@ -1,4 +1,6 @@
 // src/server/universalis.ts
+import { RateLimiter } from 'limiter'
+
 const DC_NAME = '陸行鳥'
 const HOME_WORLD = '利維坦'
 const BASE_URL = 'https://universalis.app/api/v2'
@@ -50,49 +52,31 @@ export class Semaphore {
   }
 }
 
-export class RateLimiter {
-  private tokens: number
-  private lastRefill: number
-  private maxTokens: number
-  private msPerToken: number
+class OutboundRateLimiter {
+  private limiter: RateLimiter
+  private rate: number
 
   constructor(ratePerSecond: number) {
-    this.maxTokens = ratePerSecond
-    this.tokens = ratePerSecond
-    this.lastRefill = Date.now()
-    this.msPerToken = 1000 / ratePerSecond
+    this.rate = ratePerSecond
+    this.limiter = new RateLimiter({ tokensPerInterval: ratePerSecond, interval: 'second' })
   }
 
   setRate(ratePerSecond: number): void {
-    this.maxTokens = ratePerSecond
-    this.msPerToken = 1000 / ratePerSecond
-    this.tokens = Math.min(this.tokens, this.maxTokens)
+    this.rate = ratePerSecond
+    this.limiter = new RateLimiter({ tokensPerInterval: ratePerSecond, interval: 'second' })
   }
 
   getRate(): number {
-    return this.maxTokens
+    return this.rate
   }
 
   async acquire(): Promise<void> {
-    const now = Date.now()
-    const elapsed = now - this.lastRefill
-    this.tokens = Math.min(this.maxTokens, this.tokens + elapsed / this.msPerToken)
-    this.lastRefill = now
-
-    if (this.tokens >= 1) {
-      this.tokens -= 1
-      return
-    }
-
-    const waitMs = (1 - this.tokens) * this.msPerToken
-    await new Promise<void>(resolve => setTimeout(resolve, waitMs))
-    this.tokens = 0
-    this.lastRefill = Date.now()
+    await this.limiter.removeTokens(1)
   }
 }
 
 const semaphore = new Semaphore(4)
-export const rateLimiter = new RateLimiter(5)
+export const rateLimiter = new OutboundRateLimiter(5)
 
 const RETRY = Symbol('retry')
 

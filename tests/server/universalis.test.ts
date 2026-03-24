@@ -1,6 +1,6 @@
 // tests/server/universalis.test.ts
 import { test, expect, describe, mock, afterEach } from 'bun:test'
-import { RateLimiter, Semaphore, fetchMarketableItems, fetchDCListings, fetchWorldListings, fetchItemNames } from '../../src/server/universalis.ts'
+import { Semaphore, fetchMarketableItems, fetchDCListings, fetchWorldListings, fetchItemNames } from '../../src/server/universalis.ts'
 
 describe('fetchMarketableItems', () => {
   const originalFetch = globalThis.fetch
@@ -256,24 +256,25 @@ describe('Semaphore', () => {
   })
 })
 
-describe('RateLimiter', () => {
+describe('RateLimiter (limiter library)', () => {
   test('allows burst up to rate', async () => {
-    const limiter = new RateLimiter(100)
+    const { RateLimiter } = await import('limiter')
+    const limiter = new RateLimiter({ tokensPerInterval: 100, interval: 'second' })
     // Should be able to acquire 10 tokens immediately (well within 100/s budget)
     for (let i = 0; i < 10; i++) {
-      await limiter.acquire()
+      await limiter.removeTokens(1)
     }
-    // If we reach here without timeout, the rate limiter didn't block unnecessarily
     expect(true).toBe(true)
   })
 
   test('delays when token bucket is exhausted', async () => {
-    const limiter = new RateLimiter(10)  // 10 req/s = 1 token per 100ms
+    const { RateLimiter } = await import('limiter')
+    const limiter = new RateLimiter({ tokensPerInterval: 10, interval: 'second' })
     // Drain the initial tokens
-    for (let i = 0; i < 10; i++) await limiter.acquire()
+    for (let i = 0; i < 10; i++) await limiter.removeTokens(1)
     // Next acquire should wait ~100ms
     const start = Date.now()
-    await limiter.acquire()
+    await limiter.removeTokens(1)
     const elapsed = Date.now() - start
     expect(elapsed).toBeGreaterThan(50)  // generous lower bound
   })
