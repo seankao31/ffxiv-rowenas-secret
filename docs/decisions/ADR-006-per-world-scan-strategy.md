@@ -23,8 +23,6 @@ The DC codepath is preserved and selectable via `SCAN_STRATEGY=dc` environment v
 
 ### Benchmark results (500 items, 5 batches)
 
-> **Note:** These 500-item benchmarks were measured through a VPN (~3× latency inflation). Absolute times are higher than expected in production, but the relative advantage of per-world vs DC holds — smaller payloads complete faster regardless of base latency.
-
 | Metric | DC | Per-world |
 |--------|-----|-----------|
 | Phase 1 time | 21.4s | 15.4s |
@@ -45,7 +43,7 @@ The DC codepath is preserved and selectable via `SCAN_STRATEGY=dc` environment v
 
 Per-world Phase 1 breakdown: most worlds ~11s, 拉姆 6.6s (empty), 泰坦 8.6s (sparse). See [ADR-005](ADR-005-scan-rate-limiting.md) for detailed per-world throughput data.
 
-### Per-world breakdown (500 items, VPN-affected)
+### Per-world breakdown (500 items)
 
 | World | Time | Listings |
 |-------|------|----------|
@@ -63,11 +61,11 @@ Per-world Phase 1 breakdown: most worlds ~11s, 拉姆 6.6s (empty), 泰坦 8.6s 
 - DC endpoint payloads contain all 8 worlds' listings → large JSON parse cost and transfer time (~2s per batch).
 - Per-world payloads are ~1/8 the size → response times match Phase 2 speeds (~0.4s per batch).
 - Worlds with few or no listings (拉姆) complete nearly instantly, naturally skipping dead data.
-- The rate limiter (20 req/s) is the bottleneck, not request count — smaller responses complete faster, freeing slots sooner.
+- The rate limiter is the bottleneck, not request count — smaller responses complete faster, freeing slots sooner.
 
 ### Why sequential worlds, not parallel?
 
-Running all 8 worlds concurrently would exceed the 8-connection semaphore and 20 req/s rate limit, causing heavy queuing. Sequential worlds with concurrent batches stays within the limits established in ADR-005.
+Running all 8 worlds concurrently would exceed the connection semaphore and rate limit, causing heavy queuing. Sequential worlds with concurrent batches stays within the limits established in ADR-005.
 
 ## Implementation
 

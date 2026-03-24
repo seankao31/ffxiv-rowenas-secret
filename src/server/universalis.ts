@@ -81,8 +81,8 @@ export class RateLimiter {
   }
 }
 
-const semaphore = new Semaphore(8)
-const rateLimiter = new RateLimiter(20)
+const semaphore = new Semaphore(4)
+const rateLimiter = new RateLimiter(5)
 
 const RETRY = Symbol('retry')
 
