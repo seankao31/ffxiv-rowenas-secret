@@ -100,20 +100,21 @@ To see our scanner's traffic on the dashboard, all Universalis API requests shou
 
 Source: Universalis community Discord (2026-03-24).
 
-## Runtime Configuration
+## Configuration
 
-The rate limit can be adjusted without restarting the server via an admin API endpoint.
-
-### Setup
-
-Set the `ADMIN_SECRET` environment variable. If unset, the endpoint is disabled (returns 404).
-
-### Usage
+### At startup
 
 ```bash
-# View is implicit — check the Grafana dashboard or server logs.
+bun run src/server/index.ts --rate-limit 3   # or -r 3
+```
 
-# Update rate limit (1–25 req/s):
+Overrides the default 5 req/s before the scanner starts. Must be between 1 and 25.
+
+### At runtime
+
+The rate limit can be adjusted without restarting via an admin API endpoint, protected by the `ADMIN_SECRET` environment variable. If unset, the endpoint is disabled (returns 404).
+
+```bash
 curl -X PUT http://localhost:3000/api/admin/rate-limit \
   -H "Authorization: Bearer $ADMIN_SECRET" \
   -H "Content-Type: application/json" \
