@@ -37,6 +37,12 @@ export type ScanMeta = {
   nextScanEstimatedAt: number       // unix ms
 }
 
+export type ScanProgress = {
+  phase: string                     // e.g. "Phase 1: 利維坦" or "Phase 2: home world"
+  completedBatches: number
+  totalBatches: number              // total across entire scan cycle
+}
+
 export type ThresholdParams = {
   price_threshold: number           // multiplier, default 2.0
   listing_staleness_hours: number   // default 48

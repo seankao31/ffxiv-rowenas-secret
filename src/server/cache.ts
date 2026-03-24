@@ -1,5 +1,5 @@
 // src/server/cache.ts
-import type { ItemData, ScanMeta } from '../shared/types.ts'
+import type { ItemData, ScanMeta, ScanProgress } from '../shared/types.ts'
 
 const itemCache = new Map<number, ItemData>()
 const nameCache = new Map<number, string>()  // itemID → display name
@@ -40,4 +40,14 @@ export function setScanMeta(meta: ScanMeta): void {
 
 export function getScanMeta(): ScanMeta {
   return scanMeta
+}
+
+let scanProgress: ScanProgress = { phase: '', completedBatches: 0, totalBatches: 0 }
+
+export function setScanProgress(progress: ScanProgress): void {
+  scanProgress = progress
+}
+
+export function getScanProgress(): ScanProgress {
+  return scanProgress
 }

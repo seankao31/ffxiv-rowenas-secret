@@ -21,7 +21,7 @@ bun run build:client
 bun start
 ```
 
-Then open `http://localhost:3000` in your browser. The first scan takes about 1.5 minutes before results appear (the per-world strategy scans all 8 worlds sequentially — see [ADR-005](docs/decisions/ADR-005-scan-rate-limiting.md)).
+Then open `http://localhost:3000` in your browser. The first scan takes about 1.5 minutes before results appear (the per-world strategy scans all 8 worlds sequentially — see [ADR-005](docs/decisions/ADR-005-scan-rate-limiting.md)). A progress bar shows the current phase and completion percentage during the initial scan.
 
 ## Development
 
