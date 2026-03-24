@@ -75,6 +75,9 @@
             <div class="detail-inner">
               <span>Total velocity: {Math.round(opp.fairShareVelocity * (opp.activeCompetitorCount + 1) * 100) / 100}/day</span>
               <span>Tax: {fmt(opp.tax)} gil</span>
+              {#if opp.listingPrice !== opp.sellPrice}
+                <span>Listing: {fmt(opp.listingPrice)} (sell est. capped by sale history)</span>
+              {/if}
             </div>
           </td>
         </tr>

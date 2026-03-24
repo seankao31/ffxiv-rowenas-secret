@@ -2,6 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2026-03-23
+**Updated:** 2026-03-24 — realistic sell price, adaptive history window, competitor recount, turnover discount
 
 ## Context
 
@@ -25,11 +26,13 @@ Scoring is computed **per source world**, and the best-scoring world is selected
 
 ```
 for each source_world in DC (excluding home):
-  profit_per_unit = cheapest_home_price × (1 - TAX) - cheapest_source_price[world]
+  profit_per_unit = realistic_sell_price × (1 - TAX) - cheapest_source_price[world]
   if profit_per_unit <= 0: skip world
 
   source_confidence = exp(-world_data_age_hours[world] / 12)
-  world_score = profit_per_unit × fair_share_velocity × home_confidence × source_confidence
+  world_score = profit_per_unit × fair_share_velocity
+              × home_confidence × source_confidence
+              × turnover_discount
 
 item_score        = max(world_score across all source worlds)
 best_source_world = world that produced item_score
@@ -37,9 +40,15 @@ best_source_world = world that produced item_score
 
 ### Components
 
+**`realistic_sell_price`** — what buyers actually pay, not just what sellers ask
+```
+= min(cheapest_active_listing, median_recent_sale_price)
+```
+See [Realistic Sell Price](#realistic-sell-price) section below.
+
 **`profit_per_unit`** (per source world)
 ```
-= cheapest_active_price_on_home_world × (1 - MARKET_TAX)
+= realistic_sell_price × (1 - MARKET_TAX)
 - cheapest_active_price_on_source_world
 ```
 `MARKET_TAX = 0.05` (5% of sale price, standard TC server rate)
@@ -51,6 +60,8 @@ best_source_world = world that produced item_score
 Reflects your realistic share of daily demand given existing competition on the home world.
 `regularSaleVelocity` is fetched from a home-world-specific query (not DC-level), to avoid inflating the estimate with demand from other worlds.
 
+See [Active Competitor Count](#active-competitor-count) for how competitors are counted relative to `realistic_sell_price`.
+
 **`home_confidence`** — steep staleness decay (high-stakes: financial loss risk)
 ```
 = exp(-home_data_age_hours / 3)    ← halves every 3 hours
@@ -60,6 +71,59 @@ Reflects your realistic share of daily demand given existing competition on the 
 ```
 = exp(-world_data_age_hours[world] / 12)  ← halves every 12 hours
 ```
+
+**`turnover_discount`** — liquidity risk penalty for slow-selling items
+```
+= exp(-max(0, days_to_sell - 1) / 3)
+```
+See [Turnover Discount](#turnover-discount) section below.
+
+## Realistic Sell Price
+
+### Problem
+
+The original formula used `cheapest_active_listing` on the home world as the expected sell price. This is accurate for liquid items where listings sell near asking price. But for **slow-moving items**, the cheapest listing can sit at an inflated price indefinitely — nobody is buying at that price. Using it overestimates profit.
+
+**Example:** Item has 1 listing at 200K, but the last 5 actual sales were around 50K. The listing price reflects seller aspiration, not buyer willingness to pay.
+
+### Solution
+
+Cap the expected sell price at the **median of recent sales**:
+
+```
+realistic_sell_price = min(cheapest_active_listing, median_recent_sale_price)
+```
+
+This is a one-sided cap: if listings are *cheaper* than historical sales, the listing price is the better estimate (market moved down, you'd undercut that). We only override when listings are *above* historical sales, signalling inflated asking prices.
+
+**Why median over mean:** Median is robust to outliers. A single panic sale at 1 gil or a lucky sale at 10M won't distort it. For thin markets with few sales, this matters most.
+
+### Adaptive History Window
+
+The recent sales used for the median must be filtered by recency — otherwise, for slow items, "recent" history spans months and may reflect a market that no longer exists.
+
+The window adapts to the item's velocity: fast items use short windows (fresh data is plentiful), slow items use longer windows (enough data points for a stable median).
+
+```
+window_days = clamp(TARGET_SALES / velocity, MIN_DAYS, MAX_DAYS)
+
+TARGET_SALES = 10    ← want ~10 data points for a reliable median
+MIN_DAYS     = 1     ← even fast items use at least 1 day of history
+MAX_DAYS     = 30    ← never use data older than 1 month
+```
+
+| Velocity | Window | Approximate data points |
+|---|---|---|
+| 10,000/day | 1 day (floor) | 10,000 |
+| 10/day | 1 day | 10 |
+| 1/day | 10 days | 10 |
+| 0.14/day (1/wk) | 30 days (cap) | ~4 |
+
+When no sales fall within the window, the system falls back to the listing price (original behaviour).
+
+### UI Impact
+
+The dashboard displays `realistic_sell_price` as the sell price. A separate `listingPrice` field preserves the raw cheapest listing. When the two differ, the expand row shows: "Listing: 200,000 (sell est. capped by sale history)".
 
 ## Multi-World Source Scoring
 
@@ -111,8 +175,8 @@ A key design insight: staleness risk is **asymmetric by direction**.
 
 | Stale data | Consequence | Reversible? |
 |---|---|---|
-| Source world price (buy side) | Travel there, see real price in-person, choose not to buy | ✅ Yes — wasted trip only |
-| Home world price (sell side) | Already bought items on another server; arrive home to a crashed market | ❌ No — money already committed |
+| Source world price (buy side) | Travel there, see real price in-person, choose not to buy | Yes — wasted trip only |
+| Home world price (sell side) | Already bought items on another server; arrive home to a crashed market | No — money already committed |
 
 Therefore home-side staleness carries a steeper penalty (3-hour half-life) versus source-side staleness (12-hour half-life).
 
@@ -120,13 +184,80 @@ Stale data is **never excluded entirely** — it retains heuristic value. Instea
 
 ## Active Competitor Count
 
-Raw listing count overstates competition. A listing is only counted as "active competition" if:
+### Baseline Filter
+
+Raw listing count overstates competition. A listing is only counted as "active" if:
 1. `pricePerUnit <= cheapest_price × price_threshold_multiplier` (not a price-gouging outlier)
 2. `lastReviewTime >= now - listing_staleness_cutoff` (seller has been recently active)
 
-Players who set prices and never update them ("dead retainers") are excluded from the competitor count.
+Players who set prices and never update them ("dead retainers") are excluded.
 
 Note: `lastReviewTime` is a **per-listing** field in the Universalis API, distinct from the per-item `lastUploadTime`.
+
+### Recount Relative to Realistic Sell Price
+
+After computing `realistic_sell_price`, competitors are recounted using the realistic price as the anchor:
+
+```
+competitor_listings = active_listings where price <= realistic_sell_price × price_threshold
+active_competitor_count = count(competitor_listings)
+```
+
+**Why:** If the cheapest listing is 200K but we plan to sell at 50K (based on sale history), the 200K seller is not real competition — buyers at the 50K price point won't comparison-shop at 200K. Only listings near *our* expected price compete for the same buyers.
+
+**Effect:** When `realistic_sell_price` drops below listing prices, high-priced listings fall out of the competitor count, increasing `fair_share_velocity`. This matches economic intuition: if you're the cheapest seller by a wide margin, you capture most of the demand.
+
+**Edge case:** If all active listings are above `realistic_sell_price × price_threshold`, competitor count = 0 and `fair_share_velocity = velocity / 1 = velocity` (full market demand). This is correct — there are no real competitors at your price point.
+
+## Turnover Discount
+
+### Problem
+
+The base score (`profit × velocity`) already favours fast-moving items linearly. But it doesn't capture the **compounding risk** of slow turnover: capital locked up in unsold inventory, exposure to price undercutting while waiting, and market shifts during the holding period. A 200K profit item that takes 2 weeks to sell ties up capital that could fund dozens of fast trades.
+
+### Solution
+
+Apply an exponential **liquidity discount** based on expected time to sell one unit:
+
+```
+days_to_sell      = 1 / fair_share_velocity
+turnover_discount = exp(-max(0, days_to_sell - IDEAL_DAYS) / τ)
+
+IDEAL_DAYS = 1    ← items selling in ≤1 day get no penalty
+τ          = 3    ← controls decay steepness
+```
+
+| Days to sell | Discount | Interpretation |
+|---|---|---|
+| ≤ 1 | 100% | Ideal — no penalty |
+| 2 | 72% | Slightly less attractive |
+| 3 | 51% | Edge of comfort — half score |
+| 5 | 26% | Reluctant territory |
+| 7 | 14% | Strongly discouraged |
+| 14 | 1.3% | Effectively eliminated from rankings |
+
+### Design Choices
+
+**Why exponential decay (again)?** Same pattern as confidence factors: each additional day of exposure adds the same *proportional* risk. This keeps the score formula consistent — all risk dimensions use `exp(-x/τ)`.
+
+**Why only affect score, not `expectedDailyProfit`?** The daily profit figure is the theoretical return if assumptions hold. The score is the *risk-adjusted* ranking. Keeping them separate lets the user see the raw economics and understand why a high-profit item ranks low (slow turnover penalised it).
+
+**Why `- 1` offset?** The user's preference: selling in 1 day is ideal, 3 days is the acceptable maximum. Without the offset, even 1-day items would be penalised (exp(-1/3) ≈ 0.72). The offset creates a "free zone" for fast-moving items.
+
+### Full Score Formula Summary
+
+```
+score = profit_per_unit
+      × fair_share_velocity
+      × home_confidence          exp(-home_age / 3)
+      × source_confidence        exp(-source_age / 12)
+      × turnover_discount        exp(-max(0, 1/velocity - 1) / 3)
+```
+
+Each multiplicative factor is a probability-like number in (0, 1] representing a distinct risk dimension:
+- **home_confidence**: is the sell price still accurate?
+- **source_confidence**: is the buy price still accurate?
+- **turnover_discount**: will I sell before the market shifts?
 
 ## Unit Cap (Overbuy Protection)
 
@@ -179,4 +310,5 @@ type ItemData = {
 - Scoring evaluates up to 7 source worlds per item. At 20,000 items this is 140,000 world-score computations per API request — still completes in milliseconds (pure arithmetic, no I/O).
 - The dashboard UI needs controls (sliders/inputs) for the configurable thresholds.
 - The recommended source world is the confidence-adjusted best, not the cheapest. The raw cheapest is surfaced as the "alt world" column for user reference.
+- Slow-moving items with inflated listings are naturally deprioritised by three reinforcing mechanisms: sell price capped by history, competitor count reduced (increasing velocity share), and turnover discount penalising the remaining long wait time.
 - Future improvement: weight `home_confidence` decay rate differently per item category (e.g., consumables reprice faster than housing items).

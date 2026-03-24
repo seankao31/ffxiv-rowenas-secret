@@ -9,6 +9,16 @@ const MARKET_TAX = 0.05
 const HOME_TIME_CONSTANT_H = 3
 const SOURCE_TIME_CONSTANT_H = 12
 const MS_PER_HOUR = 3_600_000
+// Adaptive history window: target enough sales for a stable median, bounded to [1, 30] days.
+// 10K/day → 1d window; 1/day → 10d; 0.14/day (1/wk) → 30d cap (~4 sales)
+const TARGET_HISTORY_SALES = 10
+const MIN_HISTORY_WINDOW_DAYS = 1
+const MAX_HISTORY_WINDOW_DAYS = 30
+// Turnover (liquidity) discount: penalises slow-selling items in the score.
+// Items selling in ≤ IDEAL days get no penalty; beyond that, exponential decay with τ.
+// τ=3 → at 3d to sell ≈ 51%, at 7d ≈ 14%.  Affects ranking only, not expectedDailyProfit.
+const TURNOVER_IDEAL_DAYS = 1
+const TURNOVER_TIME_CONSTANT_DAYS = 3
 
 function confidence(ageHours: number, timeConstantHours: number): number {
   return Math.exp(-ageHours / timeConstantHours)
@@ -38,12 +48,44 @@ export function scoreOpportunities(
     if (activeHomeListings.length === 0) continue
 
     const cheapestHomePrice = Math.min(...activeHomeListings.map(l => l.pricePerUnit))
-    const activeCompetitorCount = activeHomeListings.length
 
-    // --- Velocity ---
+    // --- Total velocity (needed before history window + competitor count) ---
     const velocity = params.hq ? item.hqSaleVelocity : item.regularSaleVelocity
     if (velocity === 0) continue
+
+    // --- Realistic sell price ---
+    // Cap the expected sell price at the median of recent sales to avoid
+    // overestimating profit on slow-moving items with inflated listing prices.
+    // Window adapts to velocity: fast items use short windows (fresh data),
+    // slow items use longer windows (enough data points for a stable median).
+    const windowDays = Math.min(MAX_HISTORY_WINDOW_DAYS,
+      Math.max(MIN_HISTORY_WINDOW_DAYS, TARGET_HISTORY_SALES / velocity))
+    const windowCutoff = now - windowDays * 24 * MS_PER_HOUR
+    const relevantHistory = (params.hq
+      ? item.recentHistory.filter(s => s.hq)
+      : item.recentHistory
+    ).filter(s => s.timestamp * 1000 >= windowCutoff)  // API timestamps are seconds
+    let realisticSellPrice = cheapestHomePrice
+    if (relevantHistory.length > 0) {
+      const prices = relevantHistory.map(s => s.pricePerUnit).sort((a, b) => a - b)
+      const medianPrice = prices[Math.floor(prices.length / 2)]
+      realisticSellPrice = Math.min(cheapestHomePrice, medianPrice)
+    }
+
+    // --- Competitors relative to realistic sell price ---
+    // Only count listings near our expected price as real competition.
+    // A 200K listing is not competing with us if we plan to sell at 50K.
+    const competitorListings = activeHomeListings.filter(l =>
+      l.pricePerUnit <= realisticSellPrice * params.price_threshold
+    )
+    const activeCompetitorCount = competitorListings.length
     const fairShareVelocity = velocity / (activeCompetitorCount + 1)
+
+    // --- Turnover discount ---
+    const daysToSell = 1 / fairShareVelocity
+    const turnoverDiscount = Math.exp(
+      -Math.max(0, daysToSell - TURNOVER_IDEAL_DAYS) / TURNOVER_TIME_CONSTANT_DAYS
+    )
 
     // --- Home confidence ---
     const homeAgeHours = (now - item.homeLastUploadTime) / MS_PER_HOUR
@@ -75,13 +117,13 @@ export function scoreOpportunities(
       if (activeSrc.length === 0) continue
 
       const cheapestSource = Math.min(...activeSrc.map(l => l.pricePerUnit))
-      const profitPerUnit = cheapestHomePrice * (1 - MARKET_TAX) - cheapestSource
+      const profitPerUnit = realisticSellPrice * (1 - MARKET_TAX) - cheapestSource
       if (profitPerUnit <= 0) continue
 
       const uploadTime = item.worldUploadTimes[worldID] ?? 0
       const sourceAgeHours = uploadTime > 0 ? (now - uploadTime) / MS_PER_HOUR : Infinity
       const sourceConf = confidence(sourceAgeHours, SOURCE_TIME_CONSTANT_H)
-      const worldScore = profitPerUnit * fairShareVelocity * homeConf * sourceConf
+      const worldScore = profitPerUnit * fairShareVelocity * homeConf * sourceConf * turnoverDiscount
 
       // Count only units at the exact cheapest price (multiple retainers at same price all count)
       const availableUnits = activeSrc
@@ -119,9 +161,10 @@ export function scoreOpportunities(
       itemName: nameMap.get(item.itemID) ?? `Item #${item.itemID}`,
 
       buyPrice: best.cheapestSource,
-      sellPrice: cheapestHomePrice,
+      sellPrice: realisticSellPrice,
+      listingPrice: cheapestHomePrice,
       profitPerUnit: Math.round(best.profitPerUnit),
-      tax: Math.round(cheapestHomePrice * MARKET_TAX),
+      tax: Math.round(realisticSellPrice * MARKET_TAX),
 
       sourceWorld: best.worldName,
       sourceWorldID: best.worldID,

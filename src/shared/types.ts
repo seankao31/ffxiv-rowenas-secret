@@ -50,7 +50,8 @@ export type Opportunity = {
   itemName: string
 
   buyPrice: number
-  sellPrice: number
+  sellPrice: number        // realistic sell price: min(cheapest listing, median recent sale)
+  listingPrice: number     // cheapest active listing on home world (before history adjustment)
   profitPerUnit: number
   tax: number
 
