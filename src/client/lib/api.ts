@@ -1,7 +1,7 @@
 // src/client/lib/api.ts
-import type { Opportunity, ScanMeta, ThresholdParams } from '../../shared/types.ts'
+import type { Opportunity, ScanMeta, ScanProgress, ThresholdParams } from '../../shared/types.ts'
 
-export type { Opportunity, ScanMeta }
+export type { Opportunity, ScanMeta, ScanProgress }
 export type ThresholdState = ThresholdParams
 
 export type OpportunitiesResponse = {
@@ -9,7 +9,12 @@ export type OpportunitiesResponse = {
   meta: ScanMeta
 }
 
-export async function fetchOpportunities(params: ThresholdState): Promise<OpportunitiesResponse | null> {
+export type ColdStartResponse = {
+  ready: false
+  progress: ScanProgress
+}
+
+export async function fetchOpportunities(params: ThresholdState): Promise<OpportunitiesResponse | ColdStartResponse> {
   const query = new URLSearchParams({
     price_threshold: String(params.price_threshold),
     listing_staleness_hours: String(params.listing_staleness_hours),
@@ -18,7 +23,9 @@ export async function fetchOpportunities(params: ThresholdState): Promise<Opport
     hq: String(params.hq),
   })
   const res = await fetch(`/api/opportunities?${query}`)
-  if (res.status === 202) return null  // cold start — caller shows loading state
+  if (res.status === 202) {
+    return await res.json() as ColdStartResponse
+  }
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json() as Promise<OpportunitiesResponse>
 }

@@ -1,6 +1,6 @@
 // src/server/api.ts
 import { Router } from 'express'
-import { getAllItems, getNameMap, isCacheReady, getScanMeta, setScanMeta } from './cache.ts'
+import { getAllItems, getNameMap, isCacheReady, getScanMeta, setScanMeta, getScanProgress } from './cache.ts'
 import { scoreOpportunities } from './scoring.ts'
 import type { ThresholdParams } from '../shared/types.ts'
 
@@ -30,7 +30,7 @@ function parseThresholds(query: Record<string, unknown>): ThresholdParams | { er
 
 router.get('/opportunities', (req, res) => {
   if (!isCacheReady()) {
-    res.status(202).json({ ready: false, message: 'Scan in progress, results available in ~25s' })
+    res.status(202).json({ ready: false, progress: getScanProgress() })
     return
   }
 

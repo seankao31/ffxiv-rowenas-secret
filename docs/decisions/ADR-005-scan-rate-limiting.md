@@ -35,11 +35,16 @@ At 1 req/s with artificial 200ms delays (our initial estimate before knowing the
 See [ADR-006](ADR-006-per-world-scan-strategy.md) for the per-world vs DC strategy decision. With the per-world default:
 
 ```
+Theoretical upper bound (if rate limiter were the sole bottleneck):
 Phase 1: ~168 batches × 8 worlds ÷ 20 req/s ≈ 515s (~8.6 min)
 Phase 2: ~168 batches ÷ 20 req/s             ≈  74s (~1.2 min)
-Configurable cooldown (default)               =  60s
+
+Empirical (16,736 items, direct connection):
+Phase 1: ~84s (8 worlds sequential, ~11s each)
+Phase 2: ~12s
+Cooldown (default):                           =  60s
 ──────────────────────────────────────────────────────
-Total cycle interval:                         ≈ 649s (~10.8 min)
+Total cycle interval:                         ≈ 156s (~2.6 min)
 ```
 
 Memory at baseline: 20,000 items × ~5KB ≈ **100MB** — comfortable on any EC2 instance.
@@ -66,28 +71,31 @@ On HTTP 429 response: exponential backoff (1s → 2s → 4s → ...), max 3 retr
 - The 8-connection cap means Phase 1 and Phase 2 share the same pool — they run sequentially (Phase 1 completes, then Phase 2 begins) to avoid exceeding the connection limit.
 - The rate limiter and semaphore are shared across all fetch functions regardless of scan strategy (see [ADR-006](ADR-006-per-world-scan-strategy.md)).
 
-## Empirical Validation (2026-03-24)
+## Empirical Validation (2026-03-24, revised)
 
-Real scan of 16,736 marketable items using the per-world strategy (168 batches × 100 items):
+Real scan of 16,736 marketable items using the per-world strategy (168 batches × 100 items).
 
-### Observed request rates
+> **Note:** An earlier measurement (299.7s total, ~5 req/s average) was conducted through a VPN, which inflated response latency by ~3×. The data below reflects a direct connection — the authoritative baseline.
 
-| Phase | Batches | Time (s) | Avg req/s |
-|-------|---------|----------|-----------|
-| Phase 1: 伊弗利特 | 168 | 36.0 | 4.67 |
-| Phase 1: 迦樓羅 | 168 | 33.8 | 4.97 |
-| Phase 1: 利維坦 | 168 | 37.7 | 4.46 |
-| Phase 1: 鳳凰 | 168 | 41.0 | 4.10 |
-| Phase 1: 奧汀 | 168 | 40.6 | 4.14 |
-| Phase 1: 巴哈姆特 | 168 | 46.1 | 3.64 |
-| Phase 1: 拉姆 | 168 | 8.9 | **18.88** |
-| Phase 1: 泰坦 | 168 | 19.9 | 8.44 |
-| Phase 2 (home) | 168 | 35.6 | 4.72 |
-| **Total** | **1,512** | **299.7** | **5.04** |
+### Observed request rates (direct connection)
+
+| Phase | Batches | Time (s) | Avg batch/s |
+|-------|---------|----------|-------------|
+| Phase 1: 伊弗利特 | 168 | 12.1 | 13.9 |
+| Phase 1: 迦樓羅 | 168 | 11.3 | 14.9 |
+| Phase 1: 利維坦 | 168 | 11.4 | 14.7 |
+| Phase 1: 鳳凰 | 168 | 11.9 | 14.1 |
+| Phase 1: 奧汀 | 168 | 11.0 | 15.3 |
+| Phase 1: 巴哈姆特 | 168 | 11.4 | 14.7 |
+| Phase 1: 拉姆 | 168 | 6.6 | 25.5 |
+| Phase 1: 泰坦 | 168 | 8.6 | 19.5 |
+| Phase 2 (home) | 168 | 11.6 | 14.5 |
+| **Total** | **1,512** | **95.8** | **15.8** |
 
 ### Findings
 
-- **Response latency, not the rate limiter, is the dominant bottleneck** for most worlds. With 8 connections and ~2s response times, throughput settles around 4–5 req/s — well below the 20 req/s cap.
-- **拉姆 (18.88 req/s)** is the exception: the API responded fast enough (likely cache-warm or lower listing volume) that the 20 req/s token bucket became the actual constraint. Even at this peak, we remain under the 25 req/s sustained limit with 6 req/s headroom.
-- **Burst safety:** The worst-case burst (~20 req/s from the token bucket) is well under the 50 req/s burst cap.
-- **Total cycle time (299.7s)** came in significantly under the 20,000-item theoretical estimate of 649s, because the 16,736 actual item count is smaller and most worlds' response latency keeps throughput below the rate cap.
+- **Throughput is ~14–15 batch/s for most worlds**, close to the 20 req/s rate limiter cap. With 8 concurrent connections and ~500ms average response time, the pipeline stays well-fed.
+- **拉姆 (25.5 batch/s)** and **泰坦 (19.5 batch/s)** are faster because their responses are smaller (fewer or no listings). 拉姆 exceeds the 20 req/s steady-state rate via the token bucket's burst allowance — tokens accumulate during the brief pause between worlds.
+- **Burst safety:** Even 拉姆's peak burst stays under the 50 req/s burst cap by a wide margin.
+- **Total scan time (95.8s)** is well under the theoretical upper bound of 649s. With the 60s cooldown, cycle interval is ~156s (~2.6 min).
+- **The rate limiter is now load-bearing** — without it, throughput would likely hit the 25 req/s hard limit on low-volume worlds. The 5 req/s headroom below the hard limit provides the intended safety buffer.

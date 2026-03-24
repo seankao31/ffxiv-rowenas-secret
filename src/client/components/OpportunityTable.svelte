@@ -28,9 +28,9 @@
       <th>Sell</th>
       <th>Profit/unit</th>
       <th>Units</th>
-      <th>/day</th>
-      <th>Home data</th>
-      <th>Source data</th>
+      <th>Comp</th>
+      <th>Vel</th>
+      <th>Gil/day</th>
     </tr>
   </thead>
   <tbody>
@@ -43,13 +43,19 @@
           </a>
         </td>
         <td>{opp.sourceWorld}</td>
-        <td>{fmt(opp.buyPrice)}</td>
-        <td>{fmt(opp.sellPrice)}</td>
+        <td class="price-cell">
+          <span class="price">{fmt(opp.buyPrice)}</span>
+          <span class="badge-inline"><StaleBadge confidence={opp.sourceConfidence} ageHours={opp.sourceDataAgeHours} /></span>
+        </td>
+        <td class="price-cell">
+          <span class="price">{fmt(opp.sellPrice)}</span>
+          <span class="badge-inline"><StaleBadge confidence={opp.homeConfidence} ageHours={opp.homeDataAgeHours} /></span>
+        </td>
         <td>{fmt(opp.profitPerUnit)}</td>
         <td>{opp.recommendedUnits} / {opp.availableUnits}</td>
+        <td>{opp.activeCompetitorCount}</td>
+        <td>{opp.fairShareVelocity}</td>
         <td>{fmt(opp.expectedDailyProfit)}</td>
-        <td><StaleBadge confidence={opp.homeConfidence} ageHours={opp.homeDataAgeHours} /></td>
-        <td><StaleBadge confidence={opp.sourceConfidence} ageHours={opp.sourceDataAgeHours} /></td>
       </tr>
 
       {#if opp.altSourceWorld}
@@ -67,9 +73,11 @@
         <tr class="detail">
           <td colspan="9">
             <div class="detail-inner">
-              <span>Competitors: {opp.activeCompetitorCount}</span>
-              <span>Fair share velocity: {opp.fairShareVelocity}/day</span>
+              <span>Total velocity: {Math.round(opp.fairShareVelocity * (opp.activeCompetitorCount + 1) * 100) / 100}/day</span>
               <span>Tax: {fmt(opp.tax)} gil</span>
+              {#if opp.listingPrice !== opp.sellPrice}
+                <span>Listing: {fmt(opp.listingPrice)} (sell est. capped by sale history)</span>
+              {/if}
             </div>
           </td>
         </tr>
@@ -84,6 +92,9 @@
   td     { padding: 8px 12px; border-bottom: 1px solid #1e1e2e; color: #ccc; }
   .main  { cursor: pointer; }
   .main:hover td { background: #1e2240; }
+  .price-cell { line-height: 1.1; }
+  .price-cell .price { display: block; }
+  .price-cell .badge-inline { display: block; font-size: 11px; margin-top: 2px; opacity: 0.75; }
   .alt td   { background: #141428; padding: 3px 12px 3px 28px; font-size: 12px; color: #777; }
   .detail td { background: #12122a; }
   .detail-inner { display: flex; gap: 24px; padding: 6px; color: #666; font-size: 12px; }

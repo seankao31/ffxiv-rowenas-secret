@@ -12,6 +12,8 @@
 
 ## Background & Motivation
 
+> **VPN caveat:** All 500-item benchmarks below were run through a VPN, inflating absolute times by ~3×. The relative comparisons (per-world ~28% faster than DC) still hold. See [ADR-005](../../decisions/ADR-005-scan-rate-limiting.md) for authoritative VPN-off timings on the full item set.
+
 ### Benchmark results (2026-03-24)
 
 **Current DC-endpoint approach** (extrapolated from 500-item benchmark):

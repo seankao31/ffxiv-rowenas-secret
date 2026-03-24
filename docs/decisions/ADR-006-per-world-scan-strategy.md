@@ -23,6 +23,8 @@ The DC codepath is preserved and selectable via `SCAN_STRATEGY=dc` environment v
 
 ### Benchmark results (500 items, 5 batches)
 
+> **Note:** These 500-item benchmarks were measured through a VPN (~3× latency inflation). Absolute times are higher than expected in production, but the relative advantage of per-world vs DC holds — smaller payloads complete faster regardless of base latency.
+
 | Metric | DC | Per-world |
 |--------|-----|-----------|
 | Phase 1 time | 21.4s | 15.4s |
@@ -33,7 +35,17 @@ The DC codepath is preserved and selectable via `SCAN_STRATEGY=dc` environment v
 
 **Per-world is ~28% faster on Phase 1 and ~26% faster overall.**
 
-### Per-world breakdown
+### Full-scan validation (16,736 items, direct connection)
+
+| Phase | Time (s) |
+|-------|----------|
+| Phase 1 (8 worlds) | 84.2 |
+| Phase 2 (home) | 11.6 |
+| **Total** | **95.8** |
+
+Per-world Phase 1 breakdown: most worlds ~11s, 拉姆 6.6s (empty), 泰坦 8.6s (sparse). See [ADR-005](ADR-005-scan-rate-limiting.md) for detailed per-world throughput data.
+
+### Per-world breakdown (500 items, VPN-affected)
 
 | World | Time | Listings |
 |-------|------|----------|
@@ -72,7 +84,7 @@ The `ItemData` shape is unchanged — downstream code (scoring, API, client) is 
 
 ## Consequences
 
-- Phase 1 scan time drops from ~11.9 min to ~8.6 min at the 20,000-item baseline.
+- Phase 1 scan time: ~84s empirically (16,736 items, direct connection). The theoretical upper bound at 20 req/s is ~8.6 min, but actual throughput reaches ~14–15 batch/s.
 - Total HTTP requests increase from ~168 to ~1,344 for Phase 1, but each is cheaper.
 - The DC codepath remains available for regression testing or if Universalis changes API behavior.
 - Per-world gives natural per-world progress logging, making it easier to identify slow or dead worlds.

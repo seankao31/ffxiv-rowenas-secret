@@ -134,11 +134,22 @@ export async function fetchMarketableItems(): Promise<number[]> {
   return data as number[]
 }
 
-export async function fetchItemName(itemID: number): Promise<string | null> {
-  const data = await fetchWithRetry(
-    `https://xivapi.com/item/${itemID}?columns=Name`
-  ) as { Name?: string } | null
-  return data?.Name ?? null
+const MOGBOARD_ITEMS_URL =
+  'https://raw.githubusercontent.com/Universalis-FFXIV/mogboard-next/main/data/game/tc/items.json'
+
+export async function fetchItemNames(): Promise<Map<number, string>> {
+  const res = await fetch(MOGBOARD_ITEMS_URL)
+  if (!res.ok) {
+    console.warn(`[universalis] Failed to fetch item names: HTTP ${res.status}`)
+    return new Map()
+  }
+  const data = await res.json() as Record<string, { name: string }>
+  const map = new Map<number, string>()
+  for (const [id, item] of Object.entries(data)) {
+    map.set(Number(id), item.name)
+  }
+  console.log(`[universalis] Loaded ${map.size} item names from mogboard`)
+  return map
 }
 
 export type DCBatchResult = {
