@@ -1,9 +1,7 @@
 // src/server/scanner.ts
-import { fetchMarketableItems, fetchDCListings, fetchHomeListings, fetchWorldListings, fetchItemNames, DC_WORLDS } from './universalis.ts'
+import { fetchMarketableItems, fetchDCListings, fetchHomeListings, fetchWorldListings, fetchHomeWorldCombined, fetchItemNames, DC_WORLDS, HOME_WORLD_ID } from './universalis.ts'
 import { setItem, setNameMap, setScanMeta, getScanMeta, setScanProgress } from './cache.ts'
 import type { ItemData, Listing, SaleRecord } from '../shared/types.ts'
-
-const HOME_WORLD_ID = 4030
 const SCAN_COOLDOWN_MS = 60_000
 
 type ScanStrategy = 'dc' | 'per-world'
@@ -114,22 +112,48 @@ async function runScanCycle(itemIds: number[]): Promise<void> {
 async function runScanCyclePerWorld(itemIds: number[]): Promise<void> {
   const cycleStart = Date.now()
   const batchesPerPhase = Math.ceil(itemIds.length / 100)
-  const totalBatches = batchesPerPhase * (DC_WORLDS.length + 1)  // 8 worlds + home
+  const totalBatches = batchesPerPhase * DC_WORLDS.length  // 8 worlds (home included, no separate Phase 2)
+  setScanProgress({ phase: DC_WORLDS[0]!.name, completedBatches: 0, totalBatches })
   console.log(`[scanner] Starting per-world scan of ${itemIds.length} items across ${DC_WORLDS.length} worlds`)
 
-  // Phase 1: fetch each world sequentially, merge results
   const mergedListings = new Map<number, { listings: Listing[], worldUploadTimes: Record<number, number> }>()
+  // Home world velocity/history extracted during 利維坦's pass — keyed by itemID
+  const homeByItemId = new Map<number, {
+    regularSaleVelocity: number
+    hqSaleVelocity: number
+    recentHistory: SaleRecord[]
+    lastUploadTime: number
+  }>()
 
   for (let wi = 0; wi < DC_WORLDS.length; wi++) {
     const world = DC_WORLDS[wi]!
+    const isHome = world.id === HOME_WORLD_ID
     const worldStart = Date.now()
-    console.log(`[scanner] Phase 1: ${world.name} (${world.id})...`)
+    console.log(`[scanner] ${world.name} (${world.id})${isHome ? ' [home — combined fetch]' : ''}...`)
 
-    const worldResults = await fetchWorldListings(
-      world,
-      itemIds,
-      makeProgressTracker(`Phase 1: ${world.name}`, wi * batchesPerPhase, totalBatches),
-    )
+    let worldResults: Awaited<ReturnType<typeof fetchWorldListings>>
+
+    if (isHome) {
+      const combined = await fetchHomeWorldCombined(
+        itemIds,
+        makeProgressTracker(world.name, wi * batchesPerPhase, totalBatches),
+      )
+      worldResults = combined.dcResults
+      for (const h of combined.homeResults) {
+        homeByItemId.set(h.itemID, {
+          regularSaleVelocity: h.regularSaleVelocity,
+          hqSaleVelocity: h.hqSaleVelocity,
+          recentHistory: h.recentHistory as SaleRecord[],
+          lastUploadTime: h.lastUploadTime,
+        })
+      }
+    } else {
+      worldResults = await fetchWorldListings(
+        world,
+        itemIds,
+        makeProgressTracker(world.name, wi * batchesPerPhase, totalBatches),
+      )
+    }
 
     for (const r of worldResults) {
       const existing = mergedListings.get(r.itemID)
@@ -148,30 +172,21 @@ async function runScanCyclePerWorld(itemIds: number[]): Promise<void> {
     console.log(`[scanner] ${world.name} done: ${worldResults.length} items in ${worldElapsed}s`)
   }
 
-  const p1Elapsed = ((Date.now() - cycleStart) / 1000).toFixed(1)
-  console.log(`[scanner] Phase 1 done (all worlds): ${mergedListings.size} items in ${p1Elapsed}s`)
-
-  // Phase 2: Home world (velocity + history)
-  console.log('[scanner] Phase 2: home world data...')
-  const p2Start = Date.now()
-  const homeResults = await fetchHomeListings(itemIds, makeProgressTracker('Phase 2: home world', DC_WORLDS.length * batchesPerPhase, totalBatches))
-  const p2Elapsed = ((Date.now() - p2Start) / 1000).toFixed(1)
-  console.log(`[scanner] Phase 2 done: ${homeResults.length} items in ${p2Elapsed}s`)
+  const scanElapsed = ((Date.now() - cycleStart) / 1000).toFixed(1)
+  console.log(`[scanner] All worlds done: ${mergedListings.size} items in ${scanElapsed}s`)
 
   let updated = 0
-  for (const home of homeResults) {
-    const dc = mergedListings.get(home.itemID)
-    if (!dc) continue
-
+  for (const [itemID, dc] of mergedListings) {
+    const home = homeByItemId.get(itemID)
     const itemData = buildItemData(
-      home.itemID,
+      itemID,
       dc.listings,
       dc.worldUploadTimes,
       {
-        regularSaleVelocity: home.regularSaleVelocity,
-        hqSaleVelocity: home.hqSaleVelocity,
-        recentHistory: home.recentHistory as SaleRecord[],
-        lastUploadTime: home.lastUploadTime,
+        regularSaleVelocity: home?.regularSaleVelocity ?? 0,
+        hqSaleVelocity: home?.hqSaleVelocity ?? 0,
+        recentHistory: home?.recentHistory ?? [],
+        lastUploadTime: home?.lastUploadTime ?? 0,
       }
     )
     setItem(itemData)
@@ -193,6 +208,7 @@ async function runScanCyclePerWorld(itemIds: number[]): Promise<void> {
 export async function startScanner(): Promise<void> {
   let itemIds: number[] = []
   while (itemIds.length === 0) {
+    setScanProgress({ phase: 'Fetching item list…', completedBatches: 0, totalBatches: 0 })
     console.log('[scanner] Fetching marketable item list...')
     itemIds = await fetchMarketableItems()
     if (itemIds.length === 0) {
@@ -204,6 +220,7 @@ export async function startScanner(): Promise<void> {
   console.log(`[scanner] Using "${SCAN_STRATEGY}" scan strategy`)
 
   // Fetch all item names in one shot from mogboard's TC data
+  setScanProgress({ phase: 'Loading item names…', completedBatches: 0, totalBatches: 0 })
   const names = await fetchItemNames()
   if (names.size > 0) setNameMap(names)
 
