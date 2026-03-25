@@ -50,7 +50,7 @@ The server is hosted on AWS EC2. `dist/` is not committed to git, so a build ste
 ```sh
 bun install
 bun run build:client
-pm2 start "bun start" --name ffxiv-arbitrage
+pm2 start "bun start" --name ffxiv-rowenas-secret
 pm2 save
 pm2 startup   # enable auto-restart on reboot
 ```
@@ -61,5 +61,5 @@ pm2 startup   # enable auto-restart on reboot
 git pull
 bun install           # if dependencies changed
 bun run build:client
-pm2 restart ffxiv-arbitrage
+pm2 restart ffxiv-rowenas-secret
 ```
