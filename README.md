@@ -1,4 +1,4 @@
-# ffxiv-arbitrage
+# ffxiv-rowenas-secret
 
 A personal dashboard for cross-world market board arbitrage in Final Fantasy XIV. It scans all worlds in the 陸行鳥 Data Center, finds items cheaper elsewhere than on 利維坦 (home world), and ranks them by expected daily profit.
 
