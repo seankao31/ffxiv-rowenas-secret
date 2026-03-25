@@ -1,4 +1,4 @@
-# ffxiv-arbitrage
+# ffxiv-rowenas-secret
 
 A personal dashboard for cross-world market board arbitrage in Final Fantasy XIV. It scans all worlds in the 陸行鳥 Data Center, finds items cheaper elsewhere than on 利維坦 (home world), and ranks them by expected daily profit.
 
@@ -50,7 +50,7 @@ The server is hosted on AWS EC2. `dist/` is not committed to git, so a build ste
 ```sh
 bun install
 bun run build:client
-pm2 start "bun start" --name ffxiv-arbitrage
+pm2 start "bun start" --name ffxiv-rowenas-secret
 pm2 save
 pm2 startup   # enable auto-restart on reboot
 ```
@@ -61,5 +61,5 @@ pm2 startup   # enable auto-restart on reboot
 git pull
 bun install           # if dependencies changed
 bun run build:client
-pm2 restart ffxiv-arbitrage
+pm2 restart ffxiv-rowenas-secret
 ```

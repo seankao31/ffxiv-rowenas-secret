@@ -7,7 +7,7 @@ const BASE_URL = 'https://universalis.app/api/v2'
 const BATCH_SIZE = 100
 const REQUEST_TIMEOUT_MS = 10_000
 const MAX_RETRIES = 3
-const USER_AGENT = process.env['UNIVERSALIS_USER_AGENT'] || 'FFXIV-Arbitrage-TC/1.0'
+const USER_AGENT = process.env['UNIVERSALIS_USER_AGENT'] || 'FFXIV-Rowenas-Secret/1.0'
 
 export const DC_WORLDS: { id: number; name: string }[] = [
   { id: 4028, name: '伊弗利特' },

@@ -12,3 +12,6 @@ dist/
 
 # Git worktrees
 .worktrees/
+
+# Superpowers tooling
+.superpowers/
