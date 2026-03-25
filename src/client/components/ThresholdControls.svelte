@@ -34,7 +34,7 @@
           />
           <input type="number" min="1.2" max="5.0" step="0.1"
             value={thresholds.price_threshold}
-            oninput={(e) => clampEmit('price_threshold', Number((e.target as HTMLInputElement).value), 1.2, 5.0)}
+            onchange={(e) => clampEmit('price_threshold', Number((e.target as HTMLInputElement).value), 1.2, 5.0)}
           />
         </div>
       </label>
@@ -48,7 +48,7 @@
           />
           <input type="number" min="1" max="168" step="1"
             value={thresholds.listing_staleness_hours}
-            oninput={(e) => clampEmit('listing_staleness_hours', Number((e.target as HTMLInputElement).value), 1, 168)}
+            onchange={(e) => clampEmit('listing_staleness_hours', Number((e.target as HTMLInputElement).value), 1, 168)}
           />
         </div>
       </label>
@@ -62,7 +62,7 @@
           />
           <input type="number" min="1" max="14" step="1"
             value={thresholds.days_of_supply}
-            oninput={(e) => clampEmit('days_of_supply', Number((e.target as HTMLInputElement).value), 1, 14)}
+            onchange={(e) => clampEmit('days_of_supply', Number((e.target as HTMLInputElement).value), 1, 14)}
           />
         </div>
       </label>
