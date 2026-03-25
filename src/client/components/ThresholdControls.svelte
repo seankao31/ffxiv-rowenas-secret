@@ -12,6 +12,10 @@
   function emit(patch: Partial<ThresholdState>) {
     onchange({ ...thresholds, ...patch })
   }
+
+  function clampEmit(key: keyof ThresholdState, value: number, min: number, max: number) {
+    emit({ [key]: Math.min(max, Math.max(min, value)) } as Partial<ThresholdState>)
+  }
 </script>
 
 <div class="panel">
@@ -23,26 +27,44 @@
     <div class="controls">
       <label>
         Price threshold: {thresholds.price_threshold}×
-        <input type="range" min="1.2" max="5.0" step="0.1"
-          value={thresholds.price_threshold}
-          oninput={(e) => emit({ price_threshold: Number((e.target as HTMLInputElement).value) })}
-        />
+        <div class="slider-row">
+          <input type="range" min="1.2" max="5.0" step="0.1"
+            value={thresholds.price_threshold}
+            oninput={(e) => emit({ price_threshold: Number((e.target as HTMLInputElement).value) })}
+          />
+          <input type="number" min="1.2" max="5.0" step="0.1"
+            value={thresholds.price_threshold}
+            oninput={(e) => clampEmit('price_threshold', Number((e.target as HTMLInputElement).value), 1.2, 5.0)}
+          />
+        </div>
       </label>
 
       <label>
         Listing staleness: {thresholds.listing_staleness_hours}h
-        <input type="range" min="1" max="168" step="1"
-          value={thresholds.listing_staleness_hours}
-          oninput={(e) => emit({ listing_staleness_hours: Number((e.target as HTMLInputElement).value) })}
-        />
+        <div class="slider-row">
+          <input type="range" min="1" max="168" step="1"
+            value={thresholds.listing_staleness_hours}
+            oninput={(e) => emit({ listing_staleness_hours: Number((e.target as HTMLInputElement).value) })}
+          />
+          <input type="number" min="1" max="168" step="1"
+            value={thresholds.listing_staleness_hours}
+            oninput={(e) => clampEmit('listing_staleness_hours', Number((e.target as HTMLInputElement).value), 1, 168)}
+          />
+        </div>
       </label>
 
       <label>
         Days of supply: {thresholds.days_of_supply}
-        <input type="range" min="1" max="14" step="1"
-          value={thresholds.days_of_supply}
-          oninput={(e) => emit({ days_of_supply: Number((e.target as HTMLInputElement).value) })}
-        />
+        <div class="slider-row">
+          <input type="range" min="1" max="14" step="1"
+            value={thresholds.days_of_supply}
+            oninput={(e) => emit({ days_of_supply: Number((e.target as HTMLInputElement).value) })}
+          />
+          <input type="number" min="1" max="14" step="1"
+            value={thresholds.days_of_supply}
+            oninput={(e) => clampEmit('days_of_supply', Number((e.target as HTMLInputElement).value), 1, 14)}
+          />
+        </div>
       </label>
 
       <label class="inline">
@@ -73,5 +95,8 @@
   .toggle  { width: 100%; padding: 10px 16px; background: none; border: none; color: #ccc; cursor: pointer; text-align: left; font-size: 14px; }
   .controls { display: flex; flex-wrap: wrap; gap: 20px; padding: 12px 16px 16px; }
   label    { display: flex; flex-direction: column; gap: 4px; color: #aaa; font-size: 13px; min-width: 160px; }
+  .slider-row { display: flex; align-items: center; gap: 8px; }
+  .slider-row input[type="range"] { flex: 1; }
+  .slider-row input[type="number"] { width: 60px; padding: 2px 4px; background: #0f0f1a; border: 1px solid #444; color: #ccc; border-radius: 4px; font-size: 13px; }
   .inline  { flex-direction: row; align-items: center; gap: 8px; }
 </style>
