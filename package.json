@@ -11,6 +11,7 @@
     "benchmark": "bun scripts/benchmark-scan.ts"
   },
   "dependencies": {
+    "@msgpack/msgpack": "^3.1.3",
     "@types/compression": "^1.8.1",
     "compression": "^1.8.1",
     "express": "^5.0.0",
