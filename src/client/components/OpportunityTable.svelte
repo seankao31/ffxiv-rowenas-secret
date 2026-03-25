@@ -23,6 +23,9 @@
     if (confidence >= 0.25) return '#e83'
     return '#d44'
   }
+
+  const totalVelocity = (opp: Opportunity) =>
+    Math.round(opp.fairShareVelocity * (opp.activeCompetitorCount + 1) * 100) / 100
 </script>
 
 <table>
@@ -105,7 +108,7 @@
         <!-- Vel -->
         <td>
           <div class="primary">{opp.fairShareVelocity}</div>
-          <div class="meta">{Math.round(opp.fairShareVelocity * (opp.activeCompetitorCount + 1) * 100) / 100}</div>
+          <div class="meta">{totalVelocity(opp)} total</div>
         </td>
 
         <!-- Gil/day -->
