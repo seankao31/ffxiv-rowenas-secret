@@ -1,5 +1,6 @@
 <!-- src/client/App.svelte -->
 <script lang="ts">
+  import { untrack } from 'svelte'
   import { fetchOpportunities, type Opportunity, type ScanMeta, type ScanProgress, type ThresholdState } from './lib/api.ts'
   import StatusBar from './components/StatusBar.svelte'
   import ThresholdControls from './components/ThresholdControls.svelte'
@@ -61,9 +62,11 @@
   }
 
   $effect(() => {
-    loadData()
     // Poll faster during cold start (2s) for smooth progress updates, normal 30s otherwise
     const ms = coldStart ? 2_000 : 30_000
+    // untrack: loadData reads thresholds, but this effect should only react to coldStart changes.
+    // Threshold-driven fetches go through the debounced onThresholdChange path instead.
+    untrack(() => loadData())
     const interval = setInterval(loadData, ms)
     return () => clearInterval(interval)
   })
