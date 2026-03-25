@@ -60,3 +60,22 @@ This keeps the original xivapi approach for the small number of items that actua
 - If GitHub is unreachable at startup, names fall back to `Item #${id}` (non-fatal).
 - Items missing TC names get their English name resolved lazily on the client via xivapi.
 - Names are in TC Chinese, matching the in-game locale for 陸行鳥 players.
+
+## Update: Switched to FFXIV_Market msgpack (2026-03-25)
+
+Replaced mogboard-next JSON with [`beherw/FFXIV_Market`](https://github.com/beherw/FFXIV_Market)'s `tw-items.msgpack`:
+
+```
+GET https://raw.githubusercontent.com/beherw/FFXIV_Market/main/public/data/tw-items.msgpack
+```
+
+**Why:**
+- **43,158 items** (vs ~15,555) — covers all game items, not just TC-patch-current
+- **1.3 MB msgpack** (vs ~5 MB JSON) — smaller payload
+- **More frequently updated** — multi-source pipeline (dataminer → Teamcraft fallback)
+
+**Changes:**
+- Added `@msgpack/msgpack` dependency for binary decoding
+- `fetchItemNames()` now decodes msgpack and reads `item.tw` instead of `item.name`
+- Entries with falsy `tw` values are skipped (fall through to `Item #NNN` fallback)
+- Decode errors return an empty map with a warning, consistent with fetch-error handling

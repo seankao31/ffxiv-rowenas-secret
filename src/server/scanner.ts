@@ -219,7 +219,7 @@ export async function startScanner(): Promise<void> {
   console.log(`[scanner] Found ${itemIds.length} marketable items`)
   console.log(`[scanner] Using "${SCAN_STRATEGY}" scan strategy`)
 
-  // Fetch all item names in one shot from mogboard's TC data
+  // Fetch all item names from FFXIV_Market's TW msgpack data
   setScanProgress({ phase: 'Loading item names…', completedBatches: 0, totalBatches: 0 })
   const names = await fetchItemNames()
   if (names.size > 0) setNameMap(names)

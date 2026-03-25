@@ -210,13 +210,14 @@ describe('fetchItemNames', () => {
     globalThis.fetch = originalFetch
   })
 
-  test('parses mogboard items.json into id→name map', async () => {
+  test('decodes msgpack tw-items into id→name map', async () => {
+    const { encode } = await import('@msgpack/msgpack')
     const mockData = {
-      '2': { name: '火之碎晶' },
-      '7': { name: '水之碎晶' },
+      '2': { tw: '火之碎晶' },
+      '7': { tw: '水之碎晶' },
     }
     globalThis.fetch = mock(async () =>
-      new Response(JSON.stringify(mockData), { status: 200 })
+      new Response(encode(mockData), { status: 200 })
     ) as unknown as typeof fetch
 
     const result = await fetchItemNames()
@@ -226,9 +227,38 @@ describe('fetchItemNames', () => {
     expect(result.get(7)).toBe('水之碎晶')
   })
 
+  test('skips entries with falsy tw field', async () => {
+    const { encode } = await import('@msgpack/msgpack')
+    const mockData = {
+      '2': { tw: '火之碎晶' },
+      '3': { tw: '' },
+      '4': { tw: null },
+    }
+    globalThis.fetch = mock(async () =>
+      new Response(encode(mockData), { status: 200 })
+    ) as unknown as typeof fetch
+
+    const result = await fetchItemNames()
+
+    expect(result.size).toBe(1)
+    expect(result.get(2)).toBe('火之碎晶')
+    expect(result.has(3)).toBe(false)
+    expect(result.has(4)).toBe(false)
+  })
+
   test('returns empty map on HTTP error', async () => {
     globalThis.fetch = mock(async () =>
       new Response('', { status: 500 })
+    ) as unknown as typeof fetch
+
+    const result = await fetchItemNames()
+
+    expect(result.size).toBe(0)
+  })
+
+  test('returns empty map on corrupt msgpack payload', async () => {
+    globalThis.fetch = mock(async () =>
+      new Response(new Uint8Array([0xff, 0xfe, 0x00]), { status: 200 })
     ) as unknown as typeof fetch
 
     const result = await fetchItemNames()

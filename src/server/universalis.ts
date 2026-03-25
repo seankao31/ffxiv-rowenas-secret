@@ -128,15 +128,16 @@ export async function fetchMarketableItems(): Promise<number[]> {
   return data as number[]
 }
 
-const MOGBOARD_ITEMS_URL =
-  'https://raw.githubusercontent.com/Universalis-FFXIV/mogboard-next/main/data/game/tc/items.json'
+const ITEM_NAMES_URL =
+  'https://raw.githubusercontent.com/beherw/FFXIV_Market/main/public/data/tw-items.msgpack'
 
 export async function fetchItemNames(): Promise<Map<number, string>> {
+  const { decode } = await import('@msgpack/msgpack')
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 15_000)
   let res: Response
   try {
-    res = await fetch(MOGBOARD_ITEMS_URL, {
+    res = await fetch(ITEM_NAMES_URL, {
       signal: controller.signal,
       headers: { 'User-Agent': USER_AGENT },
     })
@@ -150,12 +151,17 @@ export async function fetchItemNames(): Promise<Map<number, string>> {
     console.warn(`[universalis] Failed to fetch item names: HTTP ${res.status}`)
     return new Map()
   }
-  const data = await res.json() as Record<string, { name: string }>
   const map = new Map<number, string>()
-  for (const [id, item] of Object.entries(data)) {
-    map.set(Number(id), item.name)
+  try {
+    const data = decode(new Uint8Array(await res.arrayBuffer())) as Record<string, { tw: string }>
+    for (const [id, item] of Object.entries(data)) {
+      if (item.tw) map.set(Number(id), item.tw)
+    }
+  } catch (err) {
+    console.warn(`[universalis] Failed to decode item names: ${err instanceof Error ? err.message : err}`)
+    return new Map()
   }
-  console.log(`[universalis] Loaded ${map.size} item names from mogboard`)
+  console.log(`[universalis] Loaded ${map.size} item names from FFXIV_Market`)
   return map
 }
 
