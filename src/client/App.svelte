@@ -74,7 +74,7 @@
 
 <div class="app">
   <header>
-    <h1>FFXIV Market Arbitrage</h1>
+    <h1>羅薇娜的商業機密</h1>
   </header>
 
   <div class="content">
