@@ -63,13 +63,20 @@ router.get('/opportunities', (req, res) => {
     return
   }
 
+  // ETag derived from scan timestamp + filter params — deterministic for the same inputs
+  const meta = getScanMeta()
+  const etag = `"${meta.scanCompletedAt}-${params.price_threshold}-${params.listing_staleness_hours}-${params.days_of_supply}-${params.limit}-${params.hq}"`
+  if (req.headers['if-none-match'] === etag) {
+    res.status(304).end()
+    return
+  }
+
   try {
     const opportunities = scoreOpportunities(getAllItems(), getNameMap(), params)
 
-    // Keep itemsWithOpportunities current in meta
-    const meta = getScanMeta()
     setScanMeta({ ...meta, itemsWithOpportunities: opportunities.length })
 
+    res.setHeader('ETag', etag)
     res.json({ opportunities, meta: getScanMeta() })
   } catch (err) {
     console.error('[api] Scoring error:', err)

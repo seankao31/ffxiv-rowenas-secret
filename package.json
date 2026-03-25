@@ -11,6 +11,8 @@
     "benchmark": "bun scripts/benchmark-scan.ts"
   },
   "dependencies": {
+    "@types/compression": "^1.8.1",
+    "compression": "^1.8.1",
     "express": "^5.0.0",
     "limiter": "^3.0.0"
   },
