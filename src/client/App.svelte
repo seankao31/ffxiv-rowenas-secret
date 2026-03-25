@@ -1,5 +1,6 @@
 <!-- src/client/App.svelte -->
 <script lang="ts">
+  import { untrack } from 'svelte'
   import { fetchOpportunities, type Opportunity, type ScanMeta, type ScanProgress, type ThresholdState } from './lib/api.ts'
   import StatusBar from './components/StatusBar.svelte'
   import ThresholdControls from './components/ThresholdControls.svelte'
@@ -25,6 +26,7 @@
   })
 
   let debounceTimer: ReturnType<typeof setTimeout> | null = null
+  let flash = $state(false)
 
   async function loadData() {
     try {
@@ -37,6 +39,13 @@
         return
       }
       coldStart = false
+      // Flash timestamp when background poll detects a new scan
+      if (meta.scanCompletedAt > 0 && result.meta.scanCompletedAt !== meta.scanCompletedAt) {
+        flash = false
+        // Force a tick so Svelte removes the class before re-adding it
+        await new Promise(r => requestAnimationFrame(r))
+        flash = true
+      }
       opportunities = result.opportunities
       meta = result.meta
       loading = false
@@ -53,9 +62,11 @@
   }
 
   $effect(() => {
-    loadData()
     // Poll faster during cold start (2s) for smooth progress updates, normal 30s otherwise
     const ms = coldStart ? 2_000 : 30_000
+    // untrack: loadData reads thresholds, but this effect should only react to coldStart changes.
+    // Threshold-driven fetches go through the debounced onThresholdChange path instead.
+    untrack(() => loadData())
     const interval = setInterval(loadData, ms)
     return () => clearInterval(interval)
   })
@@ -68,7 +79,7 @@
 
   <div class="content">
     {#if meta.scanCompletedAt > 0}
-      <StatusBar {meta} />
+      <StatusBar {meta} {flash} />
     {/if}
 
     <ThresholdControls {thresholds} onchange={onThresholdChange} />
@@ -92,6 +103,7 @@
       {:else if opportunities.length === 0}
         <p class="msg">No opportunities found with current filters.</p>
       {:else}
+        <p class="result-count">Showing {opportunities.length} opportunities</p>
         <OpportunityTable {opportunities} />
       {/if}
     </main>
@@ -113,6 +125,7 @@
   footer a:hover { text-decoration: underline; }
   .msg { padding: 32px; color: #666; text-align: center; }
   .err { color: #ff6b6b; }
+  .result-count { margin: 12px 0 4px; color: #666; font-size: 13px; }
   .cold-start { padding: 48px 32px; text-align: center; }
   .cold-start .msg { padding: 0 0 16px; }
   .progress-track {

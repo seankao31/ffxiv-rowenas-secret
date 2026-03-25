@@ -1,5 +1,6 @@
 // src/server/index.ts
 import { parseArgs } from 'util'
+import compression from 'compression'
 import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -27,6 +28,7 @@ if (values['rate-limit']) {
 const app = express()
 const PORT = process.env['PORT'] ?? 3000
 
+app.use(compression())
 app.use('/api', router)
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
