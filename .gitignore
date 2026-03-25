@@ -9,3 +9,6 @@ node_modules/
 
 # Built frontend (regenerated via `bun run build:client`)
 dist/
+
+# Git worktrees
+.worktrees/
