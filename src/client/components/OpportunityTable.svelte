@@ -92,7 +92,9 @@
         <!-- Profit/unit -->
         <td>
           <div class="primary">{fmt(opp.profitPerUnit)}</div>
-          <div class="meta">{fmt(opp.tax)} tax</div>
+          {#if opp.listingProfitPerUnit !== opp.profitPerUnit}
+            <div class="meta">{fmt(opp.listingProfitPerUnit)}</div>
+          {/if}
         </td>
 
         <!-- Units -->

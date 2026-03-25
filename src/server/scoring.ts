@@ -155,7 +155,7 @@ export function scoreOpportunities(
       sellPrice: realisticSellPrice,
       listingPrice: cheapestHomePrice,
       profitPerUnit: Math.round(best.profitPerUnit),
-      tax: Math.round(realisticSellPrice * MARKET_TAX),
+      listingProfitPerUnit: Math.round(cheapestHomePrice * (1 - MARKET_TAX) - best.cheapestSource),
 
       sourceWorld: best.worldName,
       sourceWorldID: best.worldID,
