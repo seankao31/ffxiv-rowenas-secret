@@ -110,7 +110,9 @@
   </div>
 
   <footer>
-    Data sourced from <a href="https://universalis.app" target="_blank" rel="noopener">Universalis</a>
+    <p>Built with ♥ by <a href="https://yhkao.com" target="_blank" rel="noopener">Yshan</a></p>
+    <p>Data sourced from <a href="https://universalis.app" target="_blank" rel="noopener">Universalis</a></p>
+    <p class="copyright">FINAL FANTASY is a registered trademark of Square Enix Holdings Co., Ltd. © SQUARE ENIX CO., LTD. All Rights Reserved.</p>
   </footer>
 </div>
 
@@ -123,6 +125,8 @@
   footer { padding: 20px 32px; text-align: center; color: #555; font-size: 12px; border-top: 1px solid #1e1e2e; margin-top: 24px; }
   footer a { color: #7eb8f7; text-decoration: none; }
   footer a:hover { text-decoration: underline; }
+  footer p { margin: 4px 0; }
+  .copyright { color: #444; font-size: 11px; }
   .msg { padding: 32px; color: #666; text-align: center; }
   .err { color: #ff6b6b; }
   .result-count { margin: 12px 0 4px; color: #666; font-size: 13px; }
