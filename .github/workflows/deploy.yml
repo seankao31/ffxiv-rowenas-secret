@@ -1,10 +1,8 @@
-name: CI/CD
+name: Deploy
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    tags: ["v*"]
 
 env:
   IMAGE: ghcr.io/seankao31/ffxiv-rowenas-secret
@@ -21,7 +19,6 @@ jobs:
 
   deploy:
     needs: ci
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -44,7 +41,7 @@ jobs:
           platforms: linux/arm64
           tags: |
             ${{ env.IMAGE }}:latest
-            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:${{ github.ref_name }}
 
       - name: Copy docker-compose.yml to EC2
         uses: appleboy/scp-action@v0.1.7
