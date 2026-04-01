@@ -1,0 +1,6 @@
+services:
+  app:
+    image: ghcr.io/seankao31/ffxiv-rowenas-secret:latest
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
