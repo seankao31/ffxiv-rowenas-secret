@@ -327,7 +327,6 @@ describe('OutboundRateLimiter', () => {
   test('acquire resolves without error', async () => {
     const limiter = new OutboundRateLimiter(100)
     // High rate ensures acquire resolves immediately
-    await limiter.acquire()
-    expect(true).toBe(true)
+    expect(await limiter.acquire()).toBeUndefined()
   })
 })
