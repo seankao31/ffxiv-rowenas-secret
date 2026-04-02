@@ -1,6 +1,6 @@
 // tests/server/universalis.test.ts
 import { test, expect, describe, mock, afterEach } from 'bun:test'
-import { Semaphore, fetchMarketableItems, fetchDCListings, fetchWorldListings, fetchItemNames } from '../../src/server/universalis.ts'
+import { Semaphore, OutboundRateLimiter, fetchMarketableItems, fetchDCListings, fetchWorldListings, fetchItemNames } from '../../src/server/universalis.ts'
 
 describe('fetchMarketableItems', () => {
   const originalFetch = globalThis.fetch
@@ -312,26 +312,22 @@ describe('Semaphore', () => {
   })
 })
 
-describe('RateLimiter (limiter library)', () => {
-  test('allows burst up to rate', async () => {
-    const { RateLimiter } = await import('limiter')
-    const limiter = new RateLimiter({ tokensPerInterval: 100, interval: 'second' })
-    // Should be able to acquire 10 tokens immediately (well within 100/s budget)
-    for (let i = 0; i < 10; i++) {
-      await limiter.removeTokens(1)
-    }
-    expect(true).toBe(true)
+describe('OutboundRateLimiter', () => {
+  test('getRate returns initial rate', () => {
+    const limiter = new OutboundRateLimiter(7)
+    expect(limiter.getRate()).toBe(7)
   })
 
-  test('delays when token bucket is exhausted', async () => {
-    const { RateLimiter } = await import('limiter')
-    const limiter = new RateLimiter({ tokensPerInterval: 10, interval: 'second' })
-    // Drain the initial tokens
-    for (let i = 0; i < 10; i++) await limiter.removeTokens(1)
-    // Next acquire should wait ~100ms
-    const start = Date.now()
-    await limiter.removeTokens(1)
-    const elapsed = Date.now() - start
-    expect(elapsed).toBeGreaterThan(50)  // generous lower bound
+  test('setRate updates the rate', () => {
+    const limiter = new OutboundRateLimiter(5)
+    limiter.setRate(15)
+    expect(limiter.getRate()).toBe(15)
+  })
+
+  test('acquire resolves without error', async () => {
+    const limiter = new OutboundRateLimiter(100)
+    // High rate ensures acquire resolves immediately
+    await limiter.acquire()
+    expect(true).toBe(true)
   })
 })

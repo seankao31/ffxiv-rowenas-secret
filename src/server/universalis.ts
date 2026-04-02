@@ -52,7 +52,7 @@ export class Semaphore {
   }
 }
 
-class OutboundRateLimiter {
+export class OutboundRateLimiter {
   private limiter: RateLimiter
   private rate: number
 
