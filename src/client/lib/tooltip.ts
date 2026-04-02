@@ -8,8 +8,22 @@ import type { Attachment } from 'svelte/attachments'
 export function tooltip(text: string): Attachment {
   return (node) => {
     let el: HTMLDivElement | null = null
+    let pinned = false
+
+    function position() {
+      computePosition(node as HTMLElement, el!, {
+        placement: 'top',
+        middleware: [offset(8), flip(), shift({ padding: 8 })]
+      }).then(({ x, y }) => {
+        if (el) {
+          el.style.left = `${x}px`
+          el.style.top = `${y}px`
+        }
+      })
+    }
 
     function show() {
+      if (el) return
       el = document.createElement('div')
       el.textContent = text
       el.style.cssText = `
@@ -28,16 +42,7 @@ export function tooltip(text: string): Attachment {
         pointer-events: none;
       `
       document.body.appendChild(el)
-
-      computePosition(node as HTMLElement, el, {
-        placement: 'top',
-        middleware: [offset(8), flip(), shift({ padding: 8 })]
-      }).then(({ x, y }) => {
-        if (el) {
-          el.style.left = `${x}px`
-          el.style.top = `${y}px`
-        }
-      })
+      position()
     }
 
     function hide() {
@@ -45,13 +50,42 @@ export function tooltip(text: string): Attachment {
       el = null
     }
 
+    function unpin() {
+      pinned = false
+      hide()
+      document.removeEventListener('click', onOutsideClick)
+    }
+
+    function onOutsideClick(e: Event) {
+      if (node.contains(e.target as Node)) return
+      unpin()
+    }
+
+    function onMouseLeave() {
+      if (!pinned) hide()
+    }
+
+    function onClick() {
+      if (pinned) {
+        unpin()
+        return
+      }
+      show()
+      pinned = true
+      if (el) el.style.pointerEvents = 'auto'
+      document.addEventListener('click', onOutsideClick)
+    }
+
     node.addEventListener('mouseenter', show)
-    node.addEventListener('mouseleave', hide)
+    node.addEventListener('mouseleave', onMouseLeave)
+    node.addEventListener('click', onClick)
 
     return () => {
+      unpin()
       hide()
       node.removeEventListener('mouseenter', show)
-      node.removeEventListener('mouseleave', hide)
+      node.removeEventListener('mouseleave', onMouseLeave)
+      node.removeEventListener('click', onClick)
     }
   }
 }
