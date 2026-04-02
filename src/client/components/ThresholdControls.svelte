@@ -1,5 +1,6 @@
 <!-- src/client/components/ThresholdControls.svelte -->
 <script lang="ts">
+  import { Settings, ChevronUp, ChevronDown } from 'lucide-svelte'
   import type { ThresholdState } from '../lib/api.ts'
 
   let {
@@ -20,7 +21,13 @@
 
 <div class="bg-base-200 border-b border-base-300">
   <button class="w-full py-2.5 px-4 bg-transparent border-none text-base-content cursor-pointer text-left text-sm" onclick={() => (open = !open)}>
-    ⚙ Filters {open ? '▲' : '▼'}
+    <Settings class="inline w-4 h-4 align-text-bottom" />
+    Filters
+    {#if open}
+      <ChevronUp class="inline w-4 h-4 align-text-bottom" />
+    {:else}
+      <ChevronDown class="inline w-4 h-4 align-text-bottom" />
+    {/if}
   </button>
 
   {#if open}

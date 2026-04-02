@@ -4,6 +4,7 @@
   themes: night --default;
 }
 
+
 @keyframes pulse-bright {
   0%, 100% { color: currentColor; }
   50% { color: oklch(var(--bc)); }
