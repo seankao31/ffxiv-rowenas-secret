@@ -4,6 +4,7 @@
   import { fetchOpportunities, type Opportunity, type ScanMeta, type ScanProgress, type ThresholdState } from './lib/api.ts'
   import StatusBar from './components/StatusBar.svelte'
   import ThresholdControls from './components/ThresholdControls.svelte'
+  import { Heart } from 'lucide-svelte'
   import OpportunityTable from './components/OpportunityTable.svelte'
 
   let opportunities = $state<Opportunity[]>([])
@@ -110,7 +111,7 @@
   </div>
 
   <footer class="shrink-0 p-5 px-8 text-center text-base-content/40 text-xs border-t border-base-300">
-    <p class="my-1">Built with ♥ by <a class="link link-info no-underline hover:underline" href="https://yhkao.com" target="_blank" rel="noopener">Yshan</a></p>
+    <p class="my-1">Built with <Heart class="inline w-3.5 h-3.5 align-text-bottom text-error" fill="currentColor" /> by <a class="link link-info no-underline hover:underline" href="https://yhkao.com" target="_blank" rel="noopener">Yshan</a></p>
     <p class="my-1">Data sourced from <a class="link link-info no-underline hover:underline" href="https://universalis.app" target="_blank" rel="noopener">Universalis</a></p>
     <p class="my-1 text-base-content/30 text-[11px]">FINAL FANTASY is a registered trademark of Square Enix Holdings Co., Ltd. © SQUARE ENIX CO., LTD. All Rights Reserved.</p>
   </footer>
