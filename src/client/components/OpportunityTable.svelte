@@ -37,12 +37,12 @@
 </script>
 
 {#snippet infoIcon()}
-  <Info class="inline w-3.5 h-3.5 opacity-40 align-middle" />
+  <Info class="inline w-3.5 h-3.5 opacity-40 align-middle ml-1" />
 {/snippet}
 
 <div class="flex-1 overflow-y-auto min-h-0">
-  <table class="table">
-    <thead class="sticky top-0 bg-base-100 z-10">
+  <table class="table table-pin-rows">
+    <thead>
       <tr>
         <th>Item</th>
         <th>Buy from</th>
