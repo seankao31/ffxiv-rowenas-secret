@@ -48,12 +48,12 @@
         <th>Item</th>
         <th>Buy from</th>
         <th>Buy</th>
-        <th>Sell <span use:tooltip={"Estimated sell price: the lower of the cheapest listing and the median recent sale. Second line (if shown) is the current cheapest listing on the market board."}>{@render infoIcon()}</span></th>
-        <th>Profit/unit <span use:tooltip={"Sell price after 5% tax, minus buy price. Second line (if shown) uses the market board listing instead."}>{@render infoIcon()}</span></th>
-        <th>Units <span use:tooltip={"Recommended / available at source. Recommended is capped by fair-share velocity × days of supply."}>{@render infoIcon()}</span></th>
-        <th>Comp <span use:tooltip={"Active competing listings on the home world near the expected sell price."}>{@render infoIcon()}</span></th>
-        <th>Vel <span use:tooltip={"Your fair share of daily sales: total velocity ÷ (competitors + 1). Second line shows total market velocity."}>{@render infoIcon()}</span></th>
-        <th>Gil/day <span use:tooltip={"Expected daily profit: profit per unit × fair-share velocity. Second line (if shown) is an alternative source world, for comparison only — all other columns use the primary source."}>{@render infoIcon()}</span></th>
+        <th>Sell <span {@attach tooltip("Estimated sell price: the lower of the cheapest listing and the median recent sale. Second line (if shown) is the current cheapest listing on the market board.")}>{@render infoIcon()}</span></th>
+        <th>Profit/unit <span {@attach tooltip("Sell price after 5% tax, minus buy price. Second line (if shown) uses the market board listing instead.")}>{@render infoIcon()}</span></th>
+        <th>Units <span {@attach tooltip("Recommended / available at source. Recommended is capped by fair-share velocity × days of supply.")}>{@render infoIcon()}</span></th>
+        <th>Comp <span {@attach tooltip("Active competing listings on the home world near the expected sell price.")}>{@render infoIcon()}</span></th>
+        <th>Vel <span {@attach tooltip("Your fair share of daily sales: total velocity ÷ (competitors + 1). Second line shows total market velocity.")}>{@render infoIcon()}</span></th>
+        <th>Gil/day <span {@attach tooltip("Expected daily profit: profit per unit × fair-share velocity. Second line (if shown) is an alternative source world, for comparison only — all other columns use the primary source.")}>{@render infoIcon()}</span></th>
       </tr>
     </thead>
     <tbody>
