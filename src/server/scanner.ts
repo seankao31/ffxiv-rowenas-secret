@@ -7,7 +7,7 @@ const SCAN_COOLDOWN_MS = 60_000
 type ScanStrategy = 'dc' | 'per-world'
 const SCAN_STRATEGY: ScanStrategy = (process.env['SCAN_STRATEGY'] as ScanStrategy) || 'per-world'
 
-function buildItemData(
+export function buildItemData(
   itemID: number,
   dcListings: Listing[],
   worldUploadTimes: Record<number, number>,  // from DC API response, unix ms

@@ -29,7 +29,7 @@ router.put('/admin/rate-limit', (req, res) => {
   res.json({ previous, current: ratePerSecond })
 })
 
-function parseThresholds(query: Record<string, unknown>): ThresholdParams | { error: string } {
+export function parseThresholds(query: Record<string, unknown>): ThresholdParams | { error: string } {
   const price_threshold = query['price_threshold'] !== undefined
     ? Number(query['price_threshold']) : 2.0
   const listing_staleness_hours = query['listing_staleness_hours'] !== undefined

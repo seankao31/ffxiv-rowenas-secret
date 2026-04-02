@@ -52,7 +52,7 @@ export class Semaphore {
   }
 }
 
-class OutboundRateLimiter {
+export class OutboundRateLimiter {
   private limiter: RateLimiter
   private rate: number
 
@@ -117,6 +117,31 @@ function chunk<T>(arr: T[], size: number): T[][] {
   const out: T[][] = []
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size))
   return out
+}
+
+type BatchResponse = { items?: Record<string, unknown> }
+
+async function fetchBatched<T>(
+  itemIds: number[],
+  endpoint: string,
+  transformItems: (items: Record<string, unknown>) => T[],
+  onBatchDone?: ProgressCallback,
+): Promise<T[]> {
+  const batches = chunk(itemIds, BATCH_SIZE)
+  let completed = 0
+  const results = await Promise.all(
+    batches.map(async batch => {
+      const ids = batch.join(',')
+      const data = await fetchWithRetry(
+        `${BASE_URL}/${encodeURIComponent(endpoint)}/${ids}`
+      ) as BatchResponse | null
+      completed++
+      onBatchDone?.(completed, batches.length)
+      if (!data?.items) return []
+      return transformItems(data.items)
+    })
+  )
+  return results.flat()
 }
 
 export async function fetchMarketableItems(): Promise<number[]> {
@@ -198,47 +223,35 @@ export async function fetchDCListings(
   itemIds: number[],
   onBatchDone?: ProgressCallback,
 ): Promise<DCBatchResult[]> {
-  const batches = chunk(itemIds, BATCH_SIZE)
-  let completed = 0
-  const results = await Promise.all(
-    batches.map(async batch => {
-      const ids = batch.join(',')
-      const data = await fetchWithRetry(
-        `${BASE_URL}/${encodeURIComponent(DC_NAME)}/${ids}`
-      ) as {
-        items?: Record<string, {
-          itemID: number
-          worldUploadTimes?: Record<string, number>
-          listings: Array<{
-            lastReviewTime: number   // seconds from API
-            pricePerUnit: number
-            quantity: number
-            worldID: number
-            worldName: string
-            hq: boolean
-          }>
-          lastUploadTime: number
-        }>
-      } | null
-      completed++
-      onBatchDone?.(completed, batches.length)
-      if (!data?.items) return []
-      return Object.values(data.items).map(item => ({
-        itemID: item.itemID,
-        worldUploadTimes: item.worldUploadTimes ?? {},
-        listings: (item.listings ?? []).map(l => ({
-          lastReviewTime: l.lastReviewTime * 1000,  // seconds → ms
-          pricePerUnit: l.pricePerUnit,
-          quantity: l.quantity,
-          worldID: l.worldID,
-          worldName: l.worldName,
-          hq: l.hq,
-        })),
-        lastUploadTime: item.lastUploadTime ?? 0,
-      }))
-    })
+  type ApiItem = {
+    itemID: number
+    worldUploadTimes?: Record<string, number>
+    listings: Array<{
+      lastReviewTime: number
+      pricePerUnit: number
+      quantity: number
+      worldID: number
+      worldName: string
+      hq: boolean
+    }>
+    lastUploadTime: number
+  }
+  return fetchBatched(itemIds, DC_NAME, (items) =>
+    Object.values(items as Record<string, ApiItem>).map(item => ({
+      itemID: item.itemID,
+      worldUploadTimes: item.worldUploadTimes ?? {},
+      listings: (item.listings ?? []).map(l => ({
+        lastReviewTime: l.lastReviewTime * 1000,
+        pricePerUnit: l.pricePerUnit,
+        quantity: l.quantity,
+        worldID: l.worldID,
+        worldName: l.worldName,
+        hq: l.hq,
+      })),
+      lastUploadTime: item.lastUploadTime ?? 0,
+    })),
+    onBatchDone,
   )
-  return results.flat()
 }
 
 export async function fetchWorldListings(
@@ -246,44 +259,32 @@ export async function fetchWorldListings(
   itemIds: number[],
   onBatchDone?: ProgressCallback,
 ): Promise<DCBatchResult[]> {
-  const batches = chunk(itemIds, BATCH_SIZE)
-  let completed = 0
-  const results = await Promise.all(
-    batches.map(async batch => {
-      const ids = batch.join(',')
-      const data = await fetchWithRetry(
-        `${BASE_URL}/${encodeURIComponent(world.name)}/${ids}`
-      ) as {
-        items?: Record<string, {
-          itemID: number
-          lastUploadTime: number
-          listings: Array<{
-            lastReviewTime: number
-            pricePerUnit: number
-            quantity: number
-            hq: boolean
-          }>
-        }>
-      } | null
-      completed++
-      onBatchDone?.(completed, batches.length)
-      if (!data?.items) return []
-      return Object.values(data.items).map(item => ({
-        itemID: item.itemID,
-        worldUploadTimes: { [world.id]: item.lastUploadTime ?? 0 },
-        listings: (item.listings ?? []).map(l => ({
-          lastReviewTime: l.lastReviewTime * 1000,
-          pricePerUnit: l.pricePerUnit,
-          quantity: l.quantity,
-          worldID: world.id,
-          worldName: world.name,
-          hq: l.hq,
-        })),
-        lastUploadTime: item.lastUploadTime ?? 0,
-      }))
-    })
+  type ApiItem = {
+    itemID: number
+    lastUploadTime: number
+    listings: Array<{
+      lastReviewTime: number
+      pricePerUnit: number
+      quantity: number
+      hq: boolean
+    }>
+  }
+  return fetchBatched(itemIds, world.name, (items) =>
+    Object.values(items as Record<string, ApiItem>).map(item => ({
+      itemID: item.itemID,
+      worldUploadTimes: { [world.id]: item.lastUploadTime ?? 0 },
+      listings: (item.listings ?? []).map(l => ({
+        lastReviewTime: l.lastReviewTime * 1000,
+        pricePerUnit: l.pricePerUnit,
+        quantity: l.quantity,
+        worldID: world.id,
+        worldName: world.name,
+        hq: l.hq,
+      })),
+      lastUploadTime: item.lastUploadTime ?? 0,
+    })),
+    onBatchDone,
   )
-  return results.flat()
 }
 
 export const HOME_WORLD_ID = 4030
@@ -297,98 +298,70 @@ export async function fetchHomeWorldCombined(
   itemIds: number[],
   onBatchDone?: ProgressCallback,
 ): Promise<HomeWorldCombinedResult> {
-  const batches = chunk(itemIds, BATCH_SIZE)
-  let completed = 0
-  const dcAll: DCBatchResult[][] = []
-  const homeAll: HomeBatchResult[][] = []
-
-  await Promise.all(
-    batches.map(async batch => {
-      const ids = batch.join(',')
-      const data = await fetchWithRetry(
-        `${BASE_URL}/${encodeURIComponent(HOME_WORLD)}/${ids}`
-      ) as {
-        items?: Record<string, {
-          itemID: number
-          lastUploadTime: number
-          listings: Array<{
-            lastReviewTime: number
-            pricePerUnit: number
-            quantity: number
-            hq: boolean
-          }>
-          regularSaleVelocity: number
-          hqSaleVelocity: number
-          recentHistory: HomeBatchResult['recentHistory']
-        }>
-      } | null
-      completed++
-      onBatchDone?.(completed, batches.length)
-      if (!data?.items) return
-
-      const dcBatch: DCBatchResult[] = []
-      const homeBatch: HomeBatchResult[] = []
-      for (const item of Object.values(data.items)) {
-        dcBatch.push({
-          itemID: item.itemID,
-          worldUploadTimes: { [HOME_WORLD_ID]: item.lastUploadTime ?? 0 },
-          listings: (item.listings ?? []).map(l => ({
-            lastReviewTime: l.lastReviewTime * 1000,
-            pricePerUnit: l.pricePerUnit,
-            quantity: l.quantity,
-            worldID: HOME_WORLD_ID,
-            worldName: HOME_WORLD,
-            hq: l.hq,
-          })),
-          lastUploadTime: item.lastUploadTime ?? 0,
-        })
-        homeBatch.push({
-          itemID: item.itemID,
-          regularSaleVelocity: item.regularSaleVelocity ?? 0,
-          hqSaleVelocity: item.hqSaleVelocity ?? 0,
-          recentHistory: item.recentHistory ?? [],
-          lastUploadTime: item.lastUploadTime ?? 0,
-        })
-      }
-      dcAll.push(dcBatch)
-      homeAll.push(homeBatch)
-    })
+  type ApiItem = {
+    itemID: number
+    lastUploadTime: number
+    listings: Array<{
+      lastReviewTime: number
+      pricePerUnit: number
+      quantity: number
+      hq: boolean
+    }>
+    regularSaleVelocity: number
+    hqSaleVelocity: number
+    recentHistory: HomeBatchResult['recentHistory']
+  }
+  type Combined = { dc: DCBatchResult; home: HomeBatchResult }
+  const combined = await fetchBatched<Combined>(itemIds, HOME_WORLD, (items) =>
+    Object.values(items as Record<string, ApiItem>).map(item => ({
+      dc: {
+        itemID: item.itemID,
+        worldUploadTimes: { [HOME_WORLD_ID]: item.lastUploadTime ?? 0 },
+        listings: (item.listings ?? []).map(l => ({
+          lastReviewTime: l.lastReviewTime * 1000,
+          pricePerUnit: l.pricePerUnit,
+          quantity: l.quantity,
+          worldID: HOME_WORLD_ID,
+          worldName: HOME_WORLD,
+          hq: l.hq,
+        })),
+        lastUploadTime: item.lastUploadTime ?? 0,
+      },
+      home: {
+        itemID: item.itemID,
+        regularSaleVelocity: item.regularSaleVelocity ?? 0,
+        hqSaleVelocity: item.hqSaleVelocity ?? 0,
+        recentHistory: item.recentHistory ?? [],
+        lastUploadTime: item.lastUploadTime ?? 0,
+      },
+    })),
+    onBatchDone,
   )
-
-  return { dcResults: dcAll.flat(), homeResults: homeAll.flat() }
+  return {
+    dcResults: combined.map(c => c.dc),
+    homeResults: combined.map(c => c.home),
+  }
 }
 
 export async function fetchHomeListings(
   itemIds: number[],
   onBatchDone?: ProgressCallback,
 ): Promise<HomeBatchResult[]> {
-  const batches = chunk(itemIds, BATCH_SIZE)
-  let completed = 0
-  const results = await Promise.all(
-    batches.map(async batch => {
-      const ids = batch.join(',')
-      const data = await fetchWithRetry(
-        `${BASE_URL}/${encodeURIComponent(HOME_WORLD)}/${ids}`
-      ) as {
-        items?: Record<string, {
-          itemID: number
-          regularSaleVelocity: number
-          hqSaleVelocity: number
-          recentHistory: HomeBatchResult['recentHistory']
-          lastUploadTime: number
-        }>
-      } | null
-      completed++
-      onBatchDone?.(completed, batches.length)
-      if (!data?.items) return []
-      return Object.values(data.items).map(item => ({
-        itemID: item.itemID,
-        regularSaleVelocity: item.regularSaleVelocity ?? 0,
-        hqSaleVelocity: item.hqSaleVelocity ?? 0,
-        recentHistory: item.recentHistory ?? [],
-        lastUploadTime: item.lastUploadTime ?? 0,
-      }))
-    })
+  type ApiItem = {
+    itemID: number
+    regularSaleVelocity: number
+    hqSaleVelocity: number
+    recentHistory: HomeBatchResult['recentHistory']
+    lastUploadTime: number
+  }
+  return fetchBatched(itemIds, HOME_WORLD, (items) =>
+    Object.values(items as Record<string, ApiItem>).map(item => ({
+      itemID: item.itemID,
+      regularSaleVelocity: item.regularSaleVelocity ?? 0,
+      hqSaleVelocity: item.hqSaleVelocity ?? 0,
+      recentHistory: item.recentHistory ?? [],
+      lastUploadTime: item.lastUploadTime ?? 0,
+    })),
+    onBatchDone,
   )
-  return results.flat()
 }
