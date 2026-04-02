@@ -16,5 +16,8 @@ dist/
 # Superpowers tooling
 .superpowers/
 
+# Playwright MCP screenshots
+.playwright-mcp/
+
 # Private deployment docs
 docs/deployment.md
