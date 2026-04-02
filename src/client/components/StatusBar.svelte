@@ -33,22 +33,15 @@
 </script>
 
 {#if isVeryStale}
-  <div class="bar severe">⚠️ Data very outdated — last scan {lastScanLabel}</div>
+  <div role="alert" class="alert alert-error text-sm py-2 px-4 rounded-none">
+    ⚠️ Data very outdated — last scan {lastScanLabel}
+  </div>
 {:else if isStale}
-  <div class="bar stale">⚠️ Data may be outdated — last scan {lastScanLabel}</div>
+  <div role="alert" class="alert alert-warning text-sm py-2 px-4 rounded-none">
+    ⚠️ Data may be outdated — last scan {lastScanLabel}
+  </div>
 {:else}
-  <div class="bar">
-    <span class="timestamp" class:flash>Last scan: {lastScanLabel}</span>
+  <div class="py-2 px-4 bg-base-200 text-base-content/60 text-sm">
+    <span class:animate-pulse-bright={flash}>Last scan: {lastScanLabel}</span>
   </div>
 {/if}
-
-<style>
-  .bar        { padding: 8px 16px; background: #1a1a2e; color: #aaa; font-size: 13px; }
-  .stale      { background: #3a2a00; color: #ffc107; }
-  .severe     { background: #3a0000; color: #ff6b6b; }
-  .flash { animation: pulse-bright 0.6s ease 3; }
-  @keyframes pulse-bright {
-    0%, 100% { color: #aaa; }
-    50%      { color: #fff; }
-  }
-</style>
