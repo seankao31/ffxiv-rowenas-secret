@@ -1,5 +1,5 @@
-# Claude Code local settings (machine-specific)
-.claude/settings.local.json
+# Claude Code local config (machine-specific)
+.claude/
 
 # Local environment overrides
 .env
