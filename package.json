@@ -8,6 +8,7 @@
     "dev:client": "vite",
     "build:client": "vite build",
     "test": "bun test",
+    "typecheck": "tsc --noEmit",
     "benchmark": "bun scripts/benchmark-scan.ts"
   },
   "dependencies": {
