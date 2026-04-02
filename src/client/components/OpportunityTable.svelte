@@ -29,48 +29,24 @@
 </script>
 
 {#snippet infoIcon()}
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="inline w-3.5 h-3.5 opacity-40">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="inline w-3.5 h-3.5 opacity-40 align-middle">
     <path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z" clip-rule="evenodd" />
   </svg>
 {/snippet}
 
-<div class="overflow-x-auto">
+<div>
   <table class="table table-sm">
     <thead>
       <tr>
         <th>Item</th>
         <th>Buy from</th>
         <th>Buy</th>
-        <th>
-          <div class="tooltip tooltip-bottom" data-tip="Estimated sell price: the lower of the cheapest listing and the median recent sale. Second line (if shown) is the current cheapest listing on the market board.">
-            Sell {@render infoIcon()}
-          </div>
-        </th>
-        <th>
-          <div class="tooltip tooltip-bottom" data-tip="Sell price after 5% tax, minus buy price. Second line (if shown) uses the market board listing instead.">
-            Profit/unit {@render infoIcon()}
-          </div>
-        </th>
-        <th>
-          <div class="tooltip tooltip-bottom" data-tip="Recommended / available at source. Recommended is capped by fair-share velocity × days of supply.">
-            Units {@render infoIcon()}
-          </div>
-        </th>
-        <th>
-          <div class="tooltip tooltip-bottom" data-tip="Active competing listings on the home world near the expected sell price.">
-            Comp {@render infoIcon()}
-          </div>
-        </th>
-        <th>
-          <div class="tooltip tooltip-bottom" data-tip="Your fair share of daily sales: total velocity ÷ (competitors + 1). Second line shows total market velocity.">
-            Vel {@render infoIcon()}
-          </div>
-        </th>
-        <th>
-          <div class="tooltip tooltip-bottom" data-tip="Expected daily profit: profit per unit × fair-share velocity. Second line (if shown) is an alternative source world, for comparison only — all other columns use the primary source.">
-            Gil/day {@render infoIcon()}
-          </div>
-        </th>
+        <th>Sell <span class="tooltip tooltip-bottom" data-tip="Estimated sell price: the lower of the cheapest listing and the median recent sale. Second line (if shown) is the current cheapest listing on the market board.">{@render infoIcon()}</span></th>
+        <th>Profit/unit <span class="tooltip tooltip-bottom" data-tip="Sell price after 5% tax, minus buy price. Second line (if shown) uses the market board listing instead.">{@render infoIcon()}</span></th>
+        <th>Units <span class="tooltip tooltip-bottom" data-tip="Recommended / available at source. Recommended is capped by fair-share velocity × days of supply.">{@render infoIcon()}</span></th>
+        <th>Comp <span class="tooltip tooltip-bottom" data-tip="Active competing listings on the home world near the expected sell price.">{@render infoIcon()}</span></th>
+        <th>Vel <span class="tooltip tooltip-bottom" data-tip="Your fair share of daily sales: total velocity ÷ (competitors + 1). Second line shows total market velocity.">{@render infoIcon()}</span></th>
+        <th>Gil/day <span class="tooltip tooltip-left" data-tip="Expected daily profit: profit per unit × fair-share velocity. Second line (if shown) is an alternative source world, for comparison only — all other columns use the primary source.">{@render infoIcon()}</span></th>
       </tr>
     </thead>
     <tbody>
