@@ -124,10 +124,16 @@ describe('fetchItemMetadata', () => {
   })
 
   test('logs warning and does not throw on fetch failure', async () => {
+    const warnSpy = mock(() => {})
+    const originalWarn = console.warn
+    console.warn = warnSpy as typeof console.warn
     globalThis.fetch = mock(() => Promise.resolve({ ok: false, status: 500 })) as unknown as typeof fetch
 
     await expect(fetchItemMetadata([5057])).resolves.toBeUndefined()
     expect(getIconUrl(5057)).toBeUndefined()
+    expect(warnSpy).toHaveBeenCalledTimes(1)
+    expect(warnSpy.mock.calls[0]![0]).toContain('Failed to fetch item metadata')
+    console.warn = originalWarn
   })
 
   test('invokes onChange callback after successful fetch', async () => {
