@@ -273,6 +273,7 @@ describe('fetchHomeListings', () => {
     const result = await fetchHomeListings([2])
 
     expect(result).toEqual([])
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('[universalis] HTTP 500, skipping:'))
   })
 })
 
@@ -365,6 +366,7 @@ describe('fetchHomeWorldCombined', () => {
 
     expect(result.dcResults).toEqual([])
     expect(result.homeResults).toEqual([])
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('[universalis] HTTP 500, skipping:'))
   })
 })
 
