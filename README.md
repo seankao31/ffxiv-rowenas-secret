@@ -41,25 +41,6 @@ bun run dev:client
 bun test
 ```
 
-## Deployment (EC2 + PM2)
+## Deployment
 
-The server is hosted on AWS EC2. `dist/` is not committed to git, so a build step is required on deploy.
-
-**First-time setup:**
-
-```sh
-bun install
-bun run build:client
-pm2 start "bun start" --name ffxiv-rowenas-secret
-pm2 save
-pm2 startup   # enable auto-restart on reboot
-```
-
-**Updating:**
-
-```sh
-git pull
-bun install           # if dependencies changed
-bun run build:client
-pm2 restart ffxiv-rowenas-secret
-```
+The app is containerized via Docker. See the `Dockerfile` and `.github/workflows/` for details.
