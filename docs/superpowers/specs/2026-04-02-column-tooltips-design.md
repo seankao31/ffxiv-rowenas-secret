@@ -6,7 +6,11 @@ Add informational tooltips to column headers in OpportunityTable to explain what
 
 ## Approach
 
-Inline SVG info-circle icon after header text, with DaisyUI's `tooltip` component (`<div class="tooltip" data-tip="...">` wrapper). Themed by DaisyUI.
+Inline SVG info-circle icon after header text, with a portal-based tooltip attachment (`{@attach tooltip(...)}`) powered by `@floating-ui/dom`. Renders on `document.body` to escape the table's overflow clipping context. Styled to match DaisyUI's tooltip appearance via CSS custom properties.
+
+DaisyUI's built-in CSS tooltip was originally used but replaced because its pseudo-element approach gets clipped inside overflow containers (required by `table-pin-rows`). The `@floating-ui/dom` package provides only positioning (`computePosition`); interaction hooks (`useClick`, `useDismiss`) are React-only in `@floating-ui/react`, so event handling is vanilla JS.
+
+Tooltips support click-to-pin: clicking the trigger pins the tooltip so it survives mouseleave. Clicking the trigger again or clicking outside dismisses it. Pinned tooltips enable pointer-events so text can be selected.
 
 ## Columns With Tooltips
 

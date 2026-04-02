@@ -31,7 +31,7 @@ Client-side only. No server changes.
 
 The module also exposes per-item accessors (e.g., `resolveItemName(id, serverName)` and `getIconUrl(id)`) that read from the cache for use during rendering.
 
-Icon URLs are constructed as needed: `https://v2.xivapi.com/api/asset?path=${iconPath}&format=webp`, using the standard-res `path` (not `path_hr1`) since icons display at ~20px where high-res is unnecessary overhead.
+Icon URLs are constructed as needed: `https://v2.xivapi.com/api/asset?path=${iconPath}&format=webp`, using the standard-res `path` (not `path_hr1`) since icons display at 32×32px where high-res is unnecessary overhead.
 
 The cache persists across re-renders. Subsequent opportunity refreshes only fetch newly-appearing item IDs. With a max of 200 items and ~6 chars per ID, the `rows` query string stays well under URL length limits.
 
