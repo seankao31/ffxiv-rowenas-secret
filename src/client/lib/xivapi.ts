@@ -1,7 +1,7 @@
 // XIVAPI v2 client: batched item metadata (icons + English fallback names)
 
 const XIVAPI_BASE = 'https://v2.xivapi.com/api'
-const FALLBACK_RE = /^Item #(\d+)$/
+const FALLBACK_RE = /^Item #\d+$/
 
 const cache = new Map<number, { name?: string, iconPath?: string }>()
 
