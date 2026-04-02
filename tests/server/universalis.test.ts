@@ -4,9 +4,11 @@ import { Semaphore, fetchMarketableItems, fetchDCListings, fetchWorldListings, f
 
 describe('fetchMarketableItems', () => {
   const originalFetch = globalThis.fetch
+  const originalWarn = console.warn
 
   afterEach(() => {
     globalThis.fetch = originalFetch
+    console.warn = originalWarn
   })
 
   test('returns array of item IDs when API responds with valid data', async () => {
@@ -21,6 +23,7 @@ describe('fetchMarketableItems', () => {
   })
 
   test('returns empty array when API returns HTTP error', async () => {
+    console.warn = mock(() => {}) as typeof console.warn
     globalThis.fetch = mock(async () =>
       new Response('', { status: 500 })
     ) as unknown as typeof fetch
@@ -28,9 +31,11 @@ describe('fetchMarketableItems', () => {
     const result = await fetchMarketableItems()
 
     expect(result).toEqual([])
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('[universalis] HTTP 500, skipping:'))
   })
 
   test('returns empty array when API returns non-array JSON', async () => {
+    console.warn = mock(() => {}) as typeof console.warn
     globalThis.fetch = mock(async () =>
       new Response(JSON.stringify({ items: [1, 2, 3] }), { status: 200 })
     ) as unknown as typeof fetch
@@ -38,6 +43,7 @@ describe('fetchMarketableItems', () => {
     const result = await fetchMarketableItems()
 
     expect(result).toEqual([])
+    expect(console.warn).toHaveBeenCalledWith('[universalis] /marketable returned unexpected shape:', 'object')
   })
 })
 
@@ -61,9 +67,11 @@ function dcResponse(itemID: number, extra: Record<string, unknown> = {}) {
 
 describe('fetchDCListings', () => {
   const originalFetch = globalThis.fetch
+  const originalWarn = console.warn
 
   afterEach(() => {
     globalThis.fetch = originalFetch
+    console.warn = originalWarn
   })
 
   test('converts listing lastReviewTime from API seconds to milliseconds', async () => {
@@ -95,6 +103,7 @@ describe('fetchDCListings', () => {
   })
 
   test('returns empty array when API returns HTTP error', async () => {
+    console.warn = mock(() => {}) as typeof console.warn
     globalThis.fetch = mock(async () =>
       new Response('', { status: 500 })
     ) as unknown as typeof fetch
@@ -102,6 +111,7 @@ describe('fetchDCListings', () => {
     const result = await fetchDCListings([2])
 
     expect(result).toEqual([])
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('[universalis] HTTP 500, skipping:'))
   })
 })
 
@@ -124,9 +134,11 @@ function worldResponse(items: Record<number, Record<string, unknown>>) {
 
 describe('fetchWorldListings', () => {
   const originalFetch = globalThis.fetch
+  const originalWarn = console.warn
 
   afterEach(() => {
     globalThis.fetch = originalFetch
+    console.warn = originalWarn
   })
 
   test('returns listings with worldID and worldName injected', async () => {
@@ -190,6 +202,7 @@ describe('fetchWorldListings', () => {
   })
 
   test('returns empty array when API returns HTTP error', async () => {
+    console.warn = mock(() => {}) as typeof console.warn
     globalThis.fetch = mock(async () =>
       new Response('', { status: 500 })
     ) as unknown as typeof fetch
@@ -200,17 +213,23 @@ describe('fetchWorldListings', () => {
     )
 
     expect(result).toEqual([])
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('[universalis] HTTP 500, skipping:'))
   })
 })
 
 describe('fetchItemNames', () => {
   const originalFetch = globalThis.fetch
+  const originalWarn = console.warn
+  const originalLog = console.log
 
   afterEach(() => {
     globalThis.fetch = originalFetch
+    console.warn = originalWarn
+    console.log = originalLog
   })
 
   test('decodes msgpack tw-items into id→name map', async () => {
+    console.log = mock(() => {}) as typeof console.log
     const { encode } = await import('@msgpack/msgpack')
     const mockData = {
       '2': { tw: '火之碎晶' },
@@ -225,9 +244,11 @@ describe('fetchItemNames', () => {
     expect(result.size).toBe(2)
     expect(result.get(2)).toBe('火之碎晶')
     expect(result.get(7)).toBe('水之碎晶')
+    expect(console.log).toHaveBeenCalledWith('[universalis] Loaded 2 item names from FFXIV_Market')
   })
 
   test('skips entries with falsy tw field', async () => {
+    console.log = mock(() => {}) as typeof console.log
     const { encode } = await import('@msgpack/msgpack')
     const mockData = {
       '2': { tw: '火之碎晶' },
@@ -244,9 +265,11 @@ describe('fetchItemNames', () => {
     expect(result.get(2)).toBe('火之碎晶')
     expect(result.has(3)).toBe(false)
     expect(result.has(4)).toBe(false)
+    expect(console.log).toHaveBeenCalledWith('[universalis] Loaded 1 item names from FFXIV_Market')
   })
 
   test('returns empty map on HTTP error', async () => {
+    console.warn = mock(() => {}) as typeof console.warn
     globalThis.fetch = mock(async () =>
       new Response('', { status: 500 })
     ) as unknown as typeof fetch
@@ -254,9 +277,11 @@ describe('fetchItemNames', () => {
     const result = await fetchItemNames()
 
     expect(result.size).toBe(0)
+    expect(console.warn).toHaveBeenCalledWith('[universalis] Failed to fetch item names: HTTP 500')
   })
 
   test('returns empty map on corrupt msgpack payload', async () => {
+    console.warn = mock(() => {}) as typeof console.warn
     globalThis.fetch = mock(async () =>
       new Response(new Uint8Array([0xff, 0xfe, 0x00]), { status: 200 })
     ) as unknown as typeof fetch
@@ -264,6 +289,7 @@ describe('fetchItemNames', () => {
     const result = await fetchItemNames()
 
     expect(result.size).toBe(0)
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('[universalis] Failed to decode item names:'))
   })
 })
 
