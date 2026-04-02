@@ -136,6 +136,19 @@ describe('fetchItemMetadata', () => {
     console.warn = originalWarn
   })
 
+  test('logs warning and does not throw on network error', async () => {
+    const warnSpy = mock(() => {})
+    const originalWarn = console.warn
+    console.warn = warnSpy as typeof console.warn
+    globalThis.fetch = mock(() => Promise.reject(new Error('Network failure'))) as unknown as typeof fetch
+
+    await expect(fetchItemMetadata([5057])).resolves.toBeUndefined()
+    expect(getIconUrl(5057)).toBeUndefined()
+    expect(warnSpy).toHaveBeenCalledTimes(1)
+    expect(warnSpy.mock.calls[0]![0]).toContain('Failed to fetch item metadata')
+    console.warn = originalWarn
+  })
+
   test('invokes onChange callback after successful fetch', async () => {
     const onChangeSpy = mock(() => {})
     setOnChange(onChangeSpy)
