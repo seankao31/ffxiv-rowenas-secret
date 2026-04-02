@@ -1,7 +1,6 @@
 import { test, expect, describe } from 'bun:test'
 import { buildItemData } from '../../src/server/scanner.ts'
-
-const HOME_WORLD_ID = 4030
+import { HOME_WORLD_ID } from '../../src/server/universalis.ts'
 
 describe('buildItemData', () => {
   const baseDcListings = [
