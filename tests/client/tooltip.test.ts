@@ -92,7 +92,7 @@ describe('tooltip attachment factory', () => {
     tooltip('Hello')(node)
     expect(bodyChildren).toHaveLength(0)
 
-    listeners['mouseenter'][0]()
+    listeners['mouseenter']![0]!()
     expect(bodyChildren).toHaveLength(1)
     expect(bodyChildren[0].textContent).toBe('Hello')
   })
@@ -101,10 +101,10 @@ describe('tooltip attachment factory', () => {
     const node = makeNode()
     tooltip('Hello')(node)
 
-    listeners['mouseenter'][0]()
+    listeners['mouseenter']![0]!()
     expect(bodyChildren).toHaveLength(1)
 
-    listeners['mouseleave'][0]()
+    listeners['mouseleave']![0]!()
     expect(bodyChildren).toHaveLength(0)
   })
 
@@ -112,7 +112,7 @@ describe('tooltip attachment factory', () => {
     const node = makeNode()
     const cleanup = tooltip('Hello')(node)
 
-    listeners['mouseenter'][0]()
+    listeners['mouseenter']![0]!()
     expect(bodyChildren).toHaveLength(1)
 
     cleanup!()
@@ -136,14 +136,14 @@ describe('tooltip click-to-pin', () => {
     tooltip('Hello')(node)
 
     // Hover to show
-    listeners['mouseenter'][0]()
+    listeners['mouseenter']![0]!()
     expect(bodyChildren).toHaveLength(1)
 
     // Click to pin
-    listeners['click'][0]()
+    listeners['click']![0]!()
 
     // Mouseleave should NOT hide when pinned
-    listeners['mouseleave'][0]()
+    listeners['mouseleave']![0]!()
     expect(bodyChildren).toHaveLength(1)
   })
 
@@ -152,12 +152,12 @@ describe('tooltip click-to-pin', () => {
     tooltip('Hello')(node)
 
     // Click directly (no hover first)
-    listeners['click'][0]()
+    listeners['click']![0]!()
     expect(bodyChildren).toHaveLength(1)
     expect(bodyChildren[0].textContent).toBe('Hello')
 
     // Mouseleave should not hide
-    listeners['mouseleave'][0]()
+    listeners['mouseleave']![0]!()
     expect(bodyChildren).toHaveLength(1)
   })
 
@@ -165,11 +165,11 @@ describe('tooltip click-to-pin', () => {
     const node = makeNode()
     tooltip('Hello')(node)
 
-    listeners['click'][0]()
+    listeners['click']![0]!()
     expect(bodyChildren).toHaveLength(1)
 
     // Second click unpins and hides
-    listeners['click'][0]()
+    listeners['click']![0]!()
     expect(bodyChildren).toHaveLength(0)
   })
 
@@ -177,11 +177,11 @@ describe('tooltip click-to-pin', () => {
     const node = makeNode()
     tooltip('Hello')(node)
 
-    listeners['click'][0]()
+    listeners['click']![0]!()
     expect(bodyChildren).toHaveLength(1)
 
     // Simulate outside click — node.contains returns false for external targets
-    docListeners['click'][0]({ target: document.body })
+    docListeners['click']![0]!({ target: document.body })
     expect(bodyChildren).toHaveLength(0)
   })
 
@@ -189,7 +189,7 @@ describe('tooltip click-to-pin', () => {
     const node = makeNode()
     tooltip('Hello')(node)
 
-    listeners['click'][0]()
+    listeners['click']![0]!()
     expect(bodyChildren[0].style.pointerEvents).toBe('auto')
   })
 
@@ -198,15 +198,15 @@ describe('tooltip click-to-pin', () => {
     tooltip('Hello')(node)
 
     // Pin then unpin
-    listeners['click'][0]()
-    listeners['click'][0]()
+    listeners['click']![0]!()
+    listeners['click']![0]!()
     expect(bodyChildren).toHaveLength(0)
 
     // Normal hover should still work
-    listeners['mouseenter'][0]()
+    listeners['mouseenter']![0]!()
     expect(bodyChildren).toHaveLength(1)
 
-    listeners['mouseleave'][0]()
+    listeners['mouseleave']![0]!()
     expect(bodyChildren).toHaveLength(0)
   })
 
@@ -214,7 +214,7 @@ describe('tooltip click-to-pin', () => {
     const node = makeNode()
     const cleanup = tooltip('Hello')(node)
 
-    listeners['click'][0]()
+    listeners['click']![0]!()
     expect(bodyChildren).toHaveLength(1)
     expect(docListeners['click']).toHaveLength(1)
 

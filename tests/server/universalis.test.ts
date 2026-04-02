@@ -92,7 +92,7 @@ describe('fetchDCListings', () => {
 
     const result = await fetchDCListings([2])
 
-    expect(result[0].listings[0].lastReviewTime).toBe(1_774_271_895 * 1000)
+    expect(result[0]!.listings[0]!.lastReviewTime).toBe(1_774_271_895 * 1000)
   })
 
   test('extracts worldUploadTimes from DC response', async () => {
@@ -104,7 +104,7 @@ describe('fetchDCListings', () => {
 
     const result = await fetchDCListings([2])
 
-    expect(result[0].worldUploadTimes).toEqual({ '4028': 1_774_271_896_711, '4029': 1_774_274_109_636 })
+    expect(result[0]!.worldUploadTimes).toEqual({ '4028': 1_774_271_896_711, '4029': 1_774_274_109_636 })
   })
 
   test('returns empty array when API returns HTTP error', async () => {
@@ -165,10 +165,10 @@ describe('fetchWorldListings', () => {
     )
 
     expect(result.length).toBe(1)
-    expect(result[0].itemID).toBe(2)
-    expect(result[0].listings[0].worldID).toBe(4028)
-    expect(result[0].listings[0].worldName).toBe('伊弗利特')
-    expect(result[0].listings[0].lastReviewTime).toBe(1_774_271_895 * 1000)
+    expect(result[0]!.itemID).toBe(2)
+    expect(result[0]!.listings[0]!.worldID).toBe(4028)
+    expect(result[0]!.listings[0]!.worldName).toBe('伊弗利特')
+    expect(result[0]!.listings[0]!.lastReviewTime).toBe(1_774_271_895 * 1000)
   })
 
   test('populates worldUploadTimes from item lastUploadTime', async () => {
@@ -181,7 +181,7 @@ describe('fetchWorldListings', () => {
       [2],
     )
 
-    expect(result[0].worldUploadTimes).toEqual({ 4028: 1_774_271_896_711 })
+    expect(result[0]!.worldUploadTimes).toEqual({ 4028: 1_774_271_896_711 })
   })
 
   test('handles multi-item batch with correct per-item results', async () => {
@@ -200,10 +200,10 @@ describe('fetchWorldListings', () => {
     expect(result.length).toBe(2)
     const item2 = result.find(r => r.itemID === 2)!
     const item3 = result.find(r => r.itemID === 3)!
-    expect(item2.listings[0].worldID).toBe(4034)
-    expect(item2.listings[0].worldName).toBe('拉姆')
-    expect(item3.listings[0].worldID).toBe(4034)
-    expect(item3.listings[0].hq).toBe(true)
+    expect(item2.listings[0]!.worldID).toBe(4034)
+    expect(item2.listings[0]!.worldName).toBe('拉姆')
+    expect(item3.listings[0]!.worldID).toBe(4034)
+    expect(item3.listings[0]!.hq).toBe(true)
   })
 
   test('returns empty array when API returns HTTP error', async () => {
@@ -246,10 +246,10 @@ describe('fetchHomeListings', () => {
     const result = await fetchHomeListings([2])
 
     expect(result.length).toBe(1)
-    expect(result[0].itemID).toBe(2)
-    expect(result[0].regularSaleVelocity).toBe(8.5)
-    expect(result[0].hqSaleVelocity).toBe(2.1)
-    expect(result[0].recentHistory).toEqual([{ pricePerUnit: 500, quantity: 2, timestamp: 1000, hq: false }])
+    expect(result[0]!.itemID).toBe(2)
+    expect(result[0]!.regularSaleVelocity).toBe(8.5)
+    expect(result[0]!.hqSaleVelocity).toBe(2.1)
+    expect(result[0]!.recentHistory).toEqual([{ pricePerUnit: 500, quantity: 2, timestamp: 1000, hq: false }])
   })
 
   test('defaults missing fields to zero/empty', async () => {
@@ -259,9 +259,9 @@ describe('fetchHomeListings', () => {
 
     const result = await fetchHomeListings([2])
 
-    expect(result[0].regularSaleVelocity).toBe(0)
-    expect(result[0].hqSaleVelocity).toBe(0)
-    expect(result[0].recentHistory).toEqual([])
+    expect(result[0]!.regularSaleVelocity).toBe(0)
+    expect(result[0]!.hqSaleVelocity).toBe(0)
+    expect(result[0]!.recentHistory).toEqual([])
   })
 
   test('returns empty array on HTTP error', async () => {
@@ -306,16 +306,16 @@ describe('fetchHomeWorldCombined', () => {
 
     // DC result: listings with HOME_WORLD_ID injected, lastReviewTime converted to ms
     expect(result.dcResults.length).toBe(1)
-    expect(result.dcResults[0].itemID).toBe(2)
-    expect(result.dcResults[0].listings[0].worldID).toBe(4030)
-    expect(result.dcResults[0].listings[0].worldName).toBe('利維坦')
-    expect(result.dcResults[0].listings[0].lastReviewTime).toBe(1_774_271_895 * 1000)
-    expect(result.dcResults[0].worldUploadTimes).toEqual({ 4030: 1_774_271_896_711 })
+    expect(result.dcResults[0]!.itemID).toBe(2)
+    expect(result.dcResults[0]!.listings[0]!.worldID).toBe(4030)
+    expect(result.dcResults[0]!.listings[0]!.worldName).toBe('利維坦')
+    expect(result.dcResults[0]!.listings[0]!.lastReviewTime).toBe(1_774_271_895 * 1000)
+    expect(result.dcResults[0]!.worldUploadTimes).toEqual({ 4030: 1_774_271_896_711 })
 
     // Home result: velocity + history
     expect(result.homeResults.length).toBe(1)
-    expect(result.homeResults[0].regularSaleVelocity).toBe(8.5)
-    expect(result.homeResults[0].recentHistory).toEqual([
+    expect(result.homeResults[0]!.regularSaleVelocity).toBe(8.5)
+    expect(result.homeResults[0]!.recentHistory).toEqual([
       { pricePerUnit: 450, quantity: 1, timestamp: 1000, hq: false },
     ])
   })
@@ -347,8 +347,8 @@ describe('fetchHomeWorldCombined', () => {
 
     const dc2 = result.dcResults.find(r => r.itemID === 2)!
     const dc3 = result.dcResults.find(r => r.itemID === 3)!
-    expect(dc2.listings[0].worldID).toBe(4030)
-    expect(dc3.listings[0].hq).toBe(true)
+    expect(dc2.listings[0]!.worldID).toBe(4030)
+    expect(dc3.listings[0]!.hq).toBe(true)
 
     const home2 = result.homeResults.find(r => r.itemID === 2)!
     const home3 = result.homeResults.find(r => r.itemID === 3)!
