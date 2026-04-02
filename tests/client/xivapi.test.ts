@@ -52,7 +52,7 @@ describe('getIconUrl', () => {
 
 describe('fetchItemMetadata', () => {
   test('fetches metadata for uncached items and populates cache', async () => {
-    const mockFetch = mock(() => Promise.resolve({
+    const mockFetch = mock((_url: any) => Promise.resolve({
       ok: true,
       json: () => Promise.resolve({
         rows: [
@@ -80,7 +80,7 @@ describe('fetchItemMetadata', () => {
 
   test('skips already-cached items', async () => {
     _seedCache(5057, { name: 'Iron Ingot', iconPath: 'ui/icon/020000/020801.tex' })
-    const mockFetch = mock(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ rows: [] }) }))
+    const mockFetch = mock((_url: any) => Promise.resolve({ ok: true, json: () => Promise.resolve({ rows: [] }) }))
     globalThis.fetch = mockFetch as unknown as typeof fetch
 
     await fetchItemMetadata([5057])
@@ -90,7 +90,7 @@ describe('fetchItemMetadata', () => {
 
   test('fetches only uncached items from a mixed set', async () => {
     _seedCache(5057, { name: 'Iron Ingot', iconPath: 'ui/icon/020000/020801.tex' })
-    const mockFetch = mock(() => Promise.resolve({
+    const mockFetch = mock((_url: any) => Promise.resolve({
       ok: true,
       json: () => Promise.resolve({
         rows: [{
@@ -115,7 +115,7 @@ describe('fetchItemMetadata', () => {
   test('does nothing when all items are cached', async () => {
     _seedCache(5057, { iconPath: 'ui/icon/020000/020801.tex' })
     _seedCache(4718, { iconPath: 'ui/icon/024000/024101.tex' })
-    const mockFetch = mock(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ rows: [] }) }))
+    const mockFetch = mock((_url: any) => Promise.resolve({ ok: true, json: () => Promise.resolve({ rows: [] }) }))
     globalThis.fetch = mockFetch as unknown as typeof fetch
 
     await fetchItemMetadata([5057, 4718])
@@ -124,7 +124,7 @@ describe('fetchItemMetadata', () => {
   })
 
   test('logs warning and does not throw on fetch failure', async () => {
-    const warnSpy = mock(() => {})
+    const warnSpy = mock((..._args: any[]) => {})
     const originalWarn = console.warn
     console.warn = warnSpy as typeof console.warn
     globalThis.fetch = mock(() => Promise.resolve({ ok: false, status: 500 })) as unknown as typeof fetch
@@ -137,7 +137,7 @@ describe('fetchItemMetadata', () => {
   })
 
   test('logs warning and does not throw on network error', async () => {
-    const warnSpy = mock(() => {})
+    const warnSpy = mock((..._args: any[]) => {})
     const originalWarn = console.warn
     console.warn = warnSpy as typeof console.warn
     globalThis.fetch = mock(() => Promise.reject(new Error('Network failure'))) as unknown as typeof fetch
