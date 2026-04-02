@@ -72,21 +72,21 @@
   })
 </script>
 
-<div class="flex flex-col min-h-screen overflow-x-hidden">
+<div class="flex flex-col h-screen overflow-hidden">
   <header class="py-5 bg-base-200 border-b border-base-300">
     <h1 class="m-0 px-8 max-w-[1400px] mx-auto w-full box-border text-base-content text-xl font-semibold">
       羅薇娜的商業機密
     </h1>
   </header>
 
-  <div class="flex-1 max-w-[1400px] w-full mx-auto px-8 box-border">
+  <div class="flex-1 flex flex-col min-h-0 max-w-[1400px] w-full mx-auto px-8 box-border">
     {#if meta.scanCompletedAt > 0}
       <StatusBar {meta} {flash} />
     {/if}
 
     <ThresholdControls {thresholds} onchange={onThresholdChange} />
 
-    <main>
+    <main class="flex-1 flex flex-col min-h-0">
       {#if coldStart}
         {@const pct = scanProgress.totalBatches > 0
           ? Math.round((scanProgress.completedBatches / scanProgress.totalBatches) * 100)
@@ -103,13 +103,13 @@
       {:else if opportunities.length === 0}
         <p class="p-8 text-base-content/50 text-center">No opportunities found with current filters.</p>
       {:else}
-        <p class="mt-3 mb-1 text-base-content/50 text-sm">Showing {opportunities.length} opportunities</p>
+        <p class="mt-3 mb-1 text-base-content/50 text-sm shrink-0">Showing {opportunities.length} opportunities</p>
         <OpportunityTable {opportunities} />
       {/if}
     </main>
   </div>
 
-  <footer class="p-5 px-8 text-center text-base-content/40 text-xs border-t border-base-300 mt-6">
+  <footer class="shrink-0 p-5 px-8 text-center text-base-content/40 text-xs border-t border-base-300">
     <p class="my-1">Built with ♥ by <a class="link link-info no-underline hover:underline" href="https://yhkao.com" target="_blank" rel="noopener">Yshan</a></p>
     <p class="my-1">Data sourced from <a class="link link-info no-underline hover:underline" href="https://universalis.app" target="_blank" rel="noopener">Universalis</a></p>
     <p class="my-1 text-base-content/30 text-[11px]">FINAL FANTASY is a registered trademark of Square Enix Holdings Co., Ltd. © SQUARE ENIX CO., LTD. All Rights Reserved.</p>
