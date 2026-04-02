@@ -34,9 +34,9 @@
   </svg>
 {/snippet}
 
-<div>
-  <table class="table table-sm">
-    <thead>
+<div class="flex-1 overflow-y-auto min-h-0">
+  <table class="table">
+    <thead class="sticky top-0 bg-base-100 z-10">
       <tr>
         <th>Item</th>
         <th>Buy from</th>
