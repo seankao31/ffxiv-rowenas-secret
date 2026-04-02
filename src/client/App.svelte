@@ -72,7 +72,7 @@
   })
 </script>
 
-<div class="flex flex-col min-h-screen">
+<div class="flex flex-col min-h-screen overflow-x-hidden">
   <header class="py-5 bg-base-200 border-b border-base-300">
     <h1 class="m-0 px-8 max-w-[1400px] mx-auto w-full box-border text-base-content text-xl font-semibold">
       羅薇娜的商業機密
