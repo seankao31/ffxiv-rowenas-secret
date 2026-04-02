@@ -2,15 +2,22 @@
 <script lang="ts">
   import type { Opportunity } from '../lib/api.ts'
   import { Info } from 'lucide-svelte'
-  import { resolveItemName, setOnChange } from '../lib/item-names.ts'
+  import { resolveItemName, setOnChange, getIconUrl, fetchItemMetadata } from '../lib/xivapi.ts'
 
   const { opportunities }: { opportunities: Opportunity[] } = $props()
 
   let nameGeneration = $state(0)
   setOnChange(() => nameGeneration++)
 
+  $effect(() => {
+    if (opportunities.length > 0) {
+      fetchItemMetadata(opportunities.map(o => o.itemID))
+    }
+  })
+
   const fmt = (n: number) => n.toLocaleString()
   const name = (opp: Opportunity) => { void nameGeneration; return resolveItemName(opp.itemID, opp.itemName) }
+  const iconUrl = (opp: Opportunity) => { void nameGeneration; return getIconUrl(opp.itemID) }
 
   function ageLabel(ageHours: number): string {
     return ageHours < 1
@@ -50,12 +57,19 @@
     </thead>
     <tbody>
       {#each opportunities as opp (opp.itemID)}
+        {@const icon = iconUrl(opp)}
         <tr class="hover">
           <!-- Item -->
           <td>
-            <a class="link link-info no-underline hover:underline" href="https://universalis.app/market/{opp.itemID}" target="_blank" rel="noopener">
-              {name(opp)}
-            </a>
+            <div class="flex items-center gap-1.5">
+              {#if icon}
+                <img src={icon} alt="" width="20" height="20" class="flex-shrink-0"
+                  onerror={(e: Event) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
+              {/if}
+              <a class="link link-info no-underline hover:underline" href="https://universalis.app/market/{opp.itemID}" target="_blank" rel="noopener">
+                {name(opp)}
+              </a>
+            </div>
           </td>
 
           <!-- Buy from -->
