@@ -18,66 +18,66 @@
   }
 </script>
 
-<div class="panel">
-  <button class="toggle" onclick={() => (open = !open)}>
+<div class="bg-base-200 border-b border-base-300">
+  <button class="w-full py-2.5 px-4 bg-transparent border-none text-base-content cursor-pointer text-left text-sm" onclick={() => (open = !open)}>
     ⚙ Filters {open ? '▲' : '▼'}
   </button>
 
   {#if open}
-    <div class="controls">
-      <label>
+    <div class="flex flex-wrap gap-5 px-4 pt-3 pb-4">
+      <label class="flex flex-col gap-1 text-base-content/60 text-sm min-w-40">
         Price threshold: {thresholds.price_threshold}×
-        <div class="slider-row">
-          <input type="range" min="1.2" max="5.0" step="0.1"
+        <div class="flex items-center gap-2">
+          <input type="range" class="range range-sm flex-1" min="1.2" max="5.0" step="0.1"
             value={thresholds.price_threshold}
             oninput={(e) => emit({ price_threshold: Number((e.target as HTMLInputElement).value) })}
           />
-          <input type="number" min="1.2" max="5.0" step="0.1"
+          <input type="number" class="input input-sm w-16" min="1.2" max="5.0" step="0.1"
             value={thresholds.price_threshold}
             onchange={(e) => clampEmit('price_threshold', Number((e.target as HTMLInputElement).value), 1.2, 5.0)}
           />
         </div>
       </label>
 
-      <label>
+      <label class="flex flex-col gap-1 text-base-content/60 text-sm min-w-40">
         Listing staleness: {thresholds.listing_staleness_hours}h
-        <div class="slider-row">
-          <input type="range" min="1" max="168" step="1"
+        <div class="flex items-center gap-2">
+          <input type="range" class="range range-sm flex-1" min="1" max="168" step="1"
             value={thresholds.listing_staleness_hours}
             oninput={(e) => emit({ listing_staleness_hours: Number((e.target as HTMLInputElement).value) })}
           />
-          <input type="number" min="1" max="168" step="1"
+          <input type="number" class="input input-sm w-16" min="1" max="168" step="1"
             value={thresholds.listing_staleness_hours}
             onchange={(e) => clampEmit('listing_staleness_hours', Number((e.target as HTMLInputElement).value), 1, 168)}
           />
         </div>
       </label>
 
-      <label>
+      <label class="flex flex-col gap-1 text-base-content/60 text-sm min-w-40">
         Days of supply: {thresholds.days_of_supply}
-        <div class="slider-row">
-          <input type="range" min="1" max="14" step="1"
+        <div class="flex items-center gap-2">
+          <input type="range" class="range range-sm flex-1" min="1" max="14" step="1"
             value={thresholds.days_of_supply}
             oninput={(e) => emit({ days_of_supply: Number((e.target as HTMLInputElement).value) })}
           />
-          <input type="number" min="1" max="14" step="1"
+          <input type="number" class="input input-sm w-16" min="1" max="14" step="1"
             value={thresholds.days_of_supply}
             onchange={(e) => clampEmit('days_of_supply', Number((e.target as HTMLInputElement).value), 1, 14)}
           />
         </div>
       </label>
 
-      <label class="inline">
-        <input type="checkbox"
+      <label class="flex flex-row items-center gap-2 text-base-content/60 text-sm">
+        <input type="checkbox" class="checkbox checkbox-sm"
           checked={thresholds.hq}
           onchange={(e) => emit({ hq: (e.target as HTMLInputElement).checked })}
         />
         HQ only
       </label>
 
-      <label>
+      <label class="flex flex-col gap-1 text-base-content/60 text-sm">
         Results:
-        <select
+        <select class="select select-sm"
           value={String(thresholds.limit)}
           onchange={(e) => emit({ limit: Number((e.target as HTMLSelectElement).value) })}
         >
@@ -89,14 +89,3 @@
     </div>
   {/if}
 </div>
-
-<style>
-  .panel   { background: #16213e; border-bottom: 1px solid #333; }
-  .toggle  { width: 100%; padding: 10px 16px; background: none; border: none; color: #ccc; cursor: pointer; text-align: left; font-size: 14px; }
-  .controls { display: flex; flex-wrap: wrap; gap: 20px; padding: 12px 16px 16px; }
-  label    { display: flex; flex-direction: column; gap: 4px; color: #aaa; font-size: 13px; min-width: 160px; }
-  .slider-row { display: flex; align-items: center; gap: 8px; }
-  .slider-row input[type="range"] { flex: 1; }
-  .slider-row input[type="number"] { width: 60px; padding: 2px 4px; background: #0f0f1a; border: 1px solid #444; color: #ccc; border-radius: 4px; font-size: 13px; }
-  .inline  { flex-direction: row; align-items: center; gap: 8px; }
-</style>

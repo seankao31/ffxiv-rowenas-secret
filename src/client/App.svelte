@@ -72,12 +72,14 @@
   })
 </script>
 
-<div class="app">
-  <header>
-    <h1>羅薇娜的商業機密</h1>
+<div class="flex flex-col min-h-screen">
+  <header class="py-5 bg-base-200 border-b border-base-300">
+    <h1 class="m-0 px-8 max-w-[1400px] mx-auto w-full box-border text-base-content text-xl font-semibold">
+      羅薇娜的商業機密
+    </h1>
   </header>
 
-  <div class="content">
+  <div class="flex-1 max-w-[1400px] w-full mx-auto px-8 box-border">
     {#if meta.scanCompletedAt > 0}
       <StatusBar {meta} {flash} />
     {/if}
@@ -89,66 +91,27 @@
         {@const pct = scanProgress.totalBatches > 0
           ? Math.round((scanProgress.completedBatches / scanProgress.totalBatches) * 100)
           : 0}
-        <div class="cold-start">
-          <p class="msg">Initial scan in progress…</p>
-          <div class="progress-track">
-            <div class="progress-fill" style="width: {pct}%"></div>
-          </div>
-          <p class="progress-label">{scanProgress.phase || 'Starting…'} — {pct}%</p>
+        <div class="py-12 px-8 text-center">
+          <p class="pb-4 text-base-content/50 text-center">Initial scan in progress…</p>
+          <progress class="progress progress-primary w-full max-w-sm mx-auto block" value={pct} max="100"></progress>
+          <p class="mt-3 text-base-content/40 text-sm">{scanProgress.phase || 'Starting…'} — {pct}%</p>
         </div>
       {:else if loading}
-        <p class="msg">Loading…</p>
+        <p class="p-8 text-base-content/50 text-center">Loading…</p>
       {:else if error}
-        <p class="msg err">Error: {error}</p>
+        <p class="p-8 text-error text-center">Error: {error}</p>
       {:else if opportunities.length === 0}
-        <p class="msg">No opportunities found with current filters.</p>
+        <p class="p-8 text-base-content/50 text-center">No opportunities found with current filters.</p>
       {:else}
-        <p class="result-count">Showing {opportunities.length} opportunities</p>
+        <p class="mt-3 mb-1 text-base-content/50 text-sm">Showing {opportunities.length} opportunities</p>
         <OpportunityTable {opportunities} />
       {/if}
     </main>
   </div>
 
-  <footer>
-    <p>Built with ♥ by <a href="https://yhkao.com" target="_blank" rel="noopener">Yshan</a></p>
-    <p>Data sourced from <a href="https://universalis.app" target="_blank" rel="noopener">Universalis</a></p>
-    <p class="copyright">FINAL FANTASY is a registered trademark of Square Enix Holdings Co., Ltd. © SQUARE ENIX CO., LTD. All Rights Reserved.</p>
+  <footer class="p-5 px-8 text-center text-base-content/40 text-xs border-t border-base-300 mt-6">
+    <p class="my-1">Built with ♥ by <a class="link link-info no-underline hover:underline" href="https://yhkao.com" target="_blank" rel="noopener">Yshan</a></p>
+    <p class="my-1">Data sourced from <a class="link link-info no-underline hover:underline" href="https://universalis.app" target="_blank" rel="noopener">Universalis</a></p>
+    <p class="my-1 text-base-content/30 text-[11px]">FINAL FANTASY is a registered trademark of Square Enix Holdings Co., Ltd. © SQUARE ENIX CO., LTD. All Rights Reserved.</p>
   </footer>
 </div>
-
-<style>
-  :global(body) { margin: 0; background: #0f0f1a; font-family: system-ui, sans-serif; }
-  .app { display: flex; flex-direction: column; min-height: 100vh; }
-  header { padding: 20px 0; background: #1a1a2e; border-bottom: 1px solid #2a2a4a; }
-  h1 { margin: 0; padding: 0 32px; max-width: 1400px; margin-inline: auto; width: 100%; box-sizing: border-box; color: #e0e0e0; font-size: 20px; font-weight: 600; }
-  .content { flex: 1; max-width: 1400px; width: 100%; margin-inline: auto; padding: 0 32px; box-sizing: border-box; }
-  footer { padding: 20px 32px; text-align: center; color: #555; font-size: 12px; border-top: 1px solid #1e1e2e; margin-top: 24px; }
-  footer a { color: #7eb8f7; text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
-  footer p { margin: 4px 0; }
-  .copyright { color: #444; font-size: 11px; }
-  .msg { padding: 32px; color: #666; text-align: center; }
-  .err { color: #ff6b6b; }
-  .result-count { margin: 12px 0 4px; color: #666; font-size: 13px; }
-  .cold-start { padding: 48px 32px; text-align: center; }
-  .cold-start .msg { padding: 0 0 16px; }
-  .progress-track {
-    max-width: 400px;
-    margin: 0 auto;
-    height: 8px;
-    background: #1a1a2e;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: #4a6cf7;
-    border-radius: 4px;
-    transition: width 0.5s ease;
-  }
-  .progress-label {
-    margin-top: 12px;
-    color: #555;
-    font-size: 0.85rem;
-  }
-</style>
