@@ -1,6 +1,11 @@
 // tests/server/universalis.test.ts
 import { test, expect, describe, mock, afterEach } from 'bun:test'
-import { Semaphore, OutboundRateLimiter, fetchMarketableItems, fetchDCListings, fetchWorldListings, fetchItemNames } from '../../src/server/universalis.ts'
+import {
+  Semaphore, OutboundRateLimiter,
+  fetchMarketableItems, fetchDCListings, fetchWorldListings,
+  fetchHomeListings, fetchHomeWorldCombined,
+  fetchItemNames,
+} from '../../src/server/universalis.ts'
 
 describe('fetchMarketableItems', () => {
   const originalFetch = globalThis.fetch
@@ -214,6 +219,152 @@ describe('fetchWorldListings', () => {
 
     expect(result).toEqual([])
     expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('[universalis] HTTP 500, skipping:'))
+  })
+})
+
+describe('fetchHomeListings', () => {
+  const originalFetch = globalThis.fetch
+  const originalWarn = console.warn
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch
+    console.warn = originalWarn
+  })
+
+  test('extracts velocity and history from home world response', async () => {
+    globalThis.fetch = mock(async () =>
+      new Response(worldResponse({
+        2: {
+          regularSaleVelocity: 8.5,
+          hqSaleVelocity: 2.1,
+          recentHistory: [{ pricePerUnit: 500, quantity: 2, timestamp: 1000, hq: false }],
+          lastUploadTime: 1_774_271_896_711,
+        },
+      }), { status: 200 })
+    ) as unknown as typeof fetch
+
+    const result = await fetchHomeListings([2])
+
+    expect(result.length).toBe(1)
+    expect(result[0].itemID).toBe(2)
+    expect(result[0].regularSaleVelocity).toBe(8.5)
+    expect(result[0].hqSaleVelocity).toBe(2.1)
+    expect(result[0].recentHistory).toEqual([{ pricePerUnit: 500, quantity: 2, timestamp: 1000, hq: false }])
+  })
+
+  test('defaults missing fields to zero/empty', async () => {
+    globalThis.fetch = mock(async () =>
+      new Response(worldResponse({ 2: {} }), { status: 200 })
+    ) as unknown as typeof fetch
+
+    const result = await fetchHomeListings([2])
+
+    expect(result[0].regularSaleVelocity).toBe(0)
+    expect(result[0].hqSaleVelocity).toBe(0)
+    expect(result[0].recentHistory).toEqual([])
+  })
+
+  test('returns empty array on HTTP error', async () => {
+    console.warn = mock(() => {}) as typeof console.warn
+    globalThis.fetch = mock(async () =>
+      new Response('', { status: 500 })
+    ) as unknown as typeof fetch
+
+    const result = await fetchHomeListings([2])
+
+    expect(result).toEqual([])
+  })
+})
+
+describe('fetchHomeWorldCombined', () => {
+  const originalFetch = globalThis.fetch
+  const originalWarn = console.warn
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch
+    console.warn = originalWarn
+  })
+
+  test('returns both DC listings and home data from single API call', async () => {
+    globalThis.fetch = mock(async () =>
+      new Response(worldResponse({
+        2: {
+          listings: [{
+            lastReviewTime: 1_774_271_895,
+            pricePerUnit: 500, quantity: 3, hq: false,
+          }],
+          regularSaleVelocity: 8.5,
+          hqSaleVelocity: 2.1,
+          recentHistory: [{ pricePerUnit: 450, quantity: 1, timestamp: 1000, hq: false }],
+          lastUploadTime: 1_774_271_896_711,
+        },
+      }), { status: 200 })
+    ) as unknown as typeof fetch
+
+    const result = await fetchHomeWorldCombined([2])
+
+    // DC result: listings with HOME_WORLD_ID injected, lastReviewTime converted to ms
+    expect(result.dcResults.length).toBe(1)
+    expect(result.dcResults[0].itemID).toBe(2)
+    expect(result.dcResults[0].listings[0].worldID).toBe(4030)
+    expect(result.dcResults[0].listings[0].worldName).toBe('利維坦')
+    expect(result.dcResults[0].listings[0].lastReviewTime).toBe(1_774_271_895 * 1000)
+    expect(result.dcResults[0].worldUploadTimes).toEqual({ 4030: 1_774_271_896_711 })
+
+    // Home result: velocity + history
+    expect(result.homeResults.length).toBe(1)
+    expect(result.homeResults[0].regularSaleVelocity).toBe(8.5)
+    expect(result.homeResults[0].recentHistory).toEqual([
+      { pricePerUnit: 450, quantity: 1, timestamp: 1000, hq: false },
+    ])
+  })
+
+  test('handles multi-item batch with correct per-item results', async () => {
+    globalThis.fetch = mock(async () =>
+      new Response(worldResponse({
+        2: {
+          listings: [{ lastReviewTime: 100, pricePerUnit: 500, quantity: 3, hq: false }],
+          regularSaleVelocity: 8.5,
+          hqSaleVelocity: 2.1,
+          recentHistory: [],
+          lastUploadTime: 1_774_271_896_711,
+        },
+        3: {
+          listings: [{ lastReviewTime: 200, pricePerUnit: 700, quantity: 1, hq: true }],
+          regularSaleVelocity: 4.0,
+          hqSaleVelocity: 1.0,
+          recentHistory: [{ pricePerUnit: 650, quantity: 1, timestamp: 2000, hq: true }],
+          lastUploadTime: 1_774_271_900_000,
+        },
+      }), { status: 200 })
+    ) as unknown as typeof fetch
+
+    const result = await fetchHomeWorldCombined([2, 3])
+
+    expect(result.dcResults.length).toBe(2)
+    expect(result.homeResults.length).toBe(2)
+
+    const dc2 = result.dcResults.find(r => r.itemID === 2)!
+    const dc3 = result.dcResults.find(r => r.itemID === 3)!
+    expect(dc2.listings[0].worldID).toBe(4030)
+    expect(dc3.listings[0].hq).toBe(true)
+
+    const home2 = result.homeResults.find(r => r.itemID === 2)!
+    const home3 = result.homeResults.find(r => r.itemID === 3)!
+    expect(home2.regularSaleVelocity).toBe(8.5)
+    expect(home3.recentHistory.length).toBe(1)
+  })
+
+  test('returns empty results on HTTP error', async () => {
+    console.warn = mock(() => {}) as typeof console.warn
+    globalThis.fetch = mock(async () =>
+      new Response('', { status: 500 })
+    ) as unknown as typeof fetch
+
+    const result = await fetchHomeWorldCombined([2])
+
+    expect(result.dcResults).toEqual([])
+    expect(result.homeResults).toEqual([])
   })
 })
 
