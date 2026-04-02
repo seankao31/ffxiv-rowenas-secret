@@ -39,7 +39,7 @@ type XivApiItemRow = {
 
 let onChange: (() => void) | null = null
 
-export function setOnChange(cb: () => void) {
+export function setOnChange(cb: (() => void) | null): void {
   onChange = cb
 }
 

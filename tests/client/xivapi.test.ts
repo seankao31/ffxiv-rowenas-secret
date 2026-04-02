@@ -5,6 +5,7 @@ const originalFetch = globalThis.fetch
 
 afterEach(() => {
   globalThis.fetch = originalFetch
+  setOnChange(null)
 })
 
 beforeEach(() => {
@@ -148,10 +149,9 @@ describe('fetchItemMetadata', () => {
     await fetchItemMetadata([5057])
 
     expect(onChangeSpy).toHaveBeenCalledTimes(1)
-    setOnChange(() => {})  // clean up
   })
 
-  test('skips rows with missing Icon or Name fields', async () => {
+  test('handles rows with missing Icon or Name fields gracefully', async () => {
     globalThis.fetch = mock(() => Promise.resolve({
       ok: true,
       json: () => Promise.resolve({
