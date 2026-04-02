@@ -63,7 +63,7 @@
           <td>
             <div class="flex items-center gap-1.5">
               {#if icon}
-                <img src={icon} alt="" width="20" height="20" class="flex-shrink-0"
+                <img src={icon} alt="" width="32" height="32" class="flex-shrink-0"
                   onerror={(e: Event) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
               {/if}
               <a class="link link-info no-underline hover:underline" href="https://universalis.app/market/{opp.itemID}" target="_blank" rel="noopener">
