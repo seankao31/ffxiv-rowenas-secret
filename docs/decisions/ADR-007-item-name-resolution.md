@@ -79,3 +79,19 @@ GET https://raw.githubusercontent.com/beherw/FFXIV_Market/main/public/data/tw-it
 - `fetchItemNames()` now decodes msgpack and reads `item.tw` instead of `item.name`
 - Entries with falsy `tw` values are skipped (fall through to `Item #NNN` fallback)
 - Decode errors return an empty map with a warning, consistent with fetch-error handling
+
+## Update: Migrated client-side fallback to XIVAPI v2 (2026-04-02)
+
+Replaced per-item XIVAPI v1 calls (`xivapi.com/item/{id}?columns=Name`) with a single batched XIVAPI v2 call:
+
+    GET https://v2.xivapi.com/api/sheet/Item?rows={id1},{id2},...&fields=Icon,Name
+
+**Why:**
+- **One request replaces N:** Batch all item IDs into a single call instead of one per fallback item
+- **Icon support:** The same call retrieves icon paths (used to display item icons in the opportunity table)
+- **v1 deprecation:** XIVAPI v1 is deprecated in favor of v2
+
+**Changes:**
+- `item-names.ts` replaced by `xivapi.ts` which handles both name resolution and icon URL construction
+- Icons rendered as `<img>` elements loading directly from XIVAPI's asset endpoint (`format=webp`)
+- Cache keyed by item ID stores both English name and icon path
