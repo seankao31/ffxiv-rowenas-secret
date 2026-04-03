@@ -157,7 +157,7 @@ Category grouping (e.g., "Trading", "Crafting", "Gathering") is defined in the `
 
 Future tools are added by adding entries to the nav item list. No dynamic routing is needed in this phase — the sidebar visually shows only the arbitrage tool, with no other clickable items.
 
-When a second tool is added, client-side routing (SvelteKit or equivalent) will be introduced at that time. The shell is structured to support this without layout changes.
+Client-side routing is now provided by SvelteKit — see `2026-04-03-sveltekit-migration-design.md`. The shell layout is preserved as `+layout.svelte`.
 
 ---
 
@@ -180,7 +180,7 @@ This spec covers the structural layout change only:
 - Refactoring App.svelte into a tool page within the shell
 
 **Out of scope:**
-- Client-side routing (added when second tool ships)
+- Client-side routing (now covered by SvelteKit migration spec)
 - Login/auth implementation (profile area is a placeholder)
 - Google AdSense integration (container only)
 - Light mode
