@@ -7,7 +7,6 @@
     ontoggle: () => void
   } = $props()
 
-  let categories = $derived([...new Set(navItems.map(item => item.category))])
 </script>
 
 <nav
@@ -26,38 +25,30 @@
   </button>
 
   <div class="flex-1 overflow-y-auto pt-4">
-    {#each categories as category (category)}
+    {#each navItems as item (item.id)}
+      {@const Icon = item.icon}
+      {@const active = true}
       {#if expanded}
-        <div class="px-4 py-1.5 text-xs uppercase text-base-content/40 tracking-wider">
-          {category}
-        </div>
+        <a
+          href="/{item.id}"
+          class="flex items-center gap-3 px-4 py-2 text-sm no-underline transition-colors {active
+            ? 'border-l-2 border-accent bg-accent/10 text-accent'
+            : 'text-base-content/60 hover:bg-base-300'}"
+        >
+          <Icon class="w-5 h-5 shrink-0" />
+          <span>{item.label}</span>
+        </a>
+      {:else}
+        <a
+          href="/{item.id}"
+          class="flex items-center justify-center py-2 mx-2 rounded-lg no-underline transition-colors {active
+            ? 'bg-accent text-accent-content'
+            : 'text-base-content/60 hover:bg-base-300'}"
+          title={item.label}
+        >
+          <Icon class="w-5 h-5" />
+        </a>
       {/if}
-
-      {#each navItems.filter(item => item.category === category) as item (item.id)}
-        {@const Icon = item.icon}
-        {@const active = true}
-        {#if expanded}
-          <a
-            href="/{item.id}"
-            class="flex items-center gap-3 px-4 py-2 text-sm no-underline transition-colors {active
-              ? 'border-l-2 border-accent bg-accent/10 text-accent'
-              : 'text-base-content/60 hover:bg-base-300'}"
-          >
-            <Icon class="w-5 h-5 shrink-0" />
-            <span>{item.label}</span>
-          </a>
-        {:else}
-          <a
-            href="/{item.id}"
-            class="flex items-center justify-center py-2 mx-2 rounded-lg no-underline transition-colors {active
-              ? 'bg-accent text-accent-content'
-              : 'text-base-content/60 hover:bg-base-300'}"
-            title={item.label}
-          >
-            <Icon class="w-5 h-5" />
-          </a>
-        {/if}
-      {/each}
     {/each}
   </div>
 </nav>

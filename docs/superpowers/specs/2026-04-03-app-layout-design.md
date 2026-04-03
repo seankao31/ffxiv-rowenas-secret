@@ -49,8 +49,7 @@ The sidebar sits **below** the top bar on the left. It toggles between two state
 
 **Expanded (default for new visitors):**
 - Width: ~220px
-- Categorized navigation list with icons + text labels
-- Categories are uppercase section headers (e.g., "Trading", "Crafting", "Gathering", "Economy")
+- Flat navigation list with icons + text labels (category grouping not yet implemented)
 - Active tool highlighted with accent-color left border + background tint
 - Icons from lucide-svelte (already used in the project)
 - Scrollable if tools exceed viewport height
@@ -148,16 +147,17 @@ The sidebar sits **below** the top bar on the left. It toggles between two state
 
 ## Navigation Items
 
-For the initial implementation, only one tool exists. The sidebar renders:
+For the initial implementation, only one tool exists. The sidebar renders a flat list:
 
 ```
-Trading
   ● Arbitrage        (active)
 ```
 
-Future tools are added by adding entries to the nav item list. The sidebar supports categories as static section headers. No dynamic routing is needed in this phase — the sidebar visually shows only the arbitrage tool, with no other clickable items.
+Category grouping (e.g., "Trading", "Crafting", "Gathering") is defined in the `NavItem` data model (`category` field) but not yet rendered in the sidebar UI. Category headers should be added when the tool list grows large enough to benefit from grouping.
 
-When a second tool is added, client-side routing (hash-based or `svelte-spa-router`) will be introduced at that time. The shell is structured to support this without layout changes.
+Future tools are added by adding entries to the nav item list. No dynamic routing is needed in this phase — the sidebar visually shows only the arbitrage tool, with no other clickable items.
+
+When a second tool is added, client-side routing (SvelteKit or equivalent) will be introduced at that time. The shell is structured to support this without layout changes.
 
 ---
 
