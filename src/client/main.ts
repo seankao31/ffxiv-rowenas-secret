@@ -1,5 +1,5 @@
 import './app.css'
 import { mount } from 'svelte'
-import App from './App.svelte'
+import AppShell from './components/AppShell.svelte'
 
-mount(App, { target: document.getElementById('app')! })
+mount(AppShell, { target: document.getElementById('app')! })
