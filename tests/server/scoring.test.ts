@@ -45,7 +45,8 @@ describe('scoreOpportunities', () => {
     const r = results[0]!
     expect(r.itemID).toBe(1)
     expect(r.itemName).toBe('Iron Ore')
-    expect(r.profitPerUnit).toBe(550)  // 1000*0.95 - 400 = 550
+    expect(r.profitPerUnit).toBe(530)  // 1000*0.95 - 400*1.05 = 530 (includes 5% purchase tax)
+    expect(r.buyPrice).toBe(420)       // 400 * 1.05 (actual cost with purchase tax)
     expect(r.sourceWorldID).toBe(SRC_B)
   })
 
@@ -97,7 +98,7 @@ describe('scoreOpportunities', () => {
     })
     const results = scoreOpportunities(new Map([[1, withDead]]), names, DEFAULT)
     expect(results).toHaveLength(1)
-    expect(results[0]!.buyPrice).toBe(400)  // cheapest active price unaffected
+    expect(results[0]!.buyPrice).toBe(420)  // cheapest active price 400 * 1.05 purchase tax
   })
 
   test('picks confidence-adjusted best world, not cheapest', () => {
@@ -144,7 +145,7 @@ describe('scoreOpportunities', () => {
     }
     const results = scoreOpportunities(new Map([[1, mixed]]), names, { ...DEFAULT, hq: true })
     expect(results).toHaveLength(1)
-    expect(results[0]!.buyPrice).toBe(400)   // HQ source price
+    expect(results[0]!.buyPrice).toBe(420)   // HQ source price 400 * 1.05 purchase tax
     expect(results[0]!.sellPrice).toBe(1000) // HQ home price
     // fairShareVelocity = hqSaleVelocity(4) / (1 HQ competitor + 1) = 2
     expect(results[0]!.fairShareVelocity).toBeCloseTo(2)
