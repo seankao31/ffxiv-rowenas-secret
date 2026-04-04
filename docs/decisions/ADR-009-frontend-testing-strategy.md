@@ -43,4 +43,4 @@ Use vitest for fast component-level tests (CI on every commit), Playwright for s
 
 - vitest + jsdom + @testing-library/svelte added as devDependencies
 - Component tests go in `tests/client/` alongside existing `tests/server/`
-- `bun test` continues to run server tests; `bunx vitest` runs client tests (separate runner since Bun's test runner doesn't support jsdom/Svelte compilation)
+- All tests (server and client) run under vitest via `bun run test`

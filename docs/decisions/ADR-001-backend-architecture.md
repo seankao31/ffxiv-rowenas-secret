@@ -1,6 +1,6 @@
 # ADR-001: Backend Architecture — All-in-One Express Monolith
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-010](./ADR-010-sveltekit-migration.md)
 **Date:** 2026-03-23
 
 ## Context

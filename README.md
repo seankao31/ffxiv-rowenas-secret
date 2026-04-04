@@ -14,8 +14,8 @@ Data is sourced from the [Universalis](https://universalis.app) API and refreshe
 # Install dependencies
 bun install
 
-# Build the frontend
-bun run build:client
+# Build the app
+bun run build
 
 # Start the server
 bun start
@@ -25,20 +25,15 @@ Then open `http://localhost:3000` in your browser. The first scan takes about 1.
 
 ## Development
 
-Run the backend and frontend dev servers separately:
-
 ```sh
-# Backend (with file-watch reload)
-bun run dev:server
-
-# Frontend (Vite HMR)
-bun run dev:client
+# Start the dev server
+bun run dev
 ```
 
 ## Tests
 
 ```sh
-bun test
+bun run test
 ```
 
 ## Deployment
