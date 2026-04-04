@@ -21,7 +21,7 @@
 <div class="bg-base-200 border-b border-base-300">
   <button class="w-full py-2.5 px-4 bg-transparent border-none text-base-content cursor-pointer text-left text-sm" onclick={() => (open = !open)}>
     <Settings class="inline w-4 h-4 align-text-bottom" />
-    Filters
+    Scan Parameters
     {#if open}
       <ChevronUp class="inline w-4 h-4 align-text-bottom" />
     {:else}

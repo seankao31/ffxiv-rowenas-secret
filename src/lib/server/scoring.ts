@@ -107,7 +107,7 @@ export function scoreOpportunities(
       if (activeSrc.length === 0) continue
 
       const cheapestSource = Math.min(...activeSrc.map(l => l.pricePerUnit))
-      const profitPerUnit = realisticSellPrice * (1 - MARKET_TAX) - cheapestSource
+      const profitPerUnit = realisticSellPrice * (1 - MARKET_TAX) - cheapestSource * (1 + MARKET_TAX)
       if (profitPerUnit <= 0) continue
 
       const uploadTime = item.worldUploadTimes[worldID] ?? 0
@@ -150,11 +150,11 @@ export function scoreOpportunities(
       itemID: item.itemID,
       itemName: nameMap.get(item.itemID) ?? `Item #${item.itemID}`,
 
-      buyPrice: best.cheapestSource,
+      buyPrice: Math.round(best.cheapestSource * (1 + MARKET_TAX)),
       sellPrice: realisticSellPrice,
       listingPrice: cheapestHomePrice,
       profitPerUnit: Math.round(best.profitPerUnit),
-      listingProfitPerUnit: Math.round(cheapestHomePrice * (1 - MARKET_TAX) - best.cheapestSource),
+      listingProfitPerUnit: Math.round(cheapestHomePrice * (1 - MARKET_TAX) - best.cheapestSource * (1 + MARKET_TAX)),
 
       sourceWorld: best.worldName,
       sourceWorldID: best.worldID,
@@ -178,7 +178,7 @@ export function scoreOpportunities(
     if (alt) {
       opp.altSourceWorld = alt.worldName
       opp.altSourceWorldID = alt.worldID
-      opp.altBuyPrice = alt.cheapestSource
+      opp.altBuyPrice = Math.round(alt.cheapestSource * (1 + MARKET_TAX))
       opp.altExpectedDailyProfit = Math.round(alt.profitPerUnit * fairShareVelocity)
       opp.altSourceConfidence = Math.round(alt.sourceConf * 1000) / 1000
       opp.altSourceDataAgeHours = Math.round(alt.sourceAgeHours * 10) / 10
