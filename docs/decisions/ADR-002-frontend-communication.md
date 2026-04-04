@@ -35,7 +35,7 @@ The 30s poll sends the full response (~31 KB raw, ~4.5 KB gzipped) every time, e
 
 **ETag strategy:** The server derives an ETag from `scanCompletedAt` + filter params (price_threshold, listing_staleness_hours, days_of_supply, limit, hq). This is a pure function — no per-client state. On `If-None-Match` match, the server returns 304 and skips `scoreOpportunities()` entirely, saving both bandwidth and CPU.
 
-**Result:** ~99% of polls return 304 (~200 bytes). Monthly traffic drops to ~21 MB. gzip/Brotli compression (via `compression` middleware) further reduces the remaining full responses.
+**Result:** ~99% of polls return 304 (~200 bytes). Monthly traffic drops to ~21 MB. gzip/Brotli compression (handled by Caddy reverse proxy) further reduces the remaining full responses.
 
 **Why not partial diffs (JSON Patch, WebSocket push):** The full opportunity list is small (~4.5 KB compressed) and changes atomically per scan cycle. Diffing adds per-client server state and complexity for marginal savings over ETag/304.
 
