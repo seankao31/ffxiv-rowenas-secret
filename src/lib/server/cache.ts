@@ -1,5 +1,4 @@
-// src/server/cache.ts
-import type { ItemData, ScanMeta, ScanProgress } from '../shared/types.ts'
+import type { ItemData, ScanMeta, ScanProgress } from '$lib/shared/types.ts'
 
 const itemCache = new Map<number, ItemData>()
 const nameCache = new Map<number, string>()  // itemID → display name

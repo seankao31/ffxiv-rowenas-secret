@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state'
   import { ChevronLeft, ChevronRight } from 'lucide-svelte'
-  import { navItems } from '../client/navigation.ts'
+  import { navItems } from '$lib/client/navigation.ts'
 
   let { expanded, ontoggle }: {
     expanded: boolean

@@ -1,4 +1,4 @@
-import type { ThresholdParams } from '../shared/types.ts'
+import type { ThresholdParams } from '$lib/shared/types.ts'
 
 export function parseThresholds(query: Record<string, unknown>): ThresholdParams | { error: string } {
   const price_threshold = query['price_threshold'] !== undefined

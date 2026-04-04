@@ -1,5 +1,3 @@
-// src/shared/types.ts
-
 export type Listing = {
   pricePerUnit: number
   quantity: number
