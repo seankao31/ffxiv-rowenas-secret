@@ -58,7 +58,7 @@
     <tbody>
       {#each opportunities as opp (opp.itemID)}
         {@const icon = iconUrl(opp)}
-        <tr class="hover">
+        <tr class="hover:bg-base-300">
           <!-- Item -->
           <td>
             <div class="flex items-center gap-1.5">
