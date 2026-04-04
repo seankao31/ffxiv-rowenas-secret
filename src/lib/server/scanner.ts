@@ -1,7 +1,6 @@
-// src/server/scanner.ts
 import { fetchMarketableItems, fetchDCListings, fetchHomeListings, fetchWorldListings, fetchHomeWorldCombined, fetchItemNames, DC_WORLDS, HOME_WORLD_ID } from './universalis.ts'
 import { setItem, setNameMap, setScanMeta, getScanMeta, setScanProgress } from './cache.ts'
-import type { ItemData, Listing, SaleRecord } from '../shared/types.ts'
+import type { ItemData, Listing, SaleRecord } from '$lib/shared/types.ts'
 const SCAN_COOLDOWN_MS = 60_000
 
 type ScanStrategy = 'dc' | 'per-world'

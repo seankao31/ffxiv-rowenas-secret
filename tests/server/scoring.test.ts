@@ -1,7 +1,7 @@
 // tests/server/scoring.test.ts
-import { test, expect, describe } from 'bun:test'
-import { scoreOpportunities } from '../../src/server/scoring.ts'
-import type { ItemData, ThresholdParams } from '../../src/shared/types.ts'
+import { test, expect, describe } from 'vitest'
+import { scoreOpportunities } from '$lib/server/scoring'
+import type { ItemData, ThresholdParams } from '$lib/shared/types'
 
 const HOME = 4030
 const SRC_A = 4033  // 巴哈姆特

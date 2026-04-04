@@ -7,7 +7,8 @@
 # Dependencies
 node_modules/
 
-# Built frontend (regenerated via `bun run build:client`)
+# Build output (regenerated via `bun run build`)
+build/
 dist/
 
 # Git worktrees
@@ -21,3 +22,6 @@ dist/
 
 # Private deployment docs
 docs/deployment.md
+
+# SvelteKit generated files
+.svelte-kit/

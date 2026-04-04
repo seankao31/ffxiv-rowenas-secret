@@ -1,6 +1,6 @@
-import { test, expect, describe } from 'bun:test'
-import { buildItemData } from '../../src/server/scanner.ts'
-import { HOME_WORLD_ID } from '../../src/server/universalis.ts'
+import { test, expect, describe } from 'vitest'
+import { buildItemData } from '$lib/server/scanner'
+import { HOME_WORLD_ID } from '$lib/server/universalis'
 
 describe('buildItemData', () => {
   const baseDcListings = [

@@ -1,5 +1,4 @@
-// src/client/lib/api.ts
-import type { Opportunity, ScanMeta, ScanProgress, ThresholdParams } from '../../shared/types.ts'
+import type { Opportunity, ScanMeta, ScanProgress, ThresholdParams } from '$lib/shared/types.ts'
 
 export type { Opportunity, ScanMeta, ScanProgress }
 export type ThresholdState = ThresholdParams

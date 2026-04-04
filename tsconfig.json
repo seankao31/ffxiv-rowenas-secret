@@ -1,14 +1,8 @@
 {
+  "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
     "strict": true,
     "noUncheckedIndexedAccess": true,
-    "skipLibCheck": true,
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
-    "types": ["bun"]
-  },
-  "include": ["src/**/*", "tests/**/*"]
+    "allowImportingTsExtensions": true
+  }
 }

@@ -1,5 +1,5 @@
-import { test, expect, describe } from 'bun:test'
-import { parseThresholds } from '../../src/server/api.ts'
+import { test, expect, describe } from 'vitest'
+import { parseThresholds } from '$lib/server/thresholds'
 
 describe('parseThresholds', () => {
   test('returns defaults when no query params provided', () => {

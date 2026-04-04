@@ -1,10 +1,9 @@
-<!-- src/client/App.svelte -->
 <script lang="ts">
   import { untrack } from 'svelte'
-  import { fetchOpportunities, type Opportunity, type ScanMeta, type ScanProgress, type ThresholdState } from './lib/api.ts'
-  import StatusBar from './components/StatusBar.svelte'
-  import ThresholdControls from './components/ThresholdControls.svelte'
-  import OpportunityTable from './components/OpportunityTable.svelte'
+  import { fetchOpportunities, type Opportunity, type ScanMeta, type ScanProgress, type ThresholdState } from '$lib/client/api.ts'
+  import StatusBar from '$lib/components/StatusBar.svelte'
+  import ThresholdControls from '$lib/components/ThresholdControls.svelte'
+  import OpportunityTable from '$lib/components/OpportunityTable.svelte'
 
   let opportunities = $state<Opportunity[]>([])
   let meta = $state<ScanMeta>({
@@ -39,10 +38,8 @@
         return
       }
       coldStart = false
-      // Flash timestamp when background poll detects a new scan
       if (meta.scanCompletedAt > 0 && result.meta.scanCompletedAt !== meta.scanCompletedAt) {
         flash = false
-        // Force a tick so Svelte removes the class before re-adding it
         await new Promise(r => requestAnimationFrame(r))
         flash = true
       }
@@ -62,10 +59,7 @@
   }
 
   $effect(() => {
-    // Poll faster during cold start (2s) for smooth progress updates, normal 30s otherwise
     const ms = coldStart ? 2_000 : 30_000
-    // untrack: loadData reads thresholds, but this effect should only react to coldStart changes.
-    // Threshold-driven fetches go through the debounced onThresholdChange path instead.
     untrack(() => loadData())
     const interval = setInterval(loadData, ms)
     return () => clearInterval(interval)

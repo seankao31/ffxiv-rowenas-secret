@@ -1,7 +1,6 @@
-<!-- src/client/components/StatusBar.svelte -->
 <script lang="ts">
   import { TriangleAlert } from 'lucide-svelte'
-  import type { ScanMeta } from '../lib/api.ts'
+  import type { ScanMeta } from '$lib/client/api.ts'
 
   const { meta, flash }: {
     meta: ScanMeta

@@ -1,5 +1,4 @@
-// src/server/scoring.ts
-import type { ItemData, Opportunity, ThresholdParams } from '../shared/types.ts'
+import type { ItemData, Opportunity, ThresholdParams } from '$lib/shared/types.ts'
 
 const HOME_WORLD_ID = 4030
 const MARKET_TAX = 0.05

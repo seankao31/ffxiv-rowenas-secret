@@ -1,4 +1,3 @@
-// src/server/universalis.ts
 import { RateLimiter } from 'limiter'
 
 const DC_NAME = '陸行鳥'

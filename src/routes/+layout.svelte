@@ -1,9 +1,11 @@
 <script lang="ts">
+  import '../app.css'
   import { Heart } from 'lucide-svelte'
-  import TopBar from './TopBar.svelte'
-  import Sidebar from './Sidebar.svelte'
-  import App from '../App.svelte'
-  import { loadSidebarExpanded, saveSidebarExpanded } from '../lib/sidebar.ts'
+  import TopBar from '$lib/components/TopBar.svelte'
+  import Sidebar from '$lib/components/Sidebar.svelte'
+  import { loadSidebarExpanded, saveSidebarExpanded } from '$lib/client/sidebar.ts'
+
+  let { children } = $props()
 
   let expanded = $state(loadSidebarExpanded())
 
@@ -14,7 +16,7 @@
 </script>
 
 <div class="flex flex-col h-screen overflow-hidden">
-  <TopBar toolName="Arbitrage" />
+  <TopBar />
 
   <div class="flex flex-1 min-h-0">
     <Sidebar {expanded} ontoggle={toggleSidebar} />
@@ -23,7 +25,7 @@
       <div class="ad-zone w-full shrink-0"></div>
 
       <div class="flex-1 flex flex-col min-h-0 max-w-[1400px] w-full mx-auto px-8 box-border">
-        <App />
+        {@render children()}
       </div>
     </div>
   </div>

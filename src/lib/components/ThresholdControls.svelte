@@ -1,7 +1,6 @@
-<!-- src/client/components/ThresholdControls.svelte -->
 <script lang="ts">
   import { Settings, ChevronUp, ChevronDown } from 'lucide-svelte'
-  import type { ThresholdState } from '../lib/api.ts'
+  import type { ThresholdState } from '$lib/client/api.ts'
 
   let {
     thresholds,
