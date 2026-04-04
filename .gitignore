@@ -21,3 +21,6 @@ dist/
 
 # Private deployment docs
 docs/deployment.md
+
+# SvelteKit generated files
+.svelte-kit/

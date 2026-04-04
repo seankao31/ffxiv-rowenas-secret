@@ -1,16 +1,10 @@
-import { defineConfig } from 'vite'
+import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
-import { svelte } from '@sveltejs/vite-plugin-svelte'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
-  plugins: [tailwindcss(), svelte()],
-  build: {
-    outDir: 'dist/client',
-  },
-  root: '.',
-  server: {
-    proxy: {
-      '/api': 'http://localhost:3000',
-    },
+  plugins: [tailwindcss(), sveltekit()],
+  test: {
+    include: ['tests/**/*.test.ts'],
   },
 })
