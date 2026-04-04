@@ -3,11 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "bun src/server/index.ts",
-    "dev:server": "bun --watch src/server/index.ts",
-    "dev:client": "vite",
-    "build:client": "vite build",
-    "test": "bun test",
+    "dev": "vite dev",
+    "build": "vite build",
+    "start": "bun build/index.js",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "benchmark": "bun scripts/benchmark-scan.ts"
   },
