@@ -1,10 +1,10 @@
 <!-- src/client/App.svelte -->
 <script lang="ts">
   import { untrack } from 'svelte'
-  import { fetchOpportunities, type Opportunity, type ScanMeta, type ScanProgress, type ThresholdState } from './lib/api.ts'
-  import StatusBar from './components/StatusBar.svelte'
-  import ThresholdControls from './components/ThresholdControls.svelte'
-  import OpportunityTable from './components/OpportunityTable.svelte'
+  import { fetchOpportunities, type Opportunity, type ScanMeta, type ScanProgress, type ThresholdState } from '$lib/client/api.ts'
+  import StatusBar from '$lib/components/StatusBar.svelte'
+  import ThresholdControls from '$lib/components/ThresholdControls.svelte'
+  import OpportunityTable from '$lib/components/OpportunityTable.svelte'
 
   let opportunities = $state<Opportunity[]>([])
   let meta = $state<ScanMeta>({

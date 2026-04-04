@@ -1,9 +1,9 @@
 <!-- src/client/components/OpportunityTable.svelte -->
 <script lang="ts">
-  import type { Opportunity } from '../lib/api.ts'
+  import type { Opportunity } from '../client/api.ts'
   import { Info } from 'lucide-svelte'
-  import { resolveItemName, setOnChange, getIconUrl, fetchItemMetadata } from '../lib/xivapi.ts'
-  import { tooltip } from '../lib/tooltip.ts'
+  import { resolveItemName, setOnChange, getIconUrl, fetchItemMetadata } from '../client/xivapi.ts'
+  import { tooltip } from '../client/tooltip.ts'
 
   const { opportunities }: { opportunities: Opportunity[] } = $props()
 

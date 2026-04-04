@@ -1,6 +1,6 @@
 <script lang="ts">
   import { ChevronLeft, ChevronRight } from 'lucide-svelte'
-  import { navItems } from '../lib/navigation.ts'
+  import { navItems } from '../client/navigation.ts'
 
   let { expanded, ontoggle }: {
     expanded: boolean
