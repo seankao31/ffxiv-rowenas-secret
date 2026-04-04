@@ -1,11 +1,11 @@
 <script lang="ts">
+  import '../app.css'
   import { Heart } from 'lucide-svelte'
   import TopBar from '$lib/components/TopBar.svelte'
   import Sidebar from '$lib/components/Sidebar.svelte'
   import { loadSidebarExpanded, saveSidebarExpanded } from '$lib/client/sidebar.ts'
-  import type { Snippet } from 'svelte'
 
-  let { children }: { children: Snippet } = $props()
+  let { children } = $props()
 
   let expanded = $state(loadSidebarExpanded())
 
@@ -16,7 +16,7 @@
 </script>
 
 <div class="flex flex-col h-screen overflow-hidden">
-  <TopBar toolName="Arbitrage" />
+  <TopBar />
 
   <div class="flex flex-1 min-h-0">
     <Sidebar {expanded} ontoggle={toggleSidebar} />

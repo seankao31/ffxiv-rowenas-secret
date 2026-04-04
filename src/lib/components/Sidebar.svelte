@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { page } from '$app/state'
   import { ChevronLeft, ChevronRight } from 'lucide-svelte'
   import { navItems } from '../client/navigation.ts'
 
@@ -7,6 +8,7 @@
     ontoggle: () => void
   } = $props()
 
+  const isActive = (id: string) => page.url.pathname.startsWith(`/${id}`)
 </script>
 
 <nav
@@ -27,11 +29,10 @@
   <div class="flex-1 overflow-y-auto pt-4">
     {#each navItems as item (item.id)}
       {@const Icon = item.icon}
-      {@const active = true}
       {#if expanded}
         <a
           href="/{item.id}"
-          class="flex items-center gap-3 px-4 py-2 text-sm no-underline transition-colors {active
+          class="flex items-center gap-3 px-4 py-2 text-sm no-underline transition-colors {isActive(item.id)
             ? 'border-l-2 border-accent bg-accent/10 text-accent'
             : 'text-base-content/60 hover:bg-base-300'}"
         >
@@ -41,7 +42,7 @@
       {:else}
         <a
           href="/{item.id}"
-          class="flex items-center justify-center py-2 mx-2 rounded-lg no-underline transition-colors {active
+          class="flex items-center justify-center py-2 mx-2 rounded-lg no-underline transition-colors {isActive(item.id)
             ? 'bg-accent text-accent-content'
             : 'text-base-content/60 hover:bg-base-300'}"
           title={item.label}
