@@ -1,5 +1,5 @@
-import { test, expect, describe, beforeEach } from 'bun:test'
-import { loadSidebarExpanded, saveSidebarExpanded } from '../../src/client/lib/sidebar.ts'
+import { test, expect, describe, beforeEach } from 'vitest'
+import { loadSidebarExpanded, saveSidebarExpanded } from '$lib/client/sidebar'
 
 let storage: Record<string, string> = {}
 

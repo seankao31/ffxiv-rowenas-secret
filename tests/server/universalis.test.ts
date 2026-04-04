@@ -1,11 +1,11 @@
 // tests/server/universalis.test.ts
-import { test, expect, describe, mock, afterEach } from 'bun:test'
+import { test, expect, describe, vi, afterEach } from 'vitest'
 import {
   Semaphore, OutboundRateLimiter,
   fetchMarketableItems, fetchDCListings, fetchWorldListings,
   fetchHomeListings, fetchHomeWorldCombined,
   fetchItemNames,
-} from '../../src/server/universalis.ts'
+} from '$lib/server/universalis'
 
 describe('fetchMarketableItems', () => {
   const originalFetch = globalThis.fetch
@@ -18,7 +18,7 @@ describe('fetchMarketableItems', () => {
 
   test('returns array of item IDs when API responds with valid data', async () => {
     const expected = [2, 3, 4, 1337, 99999]
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       new Response(JSON.stringify(expected), { status: 200 })
     ) as unknown as typeof fetch
 
@@ -28,8 +28,8 @@ describe('fetchMarketableItems', () => {
   })
 
   test('returns empty array when API returns HTTP error', async () => {
-    console.warn = mock(() => {}) as typeof console.warn
-    globalThis.fetch = mock(async () =>
+    console.warn = vi.fn(() => {}) as typeof console.warn
+    globalThis.fetch = vi.fn(async () =>
       new Response('', { status: 500 })
     ) as unknown as typeof fetch
 
@@ -40,8 +40,8 @@ describe('fetchMarketableItems', () => {
   })
 
   test('returns empty array when API returns non-array JSON', async () => {
-    console.warn = mock(() => {}) as typeof console.warn
-    globalThis.fetch = mock(async () =>
+    console.warn = vi.fn(() => {}) as typeof console.warn
+    globalThis.fetch = vi.fn(async () =>
       new Response(JSON.stringify({ items: [1, 2, 3] }), { status: 200 })
     ) as unknown as typeof fetch
 
@@ -80,7 +80,7 @@ describe('fetchDCListings', () => {
   })
 
   test('converts listing lastReviewTime from API seconds to milliseconds', async () => {
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       new Response(dcResponse(2, {
         listings: [{
           lastReviewTime: 1_774_271_895,   // seconds from API
@@ -96,7 +96,7 @@ describe('fetchDCListings', () => {
   })
 
   test('extracts worldUploadTimes from DC response', async () => {
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       new Response(dcResponse(2, {
         worldUploadTimes: { '4028': 1_774_271_896_711, '4029': 1_774_274_109_636 },
       }), { status: 200 })
@@ -108,8 +108,8 @@ describe('fetchDCListings', () => {
   })
 
   test('returns empty array when API returns HTTP error', async () => {
-    console.warn = mock(() => {}) as typeof console.warn
-    globalThis.fetch = mock(async () =>
+    console.warn = vi.fn(() => {}) as typeof console.warn
+    globalThis.fetch = vi.fn(async () =>
       new Response('', { status: 500 })
     ) as unknown as typeof fetch
 
@@ -147,7 +147,7 @@ describe('fetchWorldListings', () => {
   })
 
   test('returns listings with worldID and worldName injected', async () => {
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       new Response(worldResponse({
         2: {
           listings: [{
@@ -172,7 +172,7 @@ describe('fetchWorldListings', () => {
   })
 
   test('populates worldUploadTimes from item lastUploadTime', async () => {
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       new Response(worldResponse({ 2: {} }), { status: 200 })
     ) as unknown as typeof fetch
 
@@ -185,7 +185,7 @@ describe('fetchWorldListings', () => {
   })
 
   test('handles multi-item batch with correct per-item results', async () => {
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       new Response(worldResponse({
         2: { listings: [{ lastReviewTime: 100, pricePerUnit: 10, quantity: 1, hq: false }] },
         3: { listings: [{ lastReviewTime: 200, pricePerUnit: 20, quantity: 5, hq: true }] },
@@ -207,8 +207,8 @@ describe('fetchWorldListings', () => {
   })
 
   test('returns empty array when API returns HTTP error', async () => {
-    console.warn = mock(() => {}) as typeof console.warn
-    globalThis.fetch = mock(async () =>
+    console.warn = vi.fn(() => {}) as typeof console.warn
+    globalThis.fetch = vi.fn(async () =>
       new Response('', { status: 500 })
     ) as unknown as typeof fetch
 
@@ -232,7 +232,7 @@ describe('fetchHomeListings', () => {
   })
 
   test('extracts velocity and history from home world response', async () => {
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       new Response(worldResponse({
         2: {
           regularSaleVelocity: 8.5,
@@ -253,7 +253,7 @@ describe('fetchHomeListings', () => {
   })
 
   test('defaults missing fields to zero/empty', async () => {
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       new Response(worldResponse({ 2: {} }), { status: 200 })
     ) as unknown as typeof fetch
 
@@ -265,8 +265,8 @@ describe('fetchHomeListings', () => {
   })
 
   test('returns empty array on HTTP error', async () => {
-    console.warn = mock(() => {}) as typeof console.warn
-    globalThis.fetch = mock(async () =>
+    console.warn = vi.fn(() => {}) as typeof console.warn
+    globalThis.fetch = vi.fn(async () =>
       new Response('', { status: 500 })
     ) as unknown as typeof fetch
 
@@ -287,7 +287,7 @@ describe('fetchHomeWorldCombined', () => {
   })
 
   test('returns both DC listings and home data from single API call', async () => {
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       new Response(worldResponse({
         2: {
           listings: [{
@@ -321,7 +321,7 @@ describe('fetchHomeWorldCombined', () => {
   })
 
   test('handles multi-item batch with correct per-item results', async () => {
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       new Response(worldResponse({
         2: {
           listings: [{ lastReviewTime: 100, pricePerUnit: 500, quantity: 3, hq: false }],
@@ -357,8 +357,8 @@ describe('fetchHomeWorldCombined', () => {
   })
 
   test('returns empty results on HTTP error', async () => {
-    console.warn = mock(() => {}) as typeof console.warn
-    globalThis.fetch = mock(async () =>
+    console.warn = vi.fn(() => {}) as typeof console.warn
+    globalThis.fetch = vi.fn(async () =>
       new Response('', { status: 500 })
     ) as unknown as typeof fetch
 
@@ -382,13 +382,13 @@ describe('fetchItemNames', () => {
   })
 
   test('decodes msgpack tw-items into id→name map', async () => {
-    console.log = mock(() => {}) as typeof console.log
+    console.log = vi.fn(() => {}) as typeof console.log
     const { encode } = await import('@msgpack/msgpack')
     const mockData = {
       '2': { tw: '火之碎晶' },
       '7': { tw: '水之碎晶' },
     }
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       new Response(encode(mockData), { status: 200 })
     ) as unknown as typeof fetch
 
@@ -401,14 +401,14 @@ describe('fetchItemNames', () => {
   })
 
   test('skips entries with falsy tw field', async () => {
-    console.log = mock(() => {}) as typeof console.log
+    console.log = vi.fn(() => {}) as typeof console.log
     const { encode } = await import('@msgpack/msgpack')
     const mockData = {
       '2': { tw: '火之碎晶' },
       '3': { tw: '' },
       '4': { tw: null },
     }
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       new Response(encode(mockData), { status: 200 })
     ) as unknown as typeof fetch
 
@@ -422,8 +422,8 @@ describe('fetchItemNames', () => {
   })
 
   test('returns empty map on HTTP error', async () => {
-    console.warn = mock(() => {}) as typeof console.warn
-    globalThis.fetch = mock(async () =>
+    console.warn = vi.fn(() => {}) as typeof console.warn
+    globalThis.fetch = vi.fn(async () =>
       new Response('', { status: 500 })
     ) as unknown as typeof fetch
 
@@ -434,8 +434,8 @@ describe('fetchItemNames', () => {
   })
 
   test('returns empty map on corrupt msgpack payload', async () => {
-    console.warn = mock(() => {}) as typeof console.warn
-    globalThis.fetch = mock(async () =>
+    console.warn = vi.fn(() => {}) as typeof console.warn
+    globalThis.fetch = vi.fn(async () =>
       new Response(new Uint8Array([0xff, 0xfe, 0x00]), { status: 200 })
     ) as unknown as typeof fetch
 

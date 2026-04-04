@@ -1,15 +1,13 @@
-import { test, expect, describe, beforeEach, afterEach, mock } from 'bun:test'
+import { test, expect, describe, beforeEach, afterEach, vi } from 'vitest'
 
-// Mock @floating-ui/dom before tooltip import — computePosition requires
-// a real layout engine (window, getComputedStyle) which doesn't exist in bun test.
-mock.module('@floating-ui/dom', () => ({
+vi.mock('@floating-ui/dom', () => ({
   computePosition: () => Promise.resolve({ x: 10, y: 20 }),
   offset: () => {},
   flip: () => {},
   shift: () => {},
 }))
 
-import { tooltip } from '../../src/client/lib/tooltip.ts'
+import { tooltip } from '$lib/client/tooltip'
 
 // Minimal DOM stubs for testing the attachment factory pattern.
 // We verify: event wiring, tooltip element lifecycle, and cleanup behavior.
@@ -43,7 +41,7 @@ beforeEach(() => {
         tagName: tag.toUpperCase(),
         textContent: '',
         style: { cssText: '', left: '', top: '', display: '' },
-        remove: mock(function(this: any) {
+        remove: vi.fn(function(this: any) {
           bodyChildren = bodyChildren.filter(c => c !== this)
         }),
       }

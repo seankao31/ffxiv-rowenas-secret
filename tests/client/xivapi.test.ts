@@ -1,5 +1,5 @@
-import { test, expect, describe, beforeEach, afterEach, mock } from 'bun:test'
-import { buildIconUrl, resolveItemName, getIconUrl, _seedCache, _clearCache, fetchItemMetadata, setOnChange } from '../../src/client/lib/xivapi.ts'
+import { test, expect, describe, beforeEach, afterEach, vi } from 'vitest'
+import { buildIconUrl, resolveItemName, getIconUrl, _seedCache, _clearCache, fetchItemMetadata, setOnChange } from '$lib/client/xivapi'
 
 const originalFetch = globalThis.fetch
 
@@ -52,7 +52,7 @@ describe('getIconUrl', () => {
 
 describe('fetchItemMetadata', () => {
   test('fetches metadata for uncached items and populates cache', async () => {
-    const mockFetch = mock((_url: any) => Promise.resolve({
+    const mockFetch = vi.fn((_url: any) => Promise.resolve({
       ok: true,
       json: () => Promise.resolve({
         rows: [
@@ -80,7 +80,7 @@ describe('fetchItemMetadata', () => {
 
   test('skips already-cached items', async () => {
     _seedCache(5057, { name: 'Iron Ingot', iconPath: 'ui/icon/020000/020801.tex' })
-    const mockFetch = mock((_url: any) => Promise.resolve({ ok: true, json: () => Promise.resolve({ rows: [] }) }))
+    const mockFetch = vi.fn((_url: any) => Promise.resolve({ ok: true, json: () => Promise.resolve({ rows: [] }) }))
     globalThis.fetch = mockFetch as unknown as typeof fetch
 
     await fetchItemMetadata([5057])
@@ -90,7 +90,7 @@ describe('fetchItemMetadata', () => {
 
   test('fetches only uncached items from a mixed set', async () => {
     _seedCache(5057, { name: 'Iron Ingot', iconPath: 'ui/icon/020000/020801.tex' })
-    const mockFetch = mock((_url: any) => Promise.resolve({
+    const mockFetch = vi.fn((_url: any) => Promise.resolve({
       ok: true,
       json: () => Promise.resolve({
         rows: [{
@@ -115,7 +115,7 @@ describe('fetchItemMetadata', () => {
   test('does nothing when all items are cached', async () => {
     _seedCache(5057, { iconPath: 'ui/icon/020000/020801.tex' })
     _seedCache(4718, { iconPath: 'ui/icon/024000/024101.tex' })
-    const mockFetch = mock((_url: any) => Promise.resolve({ ok: true, json: () => Promise.resolve({ rows: [] }) }))
+    const mockFetch = vi.fn((_url: any) => Promise.resolve({ ok: true, json: () => Promise.resolve({ rows: [] }) }))
     globalThis.fetch = mockFetch as unknown as typeof fetch
 
     await fetchItemMetadata([5057, 4718])
@@ -124,10 +124,10 @@ describe('fetchItemMetadata', () => {
   })
 
   test('logs warning and does not throw on fetch failure', async () => {
-    const warnSpy = mock((..._args: any[]) => {})
+    const warnSpy = vi.fn((..._args: any[]) => {})
     const originalWarn = console.warn
     console.warn = warnSpy as typeof console.warn
-    globalThis.fetch = mock(() => Promise.resolve({ ok: false, status: 500 })) as unknown as typeof fetch
+    globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 500 })) as unknown as typeof fetch
 
     await expect(fetchItemMetadata([5057])).resolves.toBeUndefined()
     expect(getIconUrl(5057)).toBeUndefined()
@@ -137,10 +137,10 @@ describe('fetchItemMetadata', () => {
   })
 
   test('logs warning and does not throw on network error', async () => {
-    const warnSpy = mock((..._args: any[]) => {})
+    const warnSpy = vi.fn((..._args: any[]) => {})
     const originalWarn = console.warn
     console.warn = warnSpy as typeof console.warn
-    globalThis.fetch = mock(() => Promise.reject(new Error('Network failure'))) as unknown as typeof fetch
+    globalThis.fetch = vi.fn(() => Promise.reject(new Error('Network failure'))) as unknown as typeof fetch
 
     await expect(fetchItemMetadata([5057])).resolves.toBeUndefined()
     expect(getIconUrl(5057)).toBeUndefined()
@@ -150,9 +150,9 @@ describe('fetchItemMetadata', () => {
   })
 
   test('invokes onChange callback after successful fetch', async () => {
-    const onChangeSpy = mock(() => {})
+    const onChangeSpy = vi.fn(() => {})
     setOnChange(onChangeSpy)
-    globalThis.fetch = mock(() => Promise.resolve({
+    globalThis.fetch = vi.fn(() => Promise.resolve({
       ok: true,
       json: () => Promise.resolve({
         rows: [{
@@ -171,7 +171,7 @@ describe('fetchItemMetadata', () => {
   })
 
   test('handles rows with missing Icon or Name fields gracefully', async () => {
-    globalThis.fetch = mock(() => Promise.resolve({
+    globalThis.fetch = vi.fn(() => Promise.resolve({
       ok: true,
       json: () => Promise.resolve({
         rows: [
