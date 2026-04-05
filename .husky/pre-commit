@@ -1,0 +1,3 @@
+if git diff --cached --name-only | grep -q '^package.json$'; then
+  bun install --frozen-lockfile
+fi
