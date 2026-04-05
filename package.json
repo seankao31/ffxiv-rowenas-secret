@@ -1,5 +1,6 @@
 {
   "name": "ffxiv-rowenas-secret",
+  "version": "0.6.1",
   "private": true,
   "type": "module",
   "scripts": {
