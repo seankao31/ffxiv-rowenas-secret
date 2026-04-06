@@ -56,7 +56,7 @@ function opp(overrides: Partial<Opportunity> & { score: number }): Opportunity {
   return {
     itemID: 1, itemName: '', buyPrice: 0, sellPrice: 0, listingPrice: 0,
     profitPerUnit: 0, listingProfitPerUnit: 0, sourceWorld: '', sourceWorldID: 0,
-    availableUnits: 0, recommendedUnits: 0, expectedDailyProfit: 0, score: 0,
+    availableUnits: 0, recommendedUnits: 0, expectedDailyProfit: 0,
     homeDataAgeHours: 0, homeConfidence: 1, sourceDataAgeHours: 0, sourceConfidence: 1,
     activeCompetitorCount: 0, fairShareVelocity: 0,
     ...overrides,
