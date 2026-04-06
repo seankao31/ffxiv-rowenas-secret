@@ -115,4 +115,19 @@ test.describe('OpportunityTable', () => {
     // Verify the icon reverts to copy after 1.5s
     await expect(firstRow.locator('[data-lucide="copy"]')).toBeVisible({ timeout: 3000 })
   })
+
+  test('copy button is hidden for unresolved item names', async ({ page }) => {
+    // Re-mock API with a fallback-named item, then re-navigate
+    await page.route('**/api/opportunities**', route => route.fulfill({
+      json: {
+        opportunities: [{ ...opportunities[0], itemName: 'Item #9999' }],
+        meta,
+      },
+    }))
+    await page.goto('/arbitrage')
+    await expect(page.locator('table')).toBeVisible()
+
+    const row = page.locator('table tbody tr').first()
+    await expect(row.locator('button[aria-label="Copy item name"]')).toHaveCount(0)
+  })
 })
