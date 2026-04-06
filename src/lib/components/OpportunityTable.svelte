@@ -46,19 +46,19 @@
 </script>
 
 {#snippet infoIcon()}
-  <Info class="inline w-3.5 h-3.5 opacity-40 align-middle ml-1" />
+  <Info class="inline w-3.5 h-3.5 opacity-40 align-middle ml-1" strokeWidth={3.5} />
 {/snippet}
 
 {#snippet sortIcon(column: SortColumn)}
   <button type="button" class="inline-flex items-center gap-0.5 cursor-pointer" aria-label="Sort by {column}" onclick={() => onSort(column)}>
     {#if sort.column === column}
       {#if sort.direction === 'asc'}
-        <ArrowUp class="inline w-3.5 h-3.5 opacity-70" />
+        <ArrowUp class="inline w-3.5 h-3.5 opacity-90" strokeWidth={3.5} />
       {:else}
-        <ArrowDown class="inline w-3.5 h-3.5 opacity-70" />
+        <ArrowDown class="inline w-3.5 h-3.5 opacity-90" strokeWidth={3.5} />
       {/if}
     {:else}
-      <ArrowUpDown class="inline w-3.5 h-3.5 opacity-25" />
+      <ArrowUpDown class="inline w-3.5 h-3.5 opacity-50" strokeWidth={3.5} />
     {/if}
   </button>
 {/snippet}
