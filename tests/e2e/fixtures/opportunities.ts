@@ -1,4 +1,4 @@
-import type { Opportunity, ScanMeta } from '../../src/lib/shared/types'
+import type { Opportunity, ScanMeta } from '../../../src/lib/shared/types'
 
 export const opportunities: Opportunity[] = [
   {
