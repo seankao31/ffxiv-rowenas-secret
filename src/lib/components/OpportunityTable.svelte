@@ -1,8 +1,9 @@
 <script lang="ts">
   import type { Opportunity } from '$lib/client/api.ts'
+  import CopyButton from '$lib/components/CopyButton.svelte'
   import { Info, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-svelte'
   import { toggleSort, sortOpportunities, type SortState, type SortColumn } from '$lib/client/sort.ts'
-  import { resolveItemName, setOnChange, getIconUrl, fetchItemMetadata } from '$lib/client/xivapi.ts'
+  import { resolveItemName, isFallbackName, setOnChange, getIconUrl, fetchItemMetadata } from '$lib/client/xivapi.ts'
   import { tooltip } from '$lib/client/tooltip.ts'
 
   const { opportunities }: { opportunities: Opportunity[] } = $props()
@@ -92,6 +93,9 @@
               <a class="link link-info no-underline hover:underline" href="https://universalis.app/market/{opp.itemID}" target="_blank" rel="noopener">
                 {name(opp)}
               </a>
+              {#if !isFallbackName(name(opp))}
+                <CopyButton text={name(opp)} />
+              {/if}
             </div>
           </td>
 

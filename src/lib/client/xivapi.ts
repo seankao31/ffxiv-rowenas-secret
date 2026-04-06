@@ -9,8 +9,12 @@ export function buildIconUrl(path: string): string {
   return `${XIVAPI_BASE}/asset?path=${path}&format=webp`
 }
 
+export function isFallbackName(name: string): boolean {
+  return FALLBACK_RE.test(name)
+}
+
 export function resolveItemName(itemID: number, serverName: string): string {
-  if (!FALLBACK_RE.test(serverName)) return serverName
+  if (!isFallbackName(serverName)) return serverName
   return cache.get(itemID)?.name ?? serverName
 }
 

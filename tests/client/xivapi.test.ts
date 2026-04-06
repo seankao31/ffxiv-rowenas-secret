@@ -1,5 +1,5 @@
 import { test, expect, describe, beforeEach, afterEach, vi } from 'vitest'
-import { buildIconUrl, resolveItemName, getIconUrl, _seedCache, _clearCache, fetchItemMetadata, setOnChange } from '$lib/client/xivapi'
+import { buildIconUrl, resolveItemName, isFallbackName, getIconUrl, _seedCache, _clearCache, fetchItemMetadata, setOnChange } from '$lib/client/xivapi'
 
 const originalFetch = globalThis.fetch
 
@@ -16,6 +16,19 @@ describe('buildIconUrl', () => {
   test('constructs asset URL from icon path', () => {
     expect(buildIconUrl('ui/icon/020000/020801.tex'))
       .toBe('https://v2.xivapi.com/api/asset?path=ui/icon/020000/020801.tex&format=webp')
+  })
+})
+
+describe('isFallbackName', () => {
+  test('returns true for fallback pattern', () => {
+    expect(isFallbackName('Item #5057')).toBe(true)
+    expect(isFallbackName('Item #99999')).toBe(true)
+  })
+
+  test('returns false for real item names', () => {
+    expect(isFallbackName('鐵塊')).toBe(false)
+    expect(isFallbackName('Mythril Ingot')).toBe(false)
+    expect(isFallbackName('Alpha Draught')).toBe(false)
   })
 })
 
