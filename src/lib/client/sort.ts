@@ -1,3 +1,5 @@
+import type { Opportunity } from '$lib/shared/types'
+
 export type SortColumn = 'profitPerUnit' | 'activeCompetitorCount' | 'fairShareVelocity' | 'expectedDailyProfit'
 export type SortDirection = 'asc' | 'desc'
 export type SortState = { column: SortColumn | null; direction: SortDirection }
@@ -18,4 +20,15 @@ export function toggleSort(state: SortState, clicked: SortColumn): SortState {
     return { column: clicked, direction: reversed }
   }
   return { column: null, direction: 'desc' }
+}
+
+export function sortOpportunities(items: Opportunity[], state: SortState): Opportunity[] {
+  if (state.column === null) return items
+  const { column, direction } = state
+  const multiplier = direction === 'desc' ? -1 : 1
+  return [...items].sort((a, b) => {
+    const diff = a[column] - b[column]
+    if (diff !== 0) return diff * multiplier
+    return b.score - a.score  // tiebreaker: score desc always
+  })
 }
