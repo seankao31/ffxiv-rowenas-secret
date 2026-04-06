@@ -11,8 +11,8 @@ async function mockApi(page: Page) {
       json: { opportunities, meta },
     })
   })
-  // Block XIVAPI calls to keep tests offline and fast
-  await page.route('**/v2.xivapi.com/**', route => route.abort())
+  // Return empty results for XIVAPI to keep tests offline and quiet
+  await page.route('**/v2.xivapi.com/**', route => route.fulfill({ json: { rows: [] } }))
 }
 
 /** Read item names from the first column of each table body row. */
