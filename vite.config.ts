@@ -10,6 +10,7 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(`v${version}`),
   },
   resolve: {
+    // Required for mounting Svelte components in happy-dom unit tests
     conditions: ['browser'],
   },
   test: {
