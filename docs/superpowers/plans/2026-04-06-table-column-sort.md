@@ -28,7 +28,7 @@ The toggle function determines new sort state from current state + clicked colum
 - Create: `tests/client/sort.test.ts`
 - Create: `src/lib/client/sort.ts`
 
-- [ ] **Step 1: Write failing tests for toggleSort**
+- [x] **Step 1: Write failing tests for toggleSort**
 
 ```ts
 // tests/client/sort.test.ts
@@ -79,12 +79,12 @@ describe('toggleSort', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bun run test -- tests/client/sort.test.ts`
 Expected: FAIL — module `$lib/client/sort` does not exist
 
-- [ ] **Step 3: Implement toggleSort**
+- [x] **Step 3: Implement toggleSort**
 
 ```ts
 // src/lib/client/sort.ts
@@ -113,12 +113,12 @@ export function toggleSort(state: SortState, clicked: SortColumn): SortState {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun run test -- tests/client/sort.test.ts`
 Expected: All 6 tests PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/client/sort.ts tests/client/sort.test.ts
@@ -135,7 +135,7 @@ The comparator sorts an array of Opportunities by a given column and direction, 
 - Modify: `tests/client/sort.test.ts`
 - Modify: `src/lib/client/sort.ts`
 
-- [ ] **Step 1: Write failing tests for sortOpportunities**
+- [x] **Step 1: Write failing tests for sortOpportunities**
 
 Append to `tests/client/sort.test.ts`. Update the import at top of file to include `sortOpportunities`:
 
@@ -202,12 +202,12 @@ describe('sortOpportunities', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify new tests fail**
+- [x] **Step 2: Run tests to verify new tests fail**
 
 Run: `bun run test -- tests/client/sort.test.ts`
 Expected: `sortOpportunities` tests FAIL (not exported), `toggleSort` tests still PASS
 
-- [ ] **Step 3: Implement sortOpportunities**
+- [x] **Step 3: Implement sortOpportunities**
 
 Add to `src/lib/client/sort.ts`:
 
@@ -224,12 +224,12 @@ export function sortOpportunities(items: Opportunity[], state: SortState): Oppor
 }
 ```
 
-- [ ] **Step 4: Run tests to verify all pass**
+- [x] **Step 4: Run tests to verify all pass**
 
 Run: `bun run test -- tests/client/sort.test.ts`
 Expected: All 12 tests PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/client/sort.ts tests/client/sort.test.ts
@@ -245,7 +245,7 @@ Add sort state, derived sorted list, clickable headers, and lucide icons to the 
 **Files:**
 - Modify: `src/lib/components/OpportunityTable.svelte`
 
-- [ ] **Step 1: Add imports and sort state**
+- [x] **Step 1: Add imports and sort state**
 
 Add to the `<script>` block in `OpportunityTable.svelte`, after existing imports:
 
@@ -266,7 +266,7 @@ function onSort(column: SortColumn) {
 }
 ```
 
-- [ ] **Step 2: Add sortable header snippet**
+- [x] **Step 2: Add sortable header snippet**
 
 Add after the existing `infoIcon` snippet:
 
@@ -286,7 +286,7 @@ Add after the existing `infoIcon` snippet:
 {/snippet}
 ```
 
-- [ ] **Step 3: Update sortable column headers**
+- [x] **Step 3: Update sortable column headers**
 
 Replace the four sortable `<th>` elements in `<thead>`:
 
@@ -306,7 +306,7 @@ Replace the four sortable `<th>` elements in `<thead>`:
 <th>Gil/day {@render sortIcon('expectedDailyProfit')} <span {@attach tooltip("Expected daily profit: profit per unit × fair-share velocity. Second line (if shown) is an alternative source world, for comparison only — all other columns use the primary source.")}>{@render infoIcon()}</span></th>
 ```
 
-- [ ] **Step 4: Replace `opportunities` with `sorted` in the render loop**
+- [x] **Step 4: Replace `opportunities` with `sorted` in the render loop**
 
 Change:
 ```svelte
@@ -317,12 +317,12 @@ To:
 {#each sorted as opp (opp.itemID)}
 ```
 
-- [ ] **Step 5: Run all tests to verify nothing is broken**
+- [x] **Step 5: Run all tests to verify nothing is broken**
 
 Run: `bun run test`
 Expected: All tests PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/components/OpportunityTable.svelte
@@ -333,7 +333,7 @@ git commit -m "feat(sort): add sortable column headers to OpportunityTable"
 
 ### Task 4: Manual verification
 
-- [ ] **Step 1: Start dev server and verify in browser**
+- [x] **Step 1: Start dev server and verify in browser**
 
 Run: `bun run dev`
 
@@ -347,7 +347,7 @@ Verify:
 7. While sorted by Comp, click Vel → switches to velocity sort
 8. Existing tooltips still work on sortable columns
 
-- [ ] **Step 2: Final commit if any visual tweaks were needed**
+- [x] **Step 2: Final commit if any visual tweaks were needed**
 
 ```bash
 git add -u
