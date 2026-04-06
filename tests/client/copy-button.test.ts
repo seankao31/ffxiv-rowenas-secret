@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import { test, expect, describe, vi, beforeEach, afterEach } from 'vitest'
 import { flushSync, mount } from 'svelte'
 import CopyButton from '$lib/components/CopyButton.svelte'
@@ -23,7 +24,7 @@ describe('CopyButton', () => {
 
   test('copies text to clipboard on click', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
-    Object.assign(navigator, { clipboard: { writeText } })
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
 
     mount(CopyButton, { target, props: { text: 'Alpha Draught' } })
     target.querySelector('button')!.click()
@@ -34,7 +35,7 @@ describe('CopyButton', () => {
   test('swaps to Check icon after click, reverts after timeout', async () => {
     vi.useFakeTimers()
     const writeText = vi.fn().mockResolvedValue(undefined)
-    Object.assign(navigator, { clipboard: { writeText } })
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
 
     mount(CopyButton, { target, props: { text: 'hello' } })
     target.querySelector('button')!.click()
@@ -56,7 +57,7 @@ describe('CopyButton', () => {
   test('does not swap icon when clipboard write fails', async () => {
     vi.useFakeTimers()
     const writeText = vi.fn().mockRejectedValue(new Error('denied'))
-    Object.assign(navigator, { clipboard: { writeText } })
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
 
     mount(CopyButton, { target, props: { text: 'hello' } })
     target.querySelector('button')!.click()
