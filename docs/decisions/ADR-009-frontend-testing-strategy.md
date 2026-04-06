@@ -31,16 +31,12 @@ Use vitest for fast component-level tests (CI on every commit), Playwright for s
 
 **Phase 1: vitest + jsdom + @testing-library/svelte.** This catches the class of bugs we've encountered (reactive logic, debounce, conditional rendering) with minimal setup since vitest shares the existing Vite config.
 
-**Phase 2 (when justified): Add Playwright.** Specific triggers for adding Playwright:
-- ETag/304 caching needs verification (browser cache behavior can't be tested in jsdom)
-- CSS animation bugs are reported (flash not rendering, timing issues)
-- Slider interaction bugs that only reproduce with real mouse events
-- Multi-page flows or routing are added
-- Cross-browser or mobile layout issues arise
-- Need to verify the full cold start → scan → display → filter pipeline end-to-end
+**Phase 2: Playwright E2E.** Added in ENG-50 to cover UI interactions that unit tests on pure functions can't reach (sort-by-column wiring, icon state changes, DOM reordering). Tests intercept API calls with `page.route()` for speed and determinism.
 
 ## Consequences
 
 - vitest + jsdom + @testing-library/svelte added as devDependencies
 - Component tests go in `tests/client/` alongside existing `tests/server/`
-- All tests (server and client) run under vitest via `bun run test`
+- Unit tests run under vitest via `bun run test`
+- E2E tests run under Playwright via `bun run test:e2e` (Chromium only, dev server on port 5173)
+- E2E tests live in `tests/e2e/`, excluded from vitest via narrow includes

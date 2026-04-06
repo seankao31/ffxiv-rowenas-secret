@@ -25,3 +25,7 @@ docs/deployment.md
 
 # SvelteKit generated files
 .svelte-kit/
+
+# Playwright
+test-results/
+playwright-report/

@@ -9,6 +9,6 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(`v${version}`),
   },
   test: {
-    include: ['tests/**/*.test.ts'],
+    include: ['tests/client/**/*.test.ts', 'tests/server/**/*.test.ts'],
   },
 })
