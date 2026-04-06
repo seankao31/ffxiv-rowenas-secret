@@ -1,0 +1,66 @@
+import type { Opportunity, ScanMeta } from '../../src/lib/shared/types'
+
+export const opportunities: Opportunity[] = [
+  {
+    itemID: 101, itemName: 'Alpha Draught',
+    buyPrice: 500, sellPrice: 1100, listingPrice: 1100,
+    profitPerUnit: 500, listingProfitPerUnit: 500,
+    sourceWorld: 'Carbuncle', sourceWorldID: 45,
+    availableUnits: 10, recommendedUnits: 5,
+    expectedDailyProfit: 1500, score: 90,
+    homeDataAgeHours: 0.5, homeConfidence: 0.9,
+    sourceDataAgeHours: 0.3, sourceConfidence: 0.95,
+    activeCompetitorCount: 2, fairShareVelocity: 3.0,
+  },
+  {
+    itemID: 102, itemName: 'Beta Elixir',
+    buyPrice: 200, sellPrice: 560, listingPrice: 560,
+    profitPerUnit: 300, listingProfitPerUnit: 300,
+    sourceWorld: 'Kujata', sourceWorldID: 49,
+    availableUnits: 8, recommendedUnits: 3,
+    expectedDailyProfit: 300, score: 80,
+    homeDataAgeHours: 1.2, homeConfidence: 0.8,
+    sourceDataAgeHours: 0.8, sourceConfidence: 0.85,
+    activeCompetitorCount: 5, fairShareVelocity: 1.0,
+  },
+  {
+    itemID: 103, itemName: 'Gamma Ingot',
+    buyPrice: 400, sellPrice: 530, listingPrice: 530,
+    profitPerUnit: 100, listingProfitPerUnit: 100,
+    sourceWorld: 'Tonberry', sourceWorldID: 46,
+    availableUnits: 20, recommendedUnits: 10,
+    expectedDailyProfit: 500, score: 70,
+    homeDataAgeHours: 0.2, homeConfidence: 0.95,
+    sourceDataAgeHours: 0.1, sourceConfidence: 0.98,
+    activeCompetitorCount: 1, fairShareVelocity: 5.0,
+  },
+  {
+    itemID: 104, itemName: 'Delta Cloth',
+    buyPrice: 300, sellPrice: 750, listingPrice: 750,
+    profitPerUnit: 400, listingProfitPerUnit: 400,
+    sourceWorld: 'Aegis', sourceWorldID: 90,
+    availableUnits: 15, recommendedUnits: 7,
+    expectedDailyProfit: 800, score: 60,
+    homeDataAgeHours: 2.0, homeConfidence: 0.7,
+    sourceDataAgeHours: 1.5, sourceConfidence: 0.75,
+    activeCompetitorCount: 3, fairShareVelocity: 2.0,
+  },
+  {
+    itemID: 105, itemName: 'Epsilon Ore',
+    buyPrice: 800, sellPrice: 1050, listingPrice: 1050,
+    profitPerUnit: 200, listingProfitPerUnit: 200,
+    sourceWorld: 'Atomos', sourceWorldID: 68,
+    availableUnits: 12, recommendedUnits: 6,
+    expectedDailyProfit: 1000, score: 50,
+    homeDataAgeHours: 0.8, homeConfidence: 0.85,
+    sourceDataAgeHours: 0.5, sourceConfidence: 0.9,
+    activeCompetitorCount: 4, fairShareVelocity: 4.0,
+  },
+]
+
+export const meta: ScanMeta = {
+  scanCompletedAt: Date.now(),
+  itemsScanned: 500,
+  itemsWithOpportunities: 5,
+  nextScanEstimatedAt: Date.now() + 30_000,
+}
