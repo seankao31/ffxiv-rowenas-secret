@@ -8,6 +8,7 @@
     "build": "vite build",
     "start": "bun build/index.js",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
     "benchmark": "bun scripts/benchmark-scan.ts",
     "prepare": "husky"
@@ -18,6 +19,7 @@
     "limiter": "^3.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@sveltejs/adapter-node": "^5.5.4",
     "@sveltejs/kit": "^2.56.1",
     "@tailwindcss/vite": "^4.2.2",
