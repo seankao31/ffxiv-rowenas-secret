@@ -26,7 +26,7 @@
 **Files:**
 - Create: `tests/client/copy-button.test.ts`
 
-- [ ] **Step 1: Write failing tests for CopyButton**
+- [x] **Step 1: Write failing tests for CopyButton**
 
 ```ts
 import { test, expect, describe, vi, beforeEach, afterEach } from 'vitest'
@@ -102,12 +102,12 @@ describe('CopyButton', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bunx vitest run tests/client/copy-button.test.ts`
 Expected: FAIL — CopyButton module does not exist
 
-- [ ] **Step 3: Commit failing tests**
+- [x] **Step 3: Commit failing tests**
 
 ```bash
 git add tests/client/copy-button.test.ts
@@ -122,7 +122,7 @@ git commit -m "test: add unit tests for CopyButton component (ENG-53)"
 - Create: `src/lib/components/CopyButton.svelte`
 - Test: `tests/client/copy-button.test.ts`
 
-- [ ] **Step 1: Implement CopyButton**
+- [x] **Step 1: Implement CopyButton**
 
 ```svelte
 <script lang="ts">
@@ -152,12 +152,12 @@ git commit -m "test: add unit tests for CopyButton component (ENG-53)"
 </button>
 ```
 
-- [ ] **Step 2: Run unit tests**
+- [x] **Step 2: Run unit tests**
 
 Run: `bunx vitest run tests/client/copy-button.test.ts`
 Expected: All 4 tests PASS
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/components/CopyButton.svelte
@@ -172,7 +172,7 @@ git commit -m "feat: add CopyButton component with clipboard + feedback (ENG-53)
 - Modify: `src/lib/components/OpportunityTable.svelte:2-3` (add import)
 - Modify: `src/lib/components/OpportunityTable.svelte:91-95` (add CopyButton after link)
 
-- [ ] **Step 1: Add import**
+- [x] **Step 1: Add import**
 
 At line 2 of `OpportunityTable.svelte`, add the CopyButton import alongside existing imports:
 
@@ -180,7 +180,7 @@ At line 2 of `OpportunityTable.svelte`, add the CopyButton import alongside exis
   import CopyButton from '$lib/components/CopyButton.svelte'
 ```
 
-- [ ] **Step 2: Add CopyButton after the item name link**
+- [x] **Step 2: Add CopyButton after the item name link**
 
 Replace the current item cell (lines 86-96):
 
@@ -200,12 +200,12 @@ Replace the current item cell (lines 86-96):
           </td>
 ```
 
-- [ ] **Step 3: Run all existing tests to verify nothing broke**
+- [x] **Step 3: Run all existing tests to verify nothing broke**
 
 Run: `bunx vitest run`
 Expected: All tests PASS
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/lib/components/OpportunityTable.svelte
@@ -219,7 +219,7 @@ git commit -m "feat: add copy button to item names in OpportunityTable (ENG-53)"
 **Files:**
 - Modify: `tests/e2e/opportunity-table.test.ts`
 
-- [ ] **Step 1: Add E2E test for copy-to-clipboard**
+- [x] **Step 1: Add E2E test for copy-to-clipboard**
 
 Add this test inside the existing `test.describe('OpportunityTable', ...)` block, after the last test:
 
@@ -244,12 +244,12 @@ Add this test inside the existing `test.describe('OpportunityTable', ...)` block
   })
 ```
 
-- [ ] **Step 2: Run E2E tests**
+- [x] **Step 2: Run E2E tests**
 
 Run: `bunx playwright test tests/e2e/opportunity-table.test.ts`
 Expected: All tests PASS (existing + new)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/e2e/opportunity-table.test.ts
