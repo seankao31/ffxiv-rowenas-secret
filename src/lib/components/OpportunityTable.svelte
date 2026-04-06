@@ -50,7 +50,7 @@
 {/snippet}
 
 {#snippet sortIcon(column: SortColumn)}
-  <button class="inline-flex items-center gap-0.5 cursor-pointer" onclick={() => onSort(column)}>
+  <button type="button" class="inline-flex items-center gap-0.5 cursor-pointer" aria-label="Sort by {column}" onclick={() => onSort(column)}>
     {#if sort.column === column}
       {#if sort.direction === 'asc'}
         <ArrowUp class="inline w-3.5 h-3.5 opacity-70" />
