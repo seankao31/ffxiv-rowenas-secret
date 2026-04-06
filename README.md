@@ -33,7 +33,8 @@ bun run dev
 ## Tests
 
 ```sh
-bun run test
+bun run test        # unit tests (vitest)
+bun run test:e2e    # E2E tests (Playwright, requires Chromium)
 ```
 
 ## Deployment

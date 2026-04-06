@@ -1,6 +1,6 @@
 # E2E Sort Testing Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Set up Playwright E2E testing and verify OpportunityTable sort-by-column interactions.
 
@@ -29,19 +29,19 @@
 - Create: `playwright.config.ts`
 - Modify: `.gitignore`
 
-- [ ] **Step 1: Install @playwright/test**
+- [x] **Step 1: Install @playwright/test**
 
 ```bash
 bun add -d @playwright/test
 ```
 
-- [ ] **Step 2: Install Chromium browser binary**
+- [x] **Step 2: Install Chromium browser binary**
 
 ```bash
 bunx playwright install chromium
 ```
 
-- [ ] **Step 3: Create `playwright.config.ts`**
+- [x] **Step 3: Create `playwright.config.ts`**
 
 ```ts
 import { defineConfig, devices } from '@playwright/test'
@@ -69,7 +69,7 @@ export default defineConfig({
 })
 ```
 
-- [ ] **Step 4: Add `test:e2e` script to `package.json`**
+- [x] **Step 4: Add `test:e2e` script to `package.json`**
 
 Add to the `"scripts"` section:
 
@@ -79,7 +79,7 @@ Add to the `"scripts"` section:
 
 Do NOT modify the existing `"test"` script — it stays as `vitest run`.
 
-- [ ] **Step 5: Add Playwright output dirs to `.gitignore`**
+- [x] **Step 5: Add Playwright output dirs to `.gitignore`**
 
 Append to `.gitignore`:
 
@@ -89,7 +89,7 @@ test-results/
 playwright-report/
 ```
 
-- [ ] **Step 6: Verify unit tests still pass**
+- [x] **Step 6: Verify unit tests still pass**
 
 ```bash
 bun test
@@ -97,7 +97,7 @@ bun test
 
 Expected: All existing tests pass. The vitest `include` pattern (`tests/**/*.test.ts`) will match E2E files too, but there are none yet.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add playwright.config.ts package.json bun.lock .gitignore
@@ -113,7 +113,7 @@ git commit -m "chore: add Playwright E2E infrastructure (ENG-50)"
 
 This is a minimal test to prove the wiring works before adding fixtures.
 
-- [ ] **Step 1: Create the smoke test**
+- [x] **Step 1: Create the smoke test**
 
 Create `tests/e2e/opportunity-table.test.ts`:
 
@@ -126,7 +126,7 @@ test('dev server starts and page loads', async ({ page }) => {
 })
 ```
 
-- [ ] **Step 2: Run the E2E test**
+- [x] **Step 2: Run the E2E test**
 
 ```bash
 bun run test:e2e
@@ -134,7 +134,7 @@ bun run test:e2e
 
 Expected: PASS — Playwright starts the dev server and navigates successfully.
 
-- [ ] **Step 3: Verify unit tests still pass and exclude E2E files**
+- [x] **Step 3: Verify unit tests still pass and exclude E2E files**
 
 The vitest `include` pattern `tests/**/*.test.ts` will match our new E2E file. Update `vite.config.ts` test config to exclude E2E:
 
@@ -155,7 +155,7 @@ bun test
 
 Expected: All unit tests pass. The E2E file is not picked up by vitest.
 
-- [ ] **Step 4: Run E2E again to confirm it still works after vite.config change**
+- [x] **Step 4: Run E2E again to confirm it still works after vite.config change**
 
 ```bash
 bun run test:e2e
@@ -163,7 +163,7 @@ bun run test:e2e
 
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/e2e/opportunity-table.test.ts vite.config.ts
@@ -196,7 +196,7 @@ Expected sort orders:
 - **activeCompetitorCount asc:** Gamma(1), Alpha(2), Delta(3), Epsilon(4), Beta(5)
 - **fairShareVelocity desc:** Gamma(5.0), Epsilon(4.0), Alpha(3.0), Delta(2.0), Beta(1.0)
 
-- [ ] **Step 1: Create the fixture file**
+- [x] **Step 1: Create the fixture file**
 
 Create `tests/e2e/fixtures/opportunities.ts`:
 
@@ -270,7 +270,7 @@ export const meta: ScanMeta = {
 }
 ```
 
-- [ ] **Step 2: Verify the fixture file compiles**
+- [x] **Step 2: Verify the fixture file compiles**
 
 ```bash
 bunx tsc --noEmit tests/e2e/fixtures/opportunities.ts 2>&1 || true
@@ -284,7 +284,7 @@ bun run typecheck
 
 If the typecheck script doesn't cover `tests/e2e/`, just confirm no syntax errors visually.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/e2e/fixtures/opportunities.ts
@@ -300,7 +300,7 @@ git commit -m "test(e2e): add opportunity fixture data for sort tests (ENG-50)"
 
 Replace the smoke test with the real test file. All tests share a `beforeEach` that mocks the API and blocks XIVAPI.
 
-- [ ] **Step 1: Rewrite the test file with rendering + default order tests**
+- [x] **Step 1: Rewrite the test file with rendering + default order tests**
 
 Replace `tests/e2e/opportunity-table.test.ts` with:
 
@@ -346,7 +346,7 @@ test.describe('OpportunityTable', () => {
 })
 ```
 
-- [ ] **Step 2: Run E2E tests**
+- [x] **Step 2: Run E2E tests**
 
 ```bash
 bun run test:e2e
@@ -354,7 +354,7 @@ bun run test:e2e
 
 Expected: 2 tests PASS.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/e2e/opportunity-table.test.ts
@@ -370,7 +370,7 @@ git commit -m "test(e2e): add table rendering and default order tests (ENG-50)"
 
 Add tests for the complete three-click cycle on the Gil/day (expectedDailyProfit) column: desc → asc → clear.
 
-- [ ] **Step 1: Add the three-click cycle tests**
+- [x] **Step 1: Add the three-click cycle tests**
 
 Add inside the existing `test.describe('OpportunityTable', ...)` block, after the default order test:
 
@@ -405,7 +405,7 @@ Add inside the existing `test.describe('OpportunityTable', ...)` block, after th
   })
 ```
 
-- [ ] **Step 2: Run E2E tests**
+- [x] **Step 2: Run E2E tests**
 
 ```bash
 bun run test:e2e
@@ -413,7 +413,7 @@ bun run test:e2e
 
 Expected: 5 tests PASS.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/e2e/opportunity-table.test.ts
@@ -429,7 +429,7 @@ git commit -m "test(e2e): add three-click sort cycle tests for Gil/day (ENG-50)"
 
 Add the remaining two tests: switching between columns, and verifying sort icon visual state.
 
-- [ ] **Step 1: Add column switching test**
+- [x] **Step 1: Add column switching test**
 
 Add inside the `test.describe` block:
 
@@ -447,7 +447,7 @@ Add inside the `test.describe` block:
   })
 ```
 
-- [ ] **Step 2: Add sort icon state test**
+- [x] **Step 2: Add sort icon state test**
 
 Add inside the `test.describe` block:
 
@@ -472,7 +472,7 @@ Add inside the `test.describe` block:
   })
 ```
 
-- [ ] **Step 3: Run E2E tests**
+- [x] **Step 3: Run E2E tests**
 
 ```bash
 bun run test:e2e
@@ -480,7 +480,7 @@ bun run test:e2e
 
 Expected: 7 tests PASS.
 
-- [ ] **Step 4: Run unit tests to confirm no regressions**
+- [x] **Step 4: Run unit tests to confirm no regressions**
 
 ```bash
 bun test
@@ -488,7 +488,7 @@ bun test
 
 Expected: All unit tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/e2e/opportunity-table.test.ts
@@ -499,7 +499,7 @@ git commit -m "test(e2e): add column switching and icon state tests (ENG-50)"
 
 ### Task 7: Final verification
 
-- [ ] **Step 1: Run the full E2E suite**
+- [x] **Step 1: Run the full E2E suite**
 
 ```bash
 bun run test:e2e
@@ -514,7 +514,7 @@ Expected: 7 tests PASS across all test cases:
 6. clicking a different column switches sort
 7. sort icon reflects active state
 
-- [ ] **Step 2: Run unit tests**
+- [x] **Step 2: Run unit tests**
 
 ```bash
 bun test
@@ -522,6 +522,6 @@ bun test
 
 Expected: All existing unit tests pass.
 
-- [ ] **Step 3: Final commit if any cleanup needed**
+- [x] **Step 3: Final commit if any cleanup needed**
 
 Only commit if there were adjustments needed during verification. Otherwise, the work is complete.
