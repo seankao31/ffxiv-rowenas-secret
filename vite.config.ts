@@ -9,10 +9,9 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(`v${version}`),
   },
-  resolve: {
-    // Required for mounting Svelte components in happy-dom unit tests
-    conditions: ['browser'],
-  },
+  // Resolve browser exports only during test runs (Svelte's mount() requires
+  // the browser build). Scoped via VITEST env var to avoid affecting SSR/dev.
+  ...(process.env.VITEST ? { resolve: { conditions: ['browser'] } } : {}),
   test: {
     include: ['tests/client/**/*.test.ts', 'tests/server/**/*.test.ts'],
   },
