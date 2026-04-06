@@ -1,19 +1,24 @@
 <script lang="ts">
   import { Copy, Check } from 'lucide-svelte'
+  import { onDestroy } from 'svelte'
 
   const { text }: { text: string } = $props()
 
   let copied = $state(false)
+  let timer: ReturnType<typeof setTimeout> | undefined
 
   async function copy() {
     try {
       await navigator.clipboard.writeText(text)
       copied = true
-      setTimeout(() => copied = false, 1500)
+      clearTimeout(timer)
+      timer = setTimeout(() => copied = false, 1500)
     } catch {
       // clipboard write failed — no feedback swap
     }
   }
+
+  onDestroy(() => clearTimeout(timer))
 </script>
 
 <button type="button" class="btn btn-ghost btn-xs opacity-50 hover:opacity-90" aria-label="Copy item name" onclick={copy}>
