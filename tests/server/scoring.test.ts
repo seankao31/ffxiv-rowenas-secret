@@ -182,3 +182,103 @@ describe('scoreOpportunities', () => {
     expect(results).toHaveLength(5)
   })
 })
+
+describe('NPC vendor pricing', () => {
+  const vendorPrices = new Map([[1, 300]])
+
+  test('NPC as primary source when cheaper than all cross-world sources', () => {
+    const data = item({
+      listings: [
+        { pricePerUnit: 1000, quantity: 5, worldID: HOME, worldName: '利維坦', lastReviewTime: FRESH, hq: false },
+        { pricePerUnit: 500, quantity: 3, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
+      ],
+    })
+    // NPC: profit = 1000*0.95 - 300 = 650 (no buy tax)
+    // 奧汀: profit = 1000*0.95 - 500*1.05 = 425
+    const results = scoreOpportunities(new Map([[1, data]]), names, DEFAULT, vendorPrices)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.sourceWorld).toBe('NPC')
+    expect(results[0]!.sourceWorldID).toBe(0)
+    expect(results[0]!.buyPrice).toBe(300)
+    expect(results[0]!.profitPerUnit).toBe(650)
+    expect(results[0]!.sourceConfidence).toBe(1)
+    expect(results[0]!.sourceDataAgeHours).toBe(0)
+  })
+
+  test('NPC as alt source when cross-world has higher score', () => {
+    const data = item({
+      listings: [
+        { pricePerUnit: 1000, quantity: 5, worldID: HOME, worldName: '利維坦', lastReviewTime: FRESH, hq: false },
+        { pricePerUnit: 200, quantity: 3, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
+      ],
+    })
+    const expensiveVendor = new Map([[1, 800]])
+    // 奧汀: profit = 1000*0.95 - 200*1.05 = 740
+    // NPC: profit = 1000*0.95 - 800 = 150
+    const results = scoreOpportunities(new Map([[1, data]]), names, DEFAULT, expensiveVendor)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.sourceWorld).toBe('奧汀')
+    expect(results[0]!.altSourceWorld).toBe('NPC')
+    expect(results[0]!.altBuyPrice).toBe(800)
+  })
+
+  test('NPC excluded when vendor price yields no profit', () => {
+    const data = item({
+      listings: [
+        { pricePerUnit: 500, quantity: 5, worldID: HOME, worldName: '利維坦', lastReviewTime: FRESH, hq: false },
+        { pricePerUnit: 400, quantity: 3, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
+      ],
+    })
+    const expensiveVendor = new Map([[1, 600]])
+    // NPC: profit = 500*0.95 - 600 = -125 → excluded
+    const results = scoreOpportunities(new Map([[1, data]]), names, DEFAULT, expensiveVendor)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.sourceWorld).toBe('奧汀')
+    expect(results[0]!.altSourceWorld).toBeUndefined()
+  })
+
+  test('item not in vendor map behaves unchanged', () => {
+    const results = scoreOpportunities(new Map([[1, item()]]), names, DEFAULT, new Map())
+    expect(results).toHaveLength(1)
+    expect(results[0]!.sourceWorld).toBe('奧汀')
+    expect(results[0]!.profitPerUnit).toBe(530)
+  })
+
+  test('undefined vendorPrices behaves unchanged', () => {
+    const results = scoreOpportunities(new Map([[1, item()]]), names, DEFAULT)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.sourceWorld).toBe('奧汀')
+    expect(results[0]!.profitPerUnit).toBe(530)
+  })
+
+  test('NPC buy price has zero tax', () => {
+    const results = scoreOpportunities(new Map([[1, item()]]), names, DEFAULT, vendorPrices)
+    expect(results[0]!.sourceWorld).toBe('NPC')
+    // buyPrice = vendorPrice (no * 1.05 tax)
+    expect(results[0]!.buyPrice).toBe(300)
+    // profitPerUnit = 1000*0.95 - 300 = 650 (no buy tax)
+    expect(results[0]!.profitPerUnit).toBe(650)
+  })
+
+  test('NPC has unlimited available units (sentinel -1)', () => {
+    const results = scoreOpportunities(new Map([[1, item()]]), names, DEFAULT, vendorPrices)
+    expect(results[0]!.sourceWorld).toBe('NPC')
+    expect(results[0]!.availableUnits).toBe(-1)
+    // recommendedUnits not capped by availableUnits
+    // fairShareVelocity = 10 / (1+1) = 5, maxUnits = ceil(5 * 3) = 15
+    expect(results[0]!.recommendedUnits).toBe(15)
+  })
+
+  test('NPC as sole source when no cross-world listings exist', () => {
+    const homeOnly = item({
+      listings: [
+        { pricePerUnit: 1000, quantity: 5, worldID: HOME, worldName: '利維坦', lastReviewTime: FRESH, hq: false },
+      ],
+    })
+    const results = scoreOpportunities(new Map([[1, homeOnly]]), names, DEFAULT, vendorPrices)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.sourceWorld).toBe('NPC')
+    expect(results[0]!.buyPrice).toBe(300)
+    expect(results[0]!.altSourceWorld).toBeUndefined()
+  })
+})
