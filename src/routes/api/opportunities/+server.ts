@@ -16,7 +16,8 @@ export const GET: RequestHandler = ({ request, url }) => {
   }
 
   const meta = getScanMeta()
-  const etag = `"${meta.scanCompletedAt}-${params.price_threshold}-${params.listing_staleness_hours}-${params.days_of_supply}-${params.limit}-${params.hq}"`
+  const vendorCount = getVendorPrices().size
+  const etag = `"${meta.scanCompletedAt}-${vendorCount}-${params.price_threshold}-${params.listing_staleness_hours}-${params.days_of_supply}-${params.limit}-${params.hq}"`
   if (request.headers.get('if-none-match') === etag) {
     return new Response(null, { status: 304 })
   }
