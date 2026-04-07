@@ -40,9 +40,9 @@ test.describe('OpportunityTable', () => {
   test('click Gil/day sorts descending', async ({ page }) => {
     await page.click('button[aria-label="Sort by expectedDailyProfit"]')
     const names = await getRowNames(page)
-    // expectedDailyProfit desc: 1500, 1000, 800, 500, 300
+    // expectedDailyProfit desc: 1500, 1120, 1000, 800, 500, 300
     expect(names).toEqual([
-      'Alpha Draught', 'Epsilon Ore', 'Delta Cloth', 'Gamma Ingot', 'Beta Elixir',
+      'Alpha Draught', 'Zeta Potion', 'Epsilon Ore', 'Delta Cloth', 'Gamma Ingot', 'Beta Elixir',
     ])
   })
 
@@ -51,9 +51,9 @@ test.describe('OpportunityTable', () => {
     await btn.click()
     await btn.click()
     const names = await getRowNames(page)
-    // expectedDailyProfit asc: 300, 500, 800, 1000, 1500
+    // expectedDailyProfit asc: 300, 500, 800, 1000, 1120, 1500
     expect(names).toEqual([
-      'Beta Elixir', 'Gamma Ingot', 'Delta Cloth', 'Epsilon Ore', 'Alpha Draught',
+      'Beta Elixir', 'Gamma Ingot', 'Delta Cloth', 'Epsilon Ore', 'Zeta Potion', 'Alpha Draught',
     ])
   })
 
@@ -72,9 +72,9 @@ test.describe('OpportunityTable', () => {
     // Then switch to Profit/unit
     await page.click('button[aria-label="Sort by profitPerUnit"]')
     const names = await getRowNames(page)
-    // profitPerUnit desc: 500, 400, 300, 200, 100
+    // profitPerUnit desc: 560, 500, 400, 300, 200, 100
     expect(names).toEqual([
-      'Alpha Draught', 'Delta Cloth', 'Beta Elixir', 'Epsilon Ore', 'Gamma Ingot',
+      'Zeta Potion', 'Alpha Draught', 'Delta Cloth', 'Beta Elixir', 'Epsilon Ore', 'Gamma Ingot',
     ])
   })
 
@@ -129,5 +129,25 @@ test.describe('OpportunityTable', () => {
 
     const row = page.locator('table tbody tr').first()
     await expect(row.locator('button[aria-label="Copy item name"]')).toHaveCount(0)
+  })
+
+  test('NPC source displays badge instead of world name', async ({ page }) => {
+    const npcRow = page.locator('table tbody tr').last() // Zeta Potion is lowest score
+    const buyFrom = npcRow.locator('td').nth(1)
+    await expect(buyFrom.locator('.badge')).toContainText('NPC')
+  })
+
+  test('NPC source shows "NPC" instead of age in buy column', async ({ page }) => {
+    const npcRow = page.locator('table tbody tr').last()
+    const buyCol = npcRow.locator('td').nth(2)
+    await expect(buyCol).toContainText('NPC')
+    // Should NOT show "0min ago"
+    await expect(buyCol).not.toContainText('ago')
+  })
+
+  test('NPC source shows unlimited units', async ({ page }) => {
+    const npcRow = page.locator('table tbody tr').last()
+    const unitsCol = npcRow.locator('td').nth(5)
+    await expect(unitsCol).toContainText('8 / ∞')
   })
 })

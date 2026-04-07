@@ -56,11 +56,22 @@ export const opportunities: Opportunity[] = [
     sourceDataAgeHours: 0.5, sourceConfidence: 0.9,
     activeCompetitorCount: 4, fairShareVelocity: 4.0,
   },
+  {
+    itemID: 106, itemName: 'Zeta Potion',
+    buyPrice: 200, sellPrice: 800, listingPrice: 800,
+    profitPerUnit: 560, listingProfitPerUnit: 560,
+    sourceWorld: 'NPC', sourceWorldID: 0,
+    availableUnits: -1, recommendedUnits: 8,
+    expectedDailyProfit: 1120, score: 45,
+    homeDataAgeHours: 0.4, homeConfidence: 0.92,
+    sourceDataAgeHours: 0, sourceConfidence: 1,
+    activeCompetitorCount: 2, fairShareVelocity: 2.0,
+  },
 ]
 
 export const meta: ScanMeta = {
   scanCompletedAt: Date.now(),
   itemsScanned: 500,
-  itemsWithOpportunities: 5,
+  itemsWithOpportunities: 6,
   nextScanEstimatedAt: Date.now() + 30_000,
 }

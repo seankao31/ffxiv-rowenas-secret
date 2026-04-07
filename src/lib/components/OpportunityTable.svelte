@@ -27,6 +27,8 @@
       : `${ageHours.toFixed(1)}h ago`
   }
 
+  const isNPC = (world: string) => world === 'NPC'
+
   function ageColor(confidence: number): string {
     if (confidence >= 0.85) return '#5b5'
     if (confidence >= 0.60) return '#cb3'
@@ -101,9 +103,21 @@
 
           <!-- Buy from -->
           <td>
-            <div>{opp.sourceWorld}</div>
+            <div>
+              {#if isNPC(opp.sourceWorld)}
+                <span class="badge badge-sm badge-soft badge-info">NPC</span>
+              {:else}
+                {opp.sourceWorld}
+              {/if}
+            </div>
             {#if opp.altSourceWorld}
-              <div class="text-xs text-base-content/50 mt-1">{opp.altSourceWorld}</div>
+              <div class="text-xs text-base-content/50 mt-1">
+                {#if isNPC(opp.altSourceWorld)}
+                  <span class="badge badge-xs badge-soft badge-info">NPC</span>
+                {:else}
+                  {opp.altSourceWorld}
+                {/if}
+              </div>
             {/if}
           </td>
 
@@ -111,13 +125,17 @@
           <td class="tabular-nums">
             <div class="flex items-baseline gap-2.5">
               <span class="w-[70px] text-right flex-shrink-0">{fmt(opp.buyPrice)}</span>
-              <span class="text-xs" style="color: {ageColor(opp.sourceConfidence)}">{ageLabel(opp.sourceDataAgeHours)}</span>
+              <span class="text-xs" style="color: {ageColor(opp.sourceConfidence)}">
+                {#if isNPC(opp.sourceWorld)}NPC{:else}{ageLabel(opp.sourceDataAgeHours)}{/if}
+              </span>
             </div>
             {#if opp.altSourceWorld && opp.altBuyPrice !== undefined}
               <div class="flex items-baseline gap-2.5 mt-1">
                 <span class="w-[70px] text-right flex-shrink-0 text-xs text-base-content/50">{fmt(opp.altBuyPrice)}</span>
                 {#if opp.altSourceConfidence !== undefined && opp.altSourceDataAgeHours !== undefined}
-                  <span class="text-xs" style="color: {ageColor(opp.altSourceConfidence)}">{ageLabel(opp.altSourceDataAgeHours)}</span>
+                  <span class="text-xs" style="color: {ageColor(opp.altSourceConfidence)}">
+                    {#if isNPC(opp.altSourceWorld ?? '')}NPC{:else}{ageLabel(opp.altSourceDataAgeHours)}{/if}
+                  </span>
                 {/if}
               </div>
             {/if}
@@ -146,7 +164,11 @@
 
           <!-- Units -->
           <td>
-            <div>{opp.recommendedUnits} / {opp.availableUnits}</div>
+            {#if opp.availableUnits < 0}
+              <div>{opp.recommendedUnits} / ∞</div>
+            {:else}
+              <div>{opp.recommendedUnits} / {opp.availableUnits}</div>
+            {/if}
           </td>
 
           <!-- Comp -->
