@@ -2,6 +2,7 @@ import type { ItemData, ScanMeta, ScanProgress } from '$lib/shared/types.ts'
 
 const itemCache = new Map<number, ItemData>()
 const nameCache = new Map<number, string>()  // itemID → display name
+let vendorPrices = new Map<number, number>()  // itemID → NPC vendor price
 
 let scanMeta: ScanMeta = {
   scanCompletedAt: 0,
@@ -49,4 +50,15 @@ export function setScanProgress(progress: ScanProgress): void {
 
 export function getScanProgress(): ScanProgress {
   return scanProgress
+}
+
+export function setVendorPrices(prices: Map<number, number>): void {
+  vendorPrices.clear()
+  for (const [id, price] of prices) {
+    vendorPrices.set(id, price)
+  }
+}
+
+export function getVendorPrices(): Map<number, number> {
+  return vendorPrices
 }
