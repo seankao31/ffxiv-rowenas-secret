@@ -14,3 +14,4 @@ This directory contains ADRs documenting significant design decisions made durin
 | [ADR-008](./ADR-008-merge-home-world-phases.md) | Merge Home World Fetch — Eliminate Redundant Phase 2 | Accepted |
 | [ADR-009](./ADR-009-frontend-testing-strategy.md) | Frontend Testing Strategy — vitest + Playwright | Accepted |
 | [ADR-010](./ADR-010-sveltekit-migration.md) | SvelteKit Migration — Replace Express with SvelteKit | Accepted |
+| [ADR-011](./ADR-011-game-data-sourcing-strategy.md) | Game Data Sourcing Strategy — XIVAPI v2 Incremental, Overhaul Later | Accepted |
