@@ -2,9 +2,11 @@ import { test, expect, describe, beforeEach, afterEach, vi } from 'vitest'
 import { buildIconUrl, resolveItemName, isFallbackName, getIconUrl, _seedCache, _clearCache, fetchItemMetadata, setOnChange } from '$lib/client/xivapi'
 
 const originalFetch = globalThis.fetch
+const originalWarn = console.warn
 
 afterEach(() => {
   globalThis.fetch = originalFetch
+  console.warn = originalWarn
   setOnChange(null)
 })
 
@@ -138,7 +140,6 @@ describe('fetchItemMetadata', () => {
 
   test('logs warning and does not throw on fetch failure', async () => {
     const warnSpy = vi.fn((..._args: any[]) => {})
-    const originalWarn = console.warn
     console.warn = warnSpy as typeof console.warn
     globalThis.fetch = vi.fn(() => Promise.resolve({ ok: false, status: 500 })) as unknown as typeof fetch
 
@@ -146,12 +147,10 @@ describe('fetchItemMetadata', () => {
     expect(getIconUrl(5057)).toBeUndefined()
     expect(warnSpy).toHaveBeenCalledTimes(1)
     expect(warnSpy.mock.calls[0]![0]).toContain('Failed to fetch item metadata')
-    console.warn = originalWarn
   })
 
   test('logs warning and does not throw on network error', async () => {
     const warnSpy = vi.fn((..._args: any[]) => {})
-    const originalWarn = console.warn
     console.warn = warnSpy as typeof console.warn
     globalThis.fetch = vi.fn(() => Promise.reject(new Error('Network failure'))) as unknown as typeof fetch
 
@@ -159,7 +158,6 @@ describe('fetchItemMetadata', () => {
     expect(getIconUrl(5057)).toBeUndefined()
     expect(warnSpy).toHaveBeenCalledTimes(1)
     expect(warnSpy.mock.calls[0]![0]).toContain('Failed to fetch item metadata')
-    console.warn = originalWarn
   })
 
   test('invokes onChange callback after successful fetch', async () => {
