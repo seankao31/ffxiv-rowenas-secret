@@ -56,7 +56,7 @@ test.describe('mobile layout', () => {
     await expect(firstItemLink).toBeVisible()
 
     // Scroll the table container to the right
-    const container = table.locator('..')
+    const container = page.locator('[data-testid="table-container"]')
     await container.evaluate(el => { el.scrollLeft = 300 })
 
     // Item name should still be visible (sticky)
