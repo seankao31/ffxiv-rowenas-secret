@@ -18,6 +18,39 @@ export type Recipe = {
 
 const DEFAULT_RECIPES_PATH = join(process.cwd(), 'data', 'recipes.msgpack')
 
+// Module-level indexes (populated by initRecipes)
+const byResult = new Map<number, Recipe[]>()
+const byIngredient = new Map<number, Recipe[]>()
+
+export async function initRecipes(
+  path = DEFAULT_RECIPES_PATH,
+): Promise<void> {
+  const recipes = await loadRecipes(path)
+
+  byResult.clear()
+  byIngredient.clear()
+
+  for (const recipe of recipes) {
+    // Index by result item
+    const resultList = byResult.get(recipe.result)
+    if (resultList) resultList.push(recipe)
+    else byResult.set(recipe.result, [recipe])
+
+    // Index by ingredient item
+    for (const ing of recipe.ingredients) {
+      const ingList = byIngredient.get(ing.id)
+      if (ingList) ingList.push(recipe)
+      else byIngredient.set(ing.id, [recipe])
+    }
+  }
+
+  console.log(`[recipes] Built indexes: ${byResult.size} result items, ${byIngredient.size} ingredient items`)
+}
+
+export function getRecipesByResult(itemId: number): Recipe[] {
+  return byResult.get(itemId) ?? []
+}
+
 export async function loadRecipes(
   path = DEFAULT_RECIPES_PATH,
 ): Promise<Recipe[]> {

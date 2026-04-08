@@ -77,3 +77,56 @@ describe('loadRecipes', () => {
       .rejects.toThrow()
   })
 })
+
+describe('recipe indexes', () => {
+  const fixtureDir = join(tmpdir(), `rowenas-recipes-idx-${process.pid}`)
+  const originalLog = console.log
+
+  // Three recipes: two produce item 100 (different jobs), one produces item 200
+  const fixtures = [
+    { id: 1, result: 100, job: 8, lvl: 50, yields: 1, ingredients: [{ id: 10, amount: 3 }] },
+    { id: 2, result: 100, job: 9, lvl: 55, yields: 1, ingredients: [{ id: 11, amount: 2 }] },
+    { id: 3, result: 200, job: 8, lvl: 60, yields: 3, ingredients: [{ id: 10, amount: 5 }, { id: 12, amount: 1 }] },
+  ]
+
+  beforeAll(async () => {
+    await mkdir(fixtureDir, { recursive: true })
+    const fixturePath = join(fixtureDir, 'recipes-index.msgpack')
+    await writeFile(fixturePath, encode(fixtures))
+
+    console.log = vi.fn(() => {}) as typeof console.log
+    const { initRecipes } = await import('$lib/server/recipes')
+    await initRecipes(fixturePath)
+  })
+
+  afterAll(async () => {
+    console.log = originalLog
+    await rm(fixtureDir, { recursive: true })
+  })
+
+  test('getRecipesByResult returns all recipes producing an item', async () => {
+    const { getRecipesByResult } = await import('$lib/server/recipes')
+
+    const recipes = getRecipesByResult(100)
+
+    expect(recipes).toHaveLength(2)
+    expect(recipes.map(r => r.id).sort()).toEqual([1, 2])
+  })
+
+  test('getRecipesByResult returns single recipe for unique result', async () => {
+    const { getRecipesByResult } = await import('$lib/server/recipes')
+
+    const recipes = getRecipesByResult(200)
+
+    expect(recipes).toHaveLength(1)
+    expect(recipes[0]!.id).toBe(3)
+  })
+
+  test('getRecipesByResult returns empty array for unknown item', async () => {
+    const { getRecipesByResult } = await import('$lib/server/recipes')
+
+    const recipes = getRecipesByResult(99999)
+
+    expect(recipes).toEqual([])
+  })
+})
