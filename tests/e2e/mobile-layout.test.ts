@@ -36,8 +36,8 @@ test.describe('mobile layout', () => {
   test('drawer closes when clicking backdrop', async ({ page }) => {
     await page.click('button[aria-label="Open menu"]')
     await expect(page.locator('[data-testid="nav-drawer"]')).toBeVisible()
-    // Click the backdrop (the overlay behind the drawer panel)
-    await page.locator('[data-testid="nav-drawer-backdrop"]').click()
+    // Click the backdrop area to the right of the 280px nav panel
+    await page.locator('[data-testid="nav-drawer-backdrop"]').click({ position: { x: 350, y: 400 } })
     await expect(page.locator('[data-testid="nav-drawer"]')).toBeHidden()
   })
 

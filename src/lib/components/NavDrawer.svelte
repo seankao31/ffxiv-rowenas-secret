@@ -10,16 +10,16 @@
   const isActive = (id: string) => page.url.pathname.startsWith(`/${id}`)
 
   function onkeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape') onclose()
+    if (open && e.key === 'Escape') onclose()
   }
 </script>
 
+<svelte:window onkeydown={onkeydown} />
+
 {#if open}
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
     data-testid="nav-drawer"
     class="fixed inset-0 z-40"
-    onkeydown={onkeydown}
   >
     <!-- Backdrop -->
     <button
