@@ -185,6 +185,8 @@ All three sources derive from the same upstream (SaintCoinach game sheets) and r
 
 ## Strategic Notes
 
+See [ADR-012](decisions/ADR-012-adopt-ffxiv-market-msgpack.md) for the full decision rationale.
+
 - **Primary data source:** FFXIV_Market's pre-built msgpack files for item names, recipes, equipment, and obtainable methods. These are derived from Teamcraft's extracts (MIT licensed upstream) and include TW Chinese — the only source with complete TW translations.
 - **Integration method:** Git submodule, copy needed files at build time. No runtime fetch to GitHub.
 - **XIVAPI v2 retained for:** Item icons (`Item.Icon`), vendor price verification (`GilShopItem` + `Item.PriceMid`). These are lightweight calls that don't justify pre-building.

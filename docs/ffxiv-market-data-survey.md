@@ -1,20 +1,20 @@
 # FFXIV_Market Data Survey
 
-ENG-81 — Survey of beherw/FFXIV_Market's pre-built msgpack data files, build
-pipeline, and runtime consumption patterns. Written 2026-04-08.
+Survey of beherw/FFXIV_Market's pre-built msgpack data files, build pipeline,
+and runtime consumption patterns. Written 2026-04-08.
 
-## Executive Summary
+## Overview
 
-FFXIV_Market pre-builds 21 msgpack files (~80 MB total) from Teamcraft's
-`extracts.json` and a TW dataminer pipeline. The data covers item names
-(7 languages), recipes, equipment, obtainable methods, NPCs, shops, instances,
-quests, fates, achievements, leves, loot sources, voyages, places, and UI
-categories. Files are fetched lazily at runtime, decoded with `@msgpack/msgpack`,
-and cached in memory.
+FFXIV_Market is a TW-focused market board dashboard (React + Vite SPA). It
+pre-builds 21 msgpack files (~80 MB total) from Teamcraft's `extracts.json`
+and a TW dataminer pipeline. Files are fetched lazily at runtime, decoded with
+`@msgpack/msgpack`, and cached in memory. All data is static between game
+patches.
 
-We currently consume exactly **one** of these files: `tw-items.msgpack` (fetched
-from GitHub raw at server startup for TW Chinese item names). Everything else
-comes from ad-hoc XIVAPI v2 calls.
+- **Repo:** https://github.com/beherw/FFXIV_Market
+- **License:** None (all rights reserved)
+- **Framework:** React 18 + Vite + Tailwind
+- **Data library:** `@msgpack/msgpack ^3.1.3`
 
 ---
 
@@ -77,7 +77,7 @@ of sources, each tagged with:
 
 ### Domain lookup files
 
-These are companion files loaded on-demand when rendering obtainable methods.
+Companion files loaded on-demand when rendering obtainable methods.
 The `obtainableDataService.js` loads only the domains needed for the current
 item's sources.
 
@@ -95,7 +95,11 @@ item's sources.
 | `voyages.msgpack` | 0.006 MB | `{ twSubmarineVoyages, twAirshipVoyages }` | Submarine/airship voyage names |
 | `ui_categories.msgpack` | 0.5 MB | `{ itemIdToCategory, itemIdsByCategory, twItemUICategories }` | Item UI category mapping |
 
-### Build script summary
+---
+
+## 2. Build Pipeline
+
+### Scripts
 
 | Script | Input | Output |
 |--------|-------|--------|
@@ -106,16 +110,56 @@ item's sources.
 | `build-ui-categories.js` | Teamcraft ui-categories.json + tw-item-ui-categories.json | `ui_categories.msgpack` |
 | `build-fates-data.js` | Teamcraft fate JSONs + tw-fates.json | `fates.msgpack` |
 
-All scripts read from a local Teamcraft git submodule (`teamcraft_git/`) and
-TW-specific JSONs produced by `tw_dataminer/`. The `prebuild` npm script runs
-them all before `vite build`.
+### Data sources
+
+All scripts read from two local sources:
+
+1. **Teamcraft git submodule** (`teamcraft_git/libs/data/src/lib/json/`) —
+   the MIT-licensed game data extraction. Contains `extracts.json` (27 MB,
+   all item acquisition methods), plus individual JSONs for items, recipes,
+   NPCs, shops, instances, quests, achievements, fates, places, equipment,
+   and UI categories, in EN/JA/DE/FR/ZH/KO.
+
+2. **TW dataminer pipeline** (`tw_dataminer/`) — SaintCoinach extraction from
+   the TW game client. Produces TW Chinese JSONs for items, NPCs, recipes,
+   fates, places, UI categories, etc. Resolved via `scripts/resolve-tw-json.js`
+   and `scripts/tw-json-paths.js`.
+
+### Build order
+
+The `prebuild` npm script runs before `vite build`:
+
+```
+resolve-tw-json → build-recipe-data → build-items-data → build-fates-data
+  → build-obtainable-methods-optimized → build-obtainable-domains
+```
+
+### Transformations
+
+Common patterns across all build scripts:
+- Strip null/undefined/empty string values to reduce size
+- Encode with `@msgpack/msgpack` (50-67% smaller than JSON, 5x faster parse)
+- `build-obtainable-methods-optimized.js` is the most complex: it reads
+  Teamcraft's `extracts.json`, resolves instance/quest/fate names, composes
+  zone display names, and extracts only the fields used in the UI per source
+  type
+
+### Utility scripts (not part of build)
+
+| Script | Purpose |
+|--------|---------|
+| `check-recipe-floats.mjs` | Validation: checks for floating-point recipe amounts |
+| `test-item-set.mjs` | Validation: tests equipment set detection |
+| `company-craft-from-csv.js` | Imported by `build-recipe-data.js` to append Company Craft recipes |
+| `download_tesseract_files.js` | Downloads Tesseract OCR data (for screenshot price reading) |
+| `download_model.js` | Downloads ML model (for OCR) |
+| `extract-optimized-extracts.js` | Older extract script (superseded by `build-obtainable-methods-optimized.js`) |
+| `build-obtainable-methods-data.js` | Older build script (superseded) |
+| `build-obtainable-methods-v2.js` | Older build script (superseded) |
 
 ---
 
-## 2. Runtime Architecture
-
-FFXIV_Market is a **React + Vite SPA** (no SSR). All data loading happens
-client-side.
+## 3. Runtime Architecture
 
 ### Loading pattern
 
@@ -147,7 +191,7 @@ obtainableDataService.js    ← domain msgpacks (npcs, shops, quests, etc.)
 fatesData.js         ← fates.msgpack
 ```
 
-### Key design decisions
+### Design decisions
 
 1. **Split by domain, not by item** — rather than one giant file, the data is
    split into topical files (items, recipes, NPCs, shops, etc.) so only needed
@@ -162,112 +206,32 @@ fatesData.js         ← fates.msgpack
 4. **Teamcraft as upstream** — all game data originates from Teamcraft's
    extracts, with TW Chinese names from a separate dataminer pipeline.
 
----
+5. **On-demand domain loading** — `obtainableDataService.js` inspects what
+   source types an item has and only fetches the domain files required (e.g.,
+   skip `shops.msgpack` if the item has no vendor sources).
 
-## 3. Our Current Data Usage
+### DataType enum
 
-### What we consume today
+Source types in `obtainable-methods.msgpack` use string keys that map to
+Teamcraft's numeric DataType enum. Centralized in `src/constants/dataTypes.js`:
 
-| Data need | Current source | Where |
-|-----------|---------------|-------|
-| TW item names | FFXIV_Market `tw-items.msgpack` via GitHub raw | `universalis.ts:fetchItemNames()` |
-| English item names | XIVAPI v2 `Item.Name` | `xivapi.ts:fetchItemMetadata()` |
-| Item icons | XIVAPI v2 `Item.Icon` | `xivapi.ts:fetchItemMetadata()` |
-| NPC vendor item list | XIVAPI v2 `GilShopItem` sheet | `vendors.ts:fetchVendorItemIds()` |
-| NPC vendor prices | XIVAPI v2 `Item.PriceMid` | `vendors.ts` |
-| Market board data | Universalis API | `universalis.ts` |
-| Marketable item IDs | Universalis `/marketable` | `universalis.ts:fetchMarketableItems()` |
-
-### What our roadmap needs (from Linear projects)
-
-| Project | Data needs |
-|---------|-----------|
-| **Crafting Optimizer** | Recipes with ingredients, crafting tree construction |
-| **Craft-for-Profit Rankings** | Recipes + market prices for cost calculation |
-| **Item Detail** | Obtainable methods (how to acquire any item), multi-language names |
-| **Retainer Venture Optimizer** | Retainer venture task definitions + loot tables |
-
----
-
-## 4. Recommendations
-
-### Adopt these files now (high value, low risk)
-
-| File | Why | Replaces |
-|------|-----|----------|
-| `tw-items.msgpack` | Already using it — but fetch from local copy instead of GitHub raw | Remote fetch in `universalis.ts` |
-| `recipes.msgpack` | Crafting Optimizer and Craft-for-Profit both need recipe data. FFXIV_Market's schema matches what we'd build ourselves. | Not yet built; would replace XIVAPI Recipe sheet calls |
-| `en-items.msgpack` | English fallback names without XIVAPI round-trips | XIVAPI `Item.Name` calls in `xivapi.ts` |
-
-### Adopt when building the relevant feature
-
-| File | When | Why |
-|------|------|-----|
-| `obtainable-methods.msgpack` | Item Detail page | "How to get this item" requires exactly this dataset |
-| `equipment.msgpack` | Item Detail / advanced search | Equipment level and job filtering |
-| `ui_categories.msgpack` | Item search/browse | Category-based browsing |
-
-### Do NOT adopt (not needed for our use cases)
-
-| File | Why skip |
-|------|----------|
-| `npcs.msgpack` (18.8 MB) | Only needed if rendering NPC names/locations in obtainable methods UI. Defer until Item Detail. |
-| `shops.msgpack` (7.7 MB) | Same — vendor shop display. Defer until Item Detail. |
-| `quests.msgpack`, `instances.msgpack`, `achievements.msgpack`, `leves.msgpack`, `places.msgpack`, `voyages.msgpack`, `loot-sources.msgpack`, `fates.msgpack` | Domain lookup files for obtainable methods rendering. Only useful alongside `obtainable-methods.msgpack`. |
-| `zh-items.msgpack`, `ja-items.msgpack`, `ko-items.msgpack`, `de-items.msgpack`, `fr-items.msgpack` | We target TW Chinese + English fallback only. No need for other languages. |
-
-### Integration approach
-
-**Option A: Git submodule (recommended)**
-Add `beherw/FFXIV_Market` as a git submodule. Copy needed msgpack files into
-our static assets at build time. Pros: versioned, reproducible, no runtime
-fetch to GitHub. Cons: submodule management overhead.
-
-**Option B: Build our own pipeline**
-Fork the build scripts, point them at our own Teamcraft submodule, generate
-msgpack files ourselves. Pros: full control, can customize schemas. Cons:
-duplicates significant work; FFXIV_Market's schemas are already well-suited.
-
-**Option C: Fetch at deploy time**
-CI/CD step downloads the latest msgpack files from FFXIV_Market's GitHub
-releases or raw URLs. Pros: simple. Cons: fragile dependency on external repo
-availability.
-
-**Recommendation:** Start with Option A for files we adopt now (tw-items,
-recipes, en-items). This is the simplest path that gives us versioned,
-reproducible data without building our own pipeline. If we later need to
-customize schemas (e.g., pruning obtainable-methods to only the types we
-render), we can fork individual build scripts at that point.
-
-### Architecture considerations
-
-Our app is **SvelteKit with SSR**, not a pure SPA like FFXIV_Market. This
-affects where we load data:
-
-- **Server-side loading** (preferred for SEO + initial render): decode msgpack
-  in `+page.server.ts` loaders, pass to components as props. Node.js has
-  plenty of memory for the larger files.
-- **Client-side loading** (for interactive features): follow FFXIV_Market's
-  pattern of lazy fetch + decode + cache. Good for on-demand data like
-  crafting trees.
-- **Hybrid**: server-side for initial page data, client-side for drill-down.
-  This is our natural SvelteKit pattern.
-
-For the recipe database specifically, loading server-side and pre-building
-indexes during startup would avoid the client downloading 4.4 MB of recipe
-data. The crafting tree construction could happen server-side as an API
-endpoint or in a `+page.server.ts` loader.
-
----
-
-## 5. Differences from Our Current Data Source Doc
-
-This survey supersedes the "FFXIV_Market (beherw)" section in
-`docs/ffxiv-data-sources.md`, which listed only `tw-items.msgpack`. The full
-inventory above should be used as the canonical reference.
-
-The "Strategic Notes" in that doc recommended "XIVAPI v2 for new data needs
-on an as-needed basis." This survey supports revising that: **FFXIV_Market's
-pre-built files are a better fit for recipes, obtainable methods, and item
-names, while XIVAPI remains appropriate for icons and vendor price
-verification (GilShopItem).**
+| ID | String key | TW name |
+|----|-----------|---------|
+| 1 | `craft` | 製作 |
+| 2 | `specialshop` | 兌換 |
+| 3 | `vendor` | NPC商店 |
+| 4 | `reduction` | 分解獲得 |
+| 5 | `desynth` | 精製獲得 |
+| 6 | `instance` | 副本 |
+| 7 | `gathering` | 採集獲得 |
+| 8 | `gardening` | 園藝獲得 |
+| 9 | `voyage` | 遠航探索 |
+| 10 | `drop` | 怪物掉落 |
+| 11 | `alarm` | 時間限定 |
+| 12 | `masterbook` | 秘籍習得 |
+| 13 | `treasure` | 寶箱/容器 |
+| 14 | `fate` | 危命任務 |
+| 15 | `venture` | 雇員探險 |
+| 18 | `quest` | 任務獎勵 |
+| 19 | `achievement` | 成就獎勵 |
+| 21 | `mogstation` | 商城購買 |
