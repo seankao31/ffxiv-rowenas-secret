@@ -3,13 +3,14 @@ import { fetchVendorPrices } from '$lib/server/vendors'
 import { setVendorPrices } from '$lib/server/cache'
 
 export async function init() {
-  // Fetch vendor prices (non-blocking for scanner — graceful degradation if XIVAPI is down)
+  // Vendor prices and scanner load concurrently.
+  // If XIVAPI is down after retries, the app runs without vendor arbitrage data.
   fetchVendorPrices()
     .then(prices => {
       if (prices.size > 0) setVendorPrices(prices)
     })
     .catch(err => {
-      console.warn('[server] Vendor price fetch failed:', err)
+      console.error('[server] Vendor price fetch failed after retries:', err)
     })
 
   startScanner().catch(err => {

@@ -129,6 +129,52 @@ describe('fetchVendorInfo', () => {
     expect(info![1]!.zone).toBe('Zone 427')
   })
 
+  test('retries data.json after non-OK response instead of caching empty map', async () => {
+    console.warn = vi.fn()
+    let dataCallCount = 0
+
+    const SECOND_ITEM_RESPONSE = {
+      item: { id: 9999, vendors: [1005633] },
+      partials: [
+        { type: 'npc', id: '1005633', obj: { i: 1005633, n: 'Material Supplier', l: 425 } },
+      ],
+    }
+
+    globalThis.fetch = vi.fn((url: string | URL) => {
+      const urlStr = String(url)
+      if (urlStr.includes('get.php')) {
+        // Return different items based on the ID in the URL
+        const data = urlStr.includes('id=9999') ? SECOND_ITEM_RESPONSE : GARLAND_ITEM_RESPONSE
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(data),
+        } as Response)
+      }
+      if (urlStr.includes('data.json')) {
+        dataCallCount++
+        if (dataCallCount === 1) {
+          // First call: non-OK response
+          return Promise.resolve({ ok: false, status: 503 } as Response)
+        }
+        // Second call: success
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(GARLAND_DATA_RESPONSE),
+        } as Response)
+      }
+      return Promise.resolve({ ok: false, status: 404 } as Response)
+    }) as unknown as typeof fetch
+
+    // First fetch — data.json returns 503, zone falls back to ID
+    await fetchVendorInfo(5057)
+    expect(getVendorInfo(5057)![0]!.zone).toBe('Zone 425')
+
+    // Second fetch (different item) — data.json should be retried and succeed
+    await fetchVendorInfo(9999)
+    expect(getVendorInfo(9999)![0]!.zone).toBe('Mist')
+    expect(dataCallCount).toBe(2)
+  })
+
   test('calls onChange callback after successful fetch', async () => {
     mockFetchResponses({
       'get.php': GARLAND_ITEM_RESPONSE,
@@ -154,6 +200,48 @@ describe('fetchVendorInfo', () => {
     const calls = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls
     const dataCalls = calls.filter(c => String(c[0]).includes('data.json'))
     expect(dataCalls).toHaveLength(1)
+  })
+
+  test('deduplicates concurrent item fetches for the same item', async () => {
+    mockFetchResponses({
+      'get.php': GARLAND_ITEM_RESPONSE,
+      'data.json': GARLAND_DATA_RESPONSE,
+    })
+
+    // Fire two concurrent fetches for the same uncached item
+    await Promise.all([fetchVendorInfo(5057), fetchVendorInfo(5057)])
+
+    const calls = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls
+    const itemCalls = calls.filter(c => String(c[0]).includes('get.php'))
+    expect(itemCalls).toHaveLength(1)
+  })
+
+  test('suppresses retries for a failed item fetch during cooldown', async () => {
+    console.warn = vi.fn()
+    let fetchCount = 0
+
+    globalThis.fetch = vi.fn((url: string | URL) => {
+      const urlStr = String(url)
+      if (urlStr.includes('get.php')) {
+        fetchCount++
+        return Promise.resolve({ ok: false, status: 500 } as Response)
+      }
+      if (urlStr.includes('data.json')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(GARLAND_DATA_RESPONSE),
+        } as Response)
+      }
+      return Promise.resolve({ ok: false, status: 404 } as Response)
+    }) as unknown as typeof fetch
+
+    // First fetch fails
+    await fetchVendorInfo(5057)
+    expect(fetchCount).toBe(1)
+
+    // Immediate retry should be suppressed
+    await fetchVendorInfo(5057)
+    expect(fetchCount).toBe(1)
   })
 
   test('only fetches NPC partials that match vendor IDs', async () => {

@@ -149,7 +149,9 @@ export function scoreOpportunities(
           profitPerUnit: npcProfit,
           sourceAgeHours: 0,
           sourceConf: 1.0,
+          // sourceConf omitted: NPC price is fixed (sourceConf=1.0), so multiplying is a no-op.
           worldScore: npcProfit * fairShareVelocity * homeConf * turnoverDiscount,
+          // Infinity converts to sentinel -1 in the Opportunity output (line ~187).
           availableUnits: Infinity,
         })
       }

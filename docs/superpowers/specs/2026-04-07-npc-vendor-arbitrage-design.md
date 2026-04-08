@@ -16,7 +16,7 @@ Add NPC vendor prices as a competing buy source in the arbitrage scoring model. 
 
 New module: `src/lib/server/vendors.ts`
 
-At server startup, paginate XIVAPI v2's `GilShopItem` sheet to build a `Map<number, number>` mapping `itemId → vendorPrice` (from `Item.PriceMid`). This is ~6,700 items across ~14 pages at 500 rows/page, adding ~10 seconds to startup.
+At server startup, paginate XIVAPI v2's `GilShopItem` sheet to build a `Map<number, number>` mapping `itemId → vendorPrice` (from `Item.PriceMid`). This is ~6,700 items across ~33 pages at 500 rows/page, yielding ~1,400 items with a positive vendor price. A blocklist of 38 known false positives (housing permits, removed items) is applied during collection.
 
 - Fetch runs in `hooks.server.ts` alongside (or before) the scanner start
 - Vendor price map stored in the cache module, passed to `scoreOpportunities()`
