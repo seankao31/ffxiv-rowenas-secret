@@ -12,7 +12,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 const BASE_URL = 'https://raw.githubusercontent.com/beherw/FFXIV_Market/main/public/data'
-const DATA_DIR = join(import.meta.dirname, '..', 'data')
+const DATA_DIR = join(process.cwd(), 'data')
 
 const FILES = [
   'tw-items.msgpack',

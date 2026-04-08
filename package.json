@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
+    "dev": "bun run download-data && vite dev",
     "download-data": "bun scripts/download-ffxiv-market-data.ts",
     "build": "bun run download-data && vite build",
     "start": "bun build/index.js",
