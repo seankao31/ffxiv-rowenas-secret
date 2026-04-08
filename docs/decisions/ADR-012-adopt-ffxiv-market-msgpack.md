@@ -81,9 +81,10 @@ language files.
 
 ### Integration method
 
-**Git submodule** pointing at `beherw/FFXIV_Market`. A build step copies the
-needed msgpack files into our static assets. This gives us versioned,
-reproducible data without building our own pipeline.
+**Build-time download script** that fetches needed msgpack files from
+FFXIV_Market's GitHub repository. The script runs as part of the build/deploy
+pipeline and fails the build if any download fails — no silent degradation.
+Downloaded files are stored locally and read by the server at startup.
 
 If we later need to customize schemas (e.g., pruning obtainable-methods to
 only the types we render), we can fork individual build scripts at that point.
@@ -136,17 +137,17 @@ This is the right long-term approach but premature today — FFXIV_Market's
 schemas already fit our needs and we'd be duplicating effort for no
 functional benefit. Planned as a future task.
 
-### Fetch msgpack files from GitHub at deploy time
+### Git submodule
 
-CI/CD step downloads the latest files from FFXIV_Market's GitHub. Simpler
-than a submodule, but fragile: depends on the external repo being available
-and not changing file paths.
+Pin `beherw/FFXIV_Market` as a submodule. Versioned and reproducible, but
+adds submodule management complexity to CI, Docker, and developer workflow
+for files we only need at build time.
 
 ## Consequences
 
 - **New dependency:** We depend on FFXIV_Market's repo structure and msgpack
-  schemas. If they make breaking changes, we need to update. Mitigated by
-  pinning the submodule to a specific commit.
+  schemas. If they make breaking changes, we need to update. Build fails
+  loudly if files are unavailable.
 - **License:** FFXIV_Market's README states "本專案僅供教育用途" (this
   project is for educational purposes only). This is a common fair-use
   declaration in Taiwan for non-commercial projects. Our use is defensible:
@@ -157,8 +158,8 @@ and not changing file paths.
   from Teamcraft's MIT-licensed data (see alternative above) to eliminate
   this dependency entirely.
 - **Data freshness:** Msgpack files are rebuilt when FFXIV_Market updates
-  their Teamcraft submodule (typically after game patches). We update by
-  pulling the latest submodule commit.
+  their Teamcraft submodule (typically after game patches). We get the latest
+  files on each build.
 - **ADR-011 is superseded:** XIVAPI v2 is no longer the default for new game
   data needs. It remains in use only for icons, English fallback names, and
   vendor price verification.
