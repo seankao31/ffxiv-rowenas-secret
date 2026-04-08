@@ -48,7 +48,6 @@ data.** Retain XIVAPI v2 only for item icons and vendor price verification.
 |------|----------|-----|
 | `tw-items.msgpack` | GitHub raw fetch in `universalis.ts` | Already using it — switch to local copy |
 | `recipes.msgpack` | Nothing (not yet built) | Crafting Optimizer and Craft-for-Profit both need this |
-| `en-items.msgpack` | XIVAPI `Item.Name` calls | English names without per-item API round-trips |
 
 **When building the relevant feature:**
 
@@ -69,6 +68,10 @@ language files.
 
 - **Item icons** (`Item.Icon`) — FFXIV_Market doesn't include icon data.
   XIVAPI's asset endpoint serves them as webp on demand.
+- **English fallback names** (`Item.Name`) — XIVAPI queries live game data,
+  so it covers items added in patches before FFXIV_Market updates. Using
+  `en-items.msgpack` instead would defeat the purpose of the fallback, since
+  both files would be stale at the same time.
 - **Vendor price verification** (`GilShopItem` + `Item.PriceMid`) — our
   arbitrage page needs vendor prices, which are in the items' `PriceMid`
   field. FFXIV_Market's `obtainable-methods.msgpack` also has vendor prices

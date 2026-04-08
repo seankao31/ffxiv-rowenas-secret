@@ -165,7 +165,6 @@ A TW-focused market board dashboard. Pre-builds game data into msgpack files usi
 |------|------|---------|--------|
 | `tw-items.msgpack` | 1.3 MB | `Record<itemID, { tw: string }>` — TW Chinese item names | **In use** (fetched from GitHub raw at startup) |
 | `recipes.msgpack` | 4.4 MB | Recipe array with ingredients, jobs, yields | **Adopt next** (Crafting Optimizer) |
-| `en-items.msgpack` | 1.6 MB | `Record<itemID, { en: string }>` — English item names | **Adopt next** (replace XIVAPI Item.Name calls) |
 | `obtainable-methods.msgpack` | 20.4 MB | `Record<itemID, ObtainSource[]>` — all acquisition methods | Adopt for Item Detail |
 | `equipment.msgpack` | 2.5 MB | Equipment level, jobs, slot category | Adopt for Item Detail |
 
