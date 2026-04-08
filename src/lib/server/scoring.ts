@@ -21,7 +21,8 @@ function confidence(ageHours: number, timeConstantHours: number): number {
 export function scoreOpportunities(
   cache: Map<number, ItemData>,
   nameMap: Map<number, string>,
-  params: ThresholdParams
+  params: ThresholdParams,
+  vendorPrices?: Map<number, number>,
 ): Opportunity[] {
   const now = Date.now()
   const stalenessCutoff = now - params.listing_staleness_hours * MS_PER_HOUR
@@ -86,6 +87,7 @@ export function scoreOpportunities(
       worldID: number
       worldName: string
       cheapestSource: number
+      effectiveBuyPrice: number
       profitPerUnit: number
       sourceAgeHours: number
       sourceConf: number
@@ -107,7 +109,8 @@ export function scoreOpportunities(
       if (activeSrc.length === 0) continue
 
       const cheapestSource = Math.min(...activeSrc.map(l => l.pricePerUnit))
-      const profitPerUnit = realisticSellPrice * (1 - MARKET_TAX) - cheapestSource * (1 + MARKET_TAX)
+      const effectiveBuyPrice = cheapestSource * (1 + MARKET_TAX)
+      const profitPerUnit = realisticSellPrice * (1 - MARKET_TAX) - effectiveBuyPrice
       if (profitPerUnit <= 0) continue
 
       const uploadTime = item.worldUploadTimes[worldID] ?? 0
@@ -124,12 +127,32 @@ export function scoreOpportunities(
         worldID,
         worldName: wListings[0]!.worldName,
         cheapestSource,
+        effectiveBuyPrice,
         profitPerUnit,
         sourceAgeHours,
         sourceConf,
         worldScore,
         availableUnits,
       })
+    }
+
+    // --- NPC vendor source ---
+    const vendorPrice = vendorPrices?.get(item.itemID)
+    if (vendorPrice !== undefined) {
+      const npcProfit = realisticSellPrice * (1 - MARKET_TAX) - vendorPrice
+      if (npcProfit > 0) {
+        worldResults.push({
+          worldID: 0,
+          worldName: 'NPC',
+          cheapestSource: vendorPrice,
+          effectiveBuyPrice: vendorPrice,
+          profitPerUnit: npcProfit,
+          sourceAgeHours: 0,
+          sourceConf: 1.0,
+          worldScore: npcProfit * fairShareVelocity * homeConf * turnoverDiscount,
+          availableUnits: Infinity,
+        })
+      }
     }
 
     if (worldResults.length === 0) continue
@@ -144,22 +167,24 @@ export function scoreOpportunities(
       : null
 
     const maxUnits = Math.ceil(fairShareVelocity * params.days_of_supply)
-    const recommendedUnits = Math.min(best.availableUnits, maxUnits)
+    const recommendedUnits = isFinite(best.availableUnits)
+      ? Math.min(best.availableUnits, maxUnits)
+      : maxUnits
 
     const opp: Opportunity = {
       itemID: item.itemID,
       itemName: nameMap.get(item.itemID) ?? `Item #${item.itemID}`,
 
-      buyPrice: Math.round(best.cheapestSource * (1 + MARKET_TAX)),
+      buyPrice: Math.round(best.effectiveBuyPrice),
       sellPrice: realisticSellPrice,
       listingPrice: cheapestHomePrice,
       profitPerUnit: Math.round(best.profitPerUnit),
-      listingProfitPerUnit: Math.round(cheapestHomePrice * (1 - MARKET_TAX) - best.cheapestSource * (1 + MARKET_TAX)),
+      listingProfitPerUnit: Math.round(cheapestHomePrice * (1 - MARKET_TAX) - best.effectiveBuyPrice),
 
       sourceWorld: best.worldName,
       sourceWorldID: best.worldID,
 
-      availableUnits: best.availableUnits,
+      availableUnits: isFinite(best.availableUnits) ? best.availableUnits : -1,
       recommendedUnits,
       expectedDailyProfit: Math.round(best.profitPerUnit * fairShareVelocity),
 
@@ -178,7 +203,7 @@ export function scoreOpportunities(
     if (alt) {
       opp.altSourceWorld = alt.worldName
       opp.altSourceWorldID = alt.worldID
-      opp.altBuyPrice = Math.round(alt.cheapestSource * (1 + MARKET_TAX))
+      opp.altBuyPrice = Math.round(alt.effectiveBuyPrice)
       opp.altExpectedDailyProfit = Math.round(alt.profitPerUnit * fairShareVelocity)
       opp.altSourceConfidence = Math.round(alt.sourceConf * 1000) / 1000
       opp.altSourceDataAgeHours = Math.round(alt.sourceAgeHours * 10) / 10
