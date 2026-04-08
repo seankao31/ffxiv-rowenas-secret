@@ -19,7 +19,7 @@
 </script>
 
 <div class="bg-base-200 border-b border-base-300">
-  <button class="w-full py-2.5 px-4 bg-transparent border-none text-base-content cursor-pointer text-left text-sm" onclick={() => (open = !open)}>
+  <button class="w-full py-2.5 px-3 lg:px-4 bg-transparent border-none text-base-content cursor-pointer text-left text-sm" onclick={() => (open = !open)}>
     <Settings class="inline w-4 h-4 align-text-bottom" />
     Scan Parameters
     {#if open}
@@ -30,8 +30,8 @@
   </button>
 
   {#if open}
-    <div class="flex flex-wrap gap-5 px-4 pt-3 pb-4">
-      <label class="flex flex-col gap-1 text-base-content/60 text-sm min-w-40">
+    <div data-testid="threshold-controls-body" class="flex flex-col lg:flex-row lg:flex-wrap gap-4 lg:gap-5 px-3 lg:px-4 pt-3 pb-4">
+      <label class="flex flex-col gap-1 text-base-content/60 text-sm lg:min-w-40">
         Price threshold: {thresholds.price_threshold}×
         <div class="flex items-center gap-2">
           <input type="range" class="range range-sm flex-1" min="1.2" max="5.0" step="0.1"
@@ -45,7 +45,7 @@
         </div>
       </label>
 
-      <label class="flex flex-col gap-1 text-base-content/60 text-sm min-w-40">
+      <label class="flex flex-col gap-1 text-base-content/60 text-sm lg:min-w-40">
         Listing staleness: {thresholds.listing_staleness_hours}h
         <div class="flex items-center gap-2">
           <input type="range" class="range range-sm flex-1" min="1" max="168" step="1"
@@ -59,7 +59,7 @@
         </div>
       </label>
 
-      <label class="flex flex-col gap-1 text-base-content/60 text-sm min-w-40">
+      <label class="flex flex-col gap-1 text-base-content/60 text-sm lg:min-w-40">
         Days of supply: {thresholds.days_of_supply}
         <div class="flex items-center gap-2">
           <input type="range" class="range range-sm flex-1" min="1" max="14" step="1"

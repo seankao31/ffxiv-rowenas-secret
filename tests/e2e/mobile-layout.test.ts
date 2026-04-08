@@ -47,6 +47,22 @@ test.describe('mobile layout', () => {
     await page.keyboard.press('Escape')
     await expect(page.locator('[data-testid="nav-drawer"]')).toBeHidden()
   })
+
+  test('threshold controls stack vertically on mobile', async ({ page }) => {
+    // Open controls
+    await page.click('text=Scan Parameters')
+    // Each slider label should be full-width (stacked), so the container should use flex-col
+    const container = page.locator('[data-testid="threshold-controls-body"]')
+    await expect(container).toBeVisible()
+    // Check controls are stacked: the first two labels should NOT be on the same Y line
+    const labels = container.locator('label')
+    const first = await labels.nth(0).boundingBox()
+    const second = await labels.nth(1).boundingBox()
+    expect(first).toBeTruthy()
+    expect(second).toBeTruthy()
+    // Stacked means second label is below first, not beside it
+    expect(second!.y).toBeGreaterThan(first!.y + first!.height / 2)
+  })
 })
 
 test.describe('desktop layout unchanged', () => {
