@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "download-data": "bun scripts/download-ffxiv-market-data.ts",
+    "build": "bun run download-data && vite build",
     "start": "bun build/index.js",
     "test": "vitest run",
     "test:e2e": "playwright test",
