@@ -3,14 +3,14 @@ import { fetchVendorPrices } from '$lib/server/vendors'
 import { setVendorPrices } from '$lib/server/cache'
 
 export async function init() {
-  // Fire-and-forget: vendor prices are non-critical and must not block scanner startup.
-  // If XIVAPI is down, the app runs without NPC arbitrage (empty vendor map).
+  // Vendor prices and scanner load concurrently.
+  // If XIVAPI is down after retries, the app runs without vendor arbitrage data.
   fetchVendorPrices()
     .then(prices => {
       if (prices.size > 0) setVendorPrices(prices)
     })
     .catch(err => {
-      console.warn('[server] Vendor price fetch failed:', err)
+      console.error('[server] Vendor price fetch failed after retries:', err)
     })
 
   startScanner().catch(err => {

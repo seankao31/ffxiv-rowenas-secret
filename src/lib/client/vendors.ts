@@ -24,6 +24,11 @@ type GarlandItemResponse = {
 
 // Cache: itemID → vendor info list
 const cache = new Map<number, VendorInfo[]>()
+// In-flight fetches: itemID → pending promise (deduplicates concurrent calls)
+const inFlight = new Map<number, Promise<void>>()
+// Failed items: itemID → failure timestamp (suppresses retries during cooldown)
+const failedItems = new Map<number, number>()
+const FAILURE_COOLDOWN_MS = 60_000
 
 let onChange: (() => void) | null = null
 
@@ -42,6 +47,7 @@ function loadLocationIndex(): Promise<Map<number, string>> {
       const res = await fetch(DATA_API)
       if (!res.ok) {
         console.warn(`[vendors] Failed to fetch location index: HTTP ${res.status}`)
+        locationPromise = null  // allow retry on transient failure
         return new Map<number, string>()
       }
 
@@ -74,12 +80,24 @@ export function getVendorInfo(itemId: number): VendorInfo[] | undefined {
 /** @internal — test-only cache reset */
 export function _clearCache(): void {
   cache.clear()
+  inFlight.clear()
+  failedItems.clear()
   locationPromise = null
 }
 
 export async function fetchVendorInfo(itemId: number): Promise<void> {
   if (cache.has(itemId)) return
+  if (inFlight.has(itemId)) return inFlight.get(itemId)
 
+  const failedAt = failedItems.get(itemId)
+  if (failedAt && Date.now() - failedAt < FAILURE_COOLDOWN_MS) return
+
+  const promise = _doFetchVendorInfo(itemId)
+  inFlight.set(itemId, promise)
+  return promise
+}
+
+async function _doFetchVendorInfo(itemId: number): Promise<void> {
   try {
     const [itemRes, locations] = await Promise.all([
       fetch(`${ITEM_API}?type=item&lang=en&version=3&id=${itemId}`),
@@ -88,6 +106,7 @@ export async function fetchVendorInfo(itemId: number): Promise<void> {
 
     if (!itemRes.ok) {
       console.warn(`[vendors] Failed to fetch vendor info for item ${itemId}: HTTP ${itemRes.status}`)
+      failedItems.set(itemId, Date.now())
       return
     }
 
@@ -105,8 +124,12 @@ export async function fetchVendorInfo(itemId: number): Promise<void> {
     }
 
     cache.set(itemId, vendors)
+    failedItems.delete(itemId)
     onChange?.()
   } catch (err) {
     console.warn(`[vendors] Failed to fetch vendor info for item ${itemId}:`, err)
+    failedItems.set(itemId, Date.now())
+  } finally {
+    inFlight.delete(itemId)
   }
 }

@@ -172,7 +172,41 @@ describe('fetchVendorPrices', () => {
     expect(prices.size).toBe(0)
   })
 
-  test('returns empty map when item price fetch fails', async () => {
+  test('retries a failed batch and succeeds', async () => {
+    suppressLogs()
+    let itemBatchCalls = 0
+
+    globalThis.fetch = vi.fn((url: string | URL) => {
+      const urlStr = String(url)
+      if (urlStr.includes('GilShopItem')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            rows: [{ row_id: 0, fields: { Item: { row_id: 5057 } } }],
+          }),
+        } as unknown as Response)
+      }
+      if (urlStr.includes('sheet/Item')) {
+        itemBatchCalls++
+        if (itemBatchCalls === 1) {
+          return Promise.resolve({ ok: false, status: 500 } as Response)
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            rows: [{ row_id: 5057, fields: { PriceMid: 63 } }],
+          }),
+        } as unknown as Response)
+      }
+      return Promise.resolve({ ok: false, status: 404 } as Response)
+    }) as unknown as typeof fetch
+
+    const prices = await fetchVendorPrices()
+    expect(prices.get(5057)).toBe(63)
+    expect(itemBatchCalls).toBe(2)
+  })
+
+  test('throws after exhausting batch retries', async () => {
     suppressLogs()
     mockFetch([
       {
@@ -181,11 +215,13 @@ describe('fetchVendorPrices', () => {
           rows: [{ row_id: 0, fields: { Item: { row_id: 5057 } } }],
         }),
       },
+      // All retries fail
+      { ok: false, status: 500, json: () => Promise.resolve({}) },
+      { ok: false, status: 500, json: () => Promise.resolve({}) },
       { ok: false, status: 500, json: () => Promise.resolve({}) },
     ])
 
-    const prices = await fetchVendorPrices()
-    expect(prices.size).toBe(0)
+    await expect(fetchVendorPrices()).rejects.toThrow()
   })
 
   test('returns empty map when GilShopItem has no rows', async () => {

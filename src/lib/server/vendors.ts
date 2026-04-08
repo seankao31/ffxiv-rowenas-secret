@@ -1,6 +1,7 @@
 const XIVAPI_BASE = 'https://v2.xivapi.com/api'
 const PAGE_SIZE = 500
 const BATCH_SIZE = 500
+const BATCH_MAX_RETRIES = 3
 
 type GilShopItemRow = {
   row_id: number
@@ -58,18 +59,30 @@ async function fetchItemPrices(itemIds: number[]): Promise<Map<number, number>> 
   const batches = chunk(itemIds, BATCH_SIZE)
 
   for (const batch of batches) {
-    const res = await fetch(`${XIVAPI_BASE}/sheet/Item?rows=${batch.join(',')}&fields=PriceMid`)
-    if (!res.ok) {
-      console.warn(`[vendors] Item price fetch failed: HTTP ${res.status}`)
-      continue
+    let lastStatus = 0
+    let success = false
+
+    for (let attempt = 0; attempt < BATCH_MAX_RETRIES; attempt++) {
+      const res = await fetch(`${XIVAPI_BASE}/sheet/Item?rows=${batch.join(',')}&fields=PriceMid`)
+      if (!res.ok) {
+        lastStatus = res.status
+        console.warn(`[vendors] Item price batch failed (attempt ${attempt + 1}/${BATCH_MAX_RETRIES}): HTTP ${res.status}`)
+        continue
+      }
+
+      const data = (await res.json()) as { rows: ItemPriceRow[] }
+      for (const row of data.rows) {
+        const price = row.fields.PriceMid
+        if (price && price > 0) {
+          prices.set(row.row_id, price)
+        }
+      }
+      success = true
+      break
     }
 
-    const data = (await res.json()) as { rows: ItemPriceRow[] }
-    for (const row of data.rows) {
-      const price = row.fields.PriceMid
-      if (price && price > 0) {
-        prices.set(row.row_id, price)
-      }
+    if (!success) {
+      throw new Error(`[vendors] Item price batch failed after ${BATCH_MAX_RETRIES} retries: HTTP ${lastStatus}`)
     }
   }
 
