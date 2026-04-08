@@ -5,6 +5,7 @@
   import { toggleSort, sortOpportunities, type SortState, type SortColumn } from '$lib/client/sort.ts'
   import { resolveItemName, isFallbackName, setOnChange, getIconUrl, fetchItemMetadata } from '$lib/client/xivapi.ts'
   import { tooltip } from '$lib/client/tooltip.ts'
+  import { fetchVendorInfo, getVendorInfo } from '$lib/client/vendors.ts'
 
   const { opportunities }: { opportunities: Opportunity[] } = $props()
 
@@ -14,6 +15,14 @@
   $effect(() => {
     if (opportunities.length > 0) {
       fetchItemMetadata(opportunities.map(o => o.itemID))
+    }
+  })
+
+  // Fetch vendor metadata for NPC-sourced opportunities
+  $effect(() => {
+    const npcItems = opportunities.filter(o => o.sourceWorld === 'NPC' || o.altSourceWorld === 'NPC')
+    for (const opp of npcItems) {
+      fetchVendorInfo(opp.itemID)
     }
   })
 
@@ -50,6 +59,22 @@
 
 {#snippet infoIcon()}
   <Info class="inline w-3.5 h-3.5 opacity-40 align-middle ml-1" strokeWidth={3.5} />
+{/snippet}
+
+{#snippet npcBadge(itemID: number, size: 'sm' | 'xs')}
+  {@const vendors = getVendorInfo(itemID)}
+  {#if vendors && vendors.length > 0}
+    <div class="dropdown dropdown-hover dropdown-end">
+      <div tabindex="0" role="button" class="badge badge-{size} badge-soft badge-info cursor-help">NPC</div>
+      <div tabindex="0" class="dropdown-content z-10 shadow-md bg-base-200 rounded-box p-2 w-56">
+        {#each vendors as v}
+          <div class="text-xs py-0.5">{v.npcName} — {v.zone}</div>
+        {/each}
+      </div>
+    </div>
+  {:else}
+    <span class="badge badge-{size} badge-soft badge-info">NPC</span>
+  {/if}
 {/snippet}
 
 {#snippet sortIcon(column: SortColumn)}
@@ -105,7 +130,7 @@
           <td>
             <div>
               {#if isNPC(opp.sourceWorld)}
-                <span class="badge badge-sm badge-soft badge-info">NPC</span>
+                {@render npcBadge(opp.itemID, 'sm')}
               {:else}
                 {opp.sourceWorld}
               {/if}
@@ -113,7 +138,7 @@
             {#if opp.altSourceWorld}
               <div class="text-xs text-base-content/50 mt-1">
                 {#if isNPC(opp.altSourceWorld)}
-                  <span class="badge badge-xs badge-soft badge-info">NPC</span>
+                  {@render npcBadge(opp.itemID, 'xs')}
                 {:else}
                   {opp.altSourceWorld}
                 {/if}
