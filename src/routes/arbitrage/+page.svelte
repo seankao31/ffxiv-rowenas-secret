@@ -72,7 +72,7 @@
 
 <ThresholdControls {thresholds} onchange={onThresholdChange} />
 
-<main class="flex-1 flex flex-col min-h-0">
+<main class="flex-1 flex flex-col min-h-0 min-w-0">
   {#if coldStart}
     {@const pct = scanProgress.totalBatches > 0
       ? Math.round((scanProgress.completedBatches / scanProgress.totalBatches) * 100)

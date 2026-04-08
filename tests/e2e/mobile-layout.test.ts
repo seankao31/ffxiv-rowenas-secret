@@ -48,6 +48,29 @@ test.describe('mobile layout', () => {
     await expect(page.locator('[data-testid="nav-drawer"]')).toBeHidden()
   })
 
+  test('item column stays visible while scrolling table horizontally', async ({ page }) => {
+    const table = page.locator('table')
+    const firstItemLink = table.locator('tbody tr:first-child td:first-child a')
+
+    // Item name should be visible initially
+    await expect(firstItemLink).toBeVisible()
+
+    // Scroll the table container to the right
+    const container = table.locator('..')
+    await container.evaluate(el => { el.scrollLeft = 300 })
+
+    // Item name should still be visible (sticky)
+    await expect(firstItemLink).toBeInViewport()
+  })
+
+  test('table scrolls horizontally on mobile', async ({ page }) => {
+    const container = page.locator('[data-testid="table-container"]')
+    const scrollWidth = await container.evaluate(el => el.scrollWidth)
+    const clientWidth = await container.evaluate(el => el.clientWidth)
+    // Table should overflow horizontally on 390px viewport
+    expect(scrollWidth).toBeGreaterThan(clientWidth)
+  })
+
   test('threshold controls stack vertically on mobile', async ({ page }) => {
     // Open controls
     await page.click('text=Scan Parameters')

@@ -25,10 +25,10 @@
       <Sidebar {expanded} ontoggle={toggleSidebar} />
     </div>
 
-    <div class="flex-1 flex flex-col min-h-0">
+    <div class="flex-1 flex flex-col min-h-0 min-w-0">
       <div class="ad-zone w-full shrink-0"></div>
 
-      <div class="flex-1 flex flex-col min-h-0 max-w-[1400px] w-full mx-auto px-3 lg:px-8 box-border">
+      <div class="flex-1 flex flex-col min-h-0 min-w-0 max-w-[1400px] w-full mx-auto px-3 lg:px-8 box-border">
         {@render children()}
       </div>
     </div>

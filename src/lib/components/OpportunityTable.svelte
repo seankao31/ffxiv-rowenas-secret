@@ -95,11 +95,11 @@
   </button>
 {/snippet}
 
-<div class="flex-1 overflow-y-auto min-h-0">
-  <table class="table table-pin-rows">
+<div data-testid="table-container" class="flex-1 overflow-auto min-h-0">
+  <table class="table table-pin-rows w-max">
     <thead>
       <tr>
-        <th>Item</th>
+        <th class="sticky left-0 z-20 bg-base-200">Item</th>
         <th>Buy from</th>
         <th>Buy</th>
         <th>Sell <span {@attach tooltip("Estimated sell price: the lower of the cheapest listing and the median recent sale. Second line (if shown) is the current cheapest listing on the market board.")}>{@render infoIcon()}</span></th>
@@ -113,9 +113,9 @@
     <tbody>
       {#each sorted as opp (opp.itemID)}
         {@const icon = iconUrl(opp)}
-        <tr class="hover:bg-base-300">
+        <tr class="group/row hover:bg-base-300">
           <!-- Item -->
-          <td>
+          <td class="sticky left-0 z-10 bg-base-100 group-hover/row:bg-base-300 border-r border-base-300">
             <div class="flex items-center gap-1.5">
               {#if icon}
                 <img src={icon} alt="" width="32" height="32" class="flex-shrink-0"
