@@ -51,6 +51,10 @@ export function getRecipesByResult(itemId: number): Recipe[] {
   return byResult.get(itemId) ?? []
 }
 
+export function getRecipesByIngredient(itemId: number): Recipe[] {
+  return byIngredient.get(itemId) ?? []
+}
+
 export async function loadRecipes(
   path = DEFAULT_RECIPES_PATH,
 ): Promise<Recipe[]> {

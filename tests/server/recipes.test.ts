@@ -129,4 +129,32 @@ describe('recipe indexes', () => {
 
     expect(recipes).toEqual([])
   })
+
+  test('getRecipesByIngredient returns recipes using an item as ingredient', async () => {
+    const { getRecipesByIngredient } = await import('$lib/server/recipes')
+
+    // Item 10 is used in recipe 1 (for item 100) and recipe 3 (for item 200)
+    const recipes = getRecipesByIngredient(10)
+
+    expect(recipes).toHaveLength(2)
+    expect(recipes.map(r => r.id).sort()).toEqual([1, 3])
+  })
+
+  test('getRecipesByIngredient returns single recipe for ingredient used once', async () => {
+    const { getRecipesByIngredient } = await import('$lib/server/recipes')
+
+    // Item 12 is only used in recipe 3
+    const recipes = getRecipesByIngredient(12)
+
+    expect(recipes).toHaveLength(1)
+    expect(recipes[0]!.id).toBe(3)
+  })
+
+  test('getRecipesByIngredient returns empty array for non-ingredient item', async () => {
+    const { getRecipesByIngredient } = await import('$lib/server/recipes')
+
+    const recipes = getRecipesByIngredient(99999)
+
+    expect(recipes).toEqual([])
+  })
 })
