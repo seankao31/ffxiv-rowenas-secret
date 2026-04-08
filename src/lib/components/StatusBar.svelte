@@ -27,15 +27,15 @@
 </script>
 
 {#if isVeryStale}
-  <div role="alert" class="alert alert-error text-sm py-2 px-4 rounded-none">
+  <div role="alert" class="alert alert-error text-sm py-2 px-3 lg:px-4 rounded-none">
     <TriangleAlert class="inline w-4 h-4 align-text-bottom" /> Data very outdated — last scan {lastScanLabel}
   </div>
 {:else if isStale}
-  <div role="alert" class="alert alert-warning text-sm py-2 px-4 rounded-none">
+  <div role="alert" class="alert alert-warning text-sm py-2 px-3 lg:px-4 rounded-none">
     <TriangleAlert class="inline w-4 h-4 align-text-bottom" /> Data may be outdated — last scan {lastScanLabel}
   </div>
 {:else}
-  <div class="py-2 px-4 bg-base-200 text-base-content/60 text-sm">
+  <div class="py-2 px-3 lg:px-4 bg-base-200 text-base-content/60 text-sm">
     <span class={[flash && "animate-pulse-bright"]}>Last scan: {lastScanLabel}</span>
   </div>
 {/if}
