@@ -5,8 +5,9 @@ FFXIV cross-world market board arbitrage dashboard for the 陸行鳥 Data Center
 ## Commands
 
 - `bun run test` — run the vitest test suite. **NEVER use bare `bun test`** — that invokes bun's native test runner which ignores vitest config.
-- `bun run dev` — start the dev server
-- `bun run build` — production build
+- `bun run dev` — start the dev server (auto-downloads game data)
+- `bun run build` — production build (auto-downloads game data)
+- `bun run download-data` — download FFXIV_Market msgpack files to `data/`
 
 ## Linear
 

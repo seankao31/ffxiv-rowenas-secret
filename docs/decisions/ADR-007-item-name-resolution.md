@@ -80,6 +80,14 @@ GET https://raw.githubusercontent.com/beherw/FFXIV_Market/main/public/data/tw-it
 - Entries with falsy `tw` values are skipped (fall through to `Item #NNN` fallback)
 - Decode errors return an empty map with a warning, consistent with fetch-error handling
 
+## Update: Build-time download replaces runtime fetch (2026-04-08)
+
+Per ADR-012, `fetchItemNames()` no longer fetches `tw-items.msgpack` from GitHub
+at runtime. A build-time download script (`scripts/download-ffxiv-market-data.ts`)
+fetches the file during `bun run build` and stores it locally in `data/`. The
+function now reads from disk via `readFile()` and throws on errors instead of
+returning an empty map — the build guarantees the file exists.
+
 ## Update: Migrated client-side fallback to XIVAPI v2 (2026-04-02)
 
 Replaced per-item XIVAPI v1 calls (`xivapi.com/item/{id}?columns=Name`) with a single batched XIVAPI v2 call:
