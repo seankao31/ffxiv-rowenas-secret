@@ -19,7 +19,7 @@ The first use case is NPC vendor prices: fetch the `GilShopItem` sheet at startu
 
 - **No new dependencies:** We already use XIVAPI v2 on the client for icons and English fallback names. Adding server-side sheet fetches uses the same API.
 - **YAGNI:** We don't yet know the full scope of data needed across future pages. Building a comprehensive data pipeline now would be premature.
-- **Acceptable startup cost:** Paginating a single sheet (~14 pages for GilShopItem) adds ~10 seconds to server startup, which is fine for a personal tool that restarts infrequently.
+- **Acceptable startup cost:** Paginating a single sheet (~33 pages for GilShopItem) adds ~10 seconds to server startup, which is fine for a personal tool that restarts infrequently.
 - **Isolated and replaceable:** Each feature's data fetching is self-contained, making it straightforward to swap out when the overhaul happens.
 
 ## Alternatives Considered

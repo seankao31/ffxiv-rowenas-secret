@@ -3,8 +3,23 @@ const PAGE_SIZE = 500
 const BATCH_SIZE = 500
 const BATCH_MAX_RETRIES = 3
 
+// Items in GilShopItem with PriceMid > 0 that are not actually vendor-purchasable.
+// Verified 2026-04-08 against Garland Tools (see docs/investigations/2026-04-08-vendor-price-verification.md).
+const FALSE_POSITIVE_ITEM_IDS: ReadonlySet<number> = new Set([
+  // Stat Hi-Potions — in GilShopItem but no NPC sells them
+  4599, 4600, 4601, 4602, 4603,
+  // Crafted gear erroneously in a GilShop definition
+  13266,
+  // Housing permits — purchased via housing UI, not a standard NPC shop
+  6320, 6321, 6322, 6323, 6324, 6325, 6326, 6327, 6328,
+  6329, 6330, 6331, 6332, 6333, 6334, 6335, 6336, 6337,
+  6338, 6339, 6340, 6341, 6342,
+  35608, 35609, 35610, 35611, 35612, 35613, 35614, 35615, 35616,
+])
+
 type GilShopItemRow = {
   row_id: number
+  subrow_id?: number
   fields: {
     Item?: { row_id: number }
   }
@@ -12,7 +27,6 @@ type GilShopItemRow = {
 
 type SheetResponse = {
   rows: GilShopItemRow[]
-  next?: string
 }
 
 type ItemPriceRow = {
@@ -42,13 +56,16 @@ async function fetchVendorItemIds(): Promise<Set<number>> {
     }
 
     const data = (await res.json()) as SheetResponse
+    if (data.rows.length === 0) break
+
     for (const row of data.rows) {
       const itemId = row.fields.Item?.row_id
-      if (itemId && itemId > 0) itemIds.add(itemId)
+      if (itemId && itemId > 0 && !FALSE_POSITIVE_ITEM_IDS.has(itemId)) itemIds.add(itemId)
     }
 
-    if (!data.next) break
-    cursor = data.next
+    // SheetResponse has no `next` cursor — construct from last row's row_id:subrow_id
+    const last = data.rows.at(-1)!
+    cursor = last.subrow_id != null ? `${last.row_id}:${last.subrow_id}` : `${last.row_id}`
   }
 
   return itemIds

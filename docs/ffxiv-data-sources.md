@@ -40,9 +40,11 @@ GET /api/sheet/Item?rows=10976,43686&fields=Icon,Name,PriceMid
 # Search for items in a specific sheet
 GET /api/search?sheets=GilShopItem&query=Item=10976&fields=Item.PriceMid&limit=5
 
-# Paginate a full sheet
-GET /api/sheet/GilShopItem?after=262144.0&limit=500
+# Paginate a subrow sheet (colon-separated row_id:subrow_id)
+GET /api/sheet/GilShopItem?after=262144:0&limit=500
 ```
+
+**Pagination note:** `SheetResponse` has no `next` cursor (unlike `SearchResponse`). To paginate, pass the last row's `row_id:subrow_id` as the `after` parameter. The subrow separator is `:` (colon), per the `RowSpecifier` schema `^\d+(:\d+)?$`.
 
 #### NPC vendor price fields
 
@@ -50,6 +52,7 @@ GET /api/sheet/GilShopItem?after=262144.0&limit=500
 - `Item.PriceLow` — price NPC pays when you sell to them (e.g., 103)
 - These are SaintCoinach field names, community-reverse-engineered, not officially documented
 - **Important:** `PriceMid` exists on all items, but only items appearing in `GilShopItem` are actually sold by NPC vendors. Some non-vendor items have `PriceMid=99999`.
+- **False positives:** 38 items appear in `GilShopItem` with `PriceMid > 0` but are not actually vendor-purchasable (housing permits, removed items, mislinked crafted gear). These are blocklisted in `src/lib/server/vendors.ts`. See `docs/investigations/2026-04-08-vendor-price-verification.md` for the full list.
 
 ---
 
