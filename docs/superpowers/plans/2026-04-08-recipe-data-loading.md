@@ -624,4 +624,4 @@ These should appear before the scanner starts its first cycle.
 | Indexes: by-result-item-id, by-ingredient-item-id | Task 2 + Task 3 |
 | API or loader can answer: "what recipes produce item X?" | Task 2: `getRecipesByResult()` |
 | API or loader can answer: "what recipes use item X as ingredient?" | Task 3: `getRecipesByIngredient()` |
-| Crafting tree construction possible (recursive ingredient resolution) | Task 4: `resolveIngredientTree()` |
+| Crafting tree construction possible (recursive ingredient resolution) | ~~Task 4: `resolveIngredientTree()`~~ Removed — premature; indexes enable this, actual traversal deferred to Crafting Optimizer |
