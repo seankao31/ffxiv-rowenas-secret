@@ -113,7 +113,7 @@ SvelteKit with SSR. Our approach:
   XIVAPI being available for vendor prices. With local msgpack files, the only
   external runtime dependency is Universalis (for market data, which is
   inherently real-time).
-- **Size is manageable.** The three immediate files total ~7.3 MB. Even the
+- **Size is manageable.** The two immediate files total ~5.7 MB. Even the
   full set (~80 MB) fits comfortably in Node.js memory.
 
 ## Alternatives Considered
@@ -125,11 +125,16 @@ intended as temporary scaffolding. With 4+ features on the roadmap that all
 need broad game data, the incremental approach no longer scales — it's time
 for the overhaul ADR-011 predicted.
 
-### Build our own pipeline from Teamcraft extracts
+### Build our own pipeline from Teamcraft extracts (future plan)
 
-Fork FFXIV_Market's build scripts, point them at our own Teamcraft submodule,
-generate msgpack files in our own format. Full control, but duplicates
-significant work for no practical benefit — their schemas already fit.
+Write our own build scripts that read Teamcraft's MIT-licensed JSON data
+(items, recipes, extracts, etc.) and produce msgpack files in our own format.
+For TW Chinese, use Teamcraft's `tw/` locale files directly instead of
+FFXIV_Market's `tw_dataminer/` output. Full control, no license concerns.
+
+This is the right long-term approach but premature today — FFXIV_Market's
+schemas already fit our needs and we'd be duplicating effort for no
+functional benefit. Planned as a future task.
 
 ### Fetch msgpack files from GitHub at deploy time
 
@@ -142,13 +147,18 @@ and not changing file paths.
 - **New dependency:** We depend on FFXIV_Market's repo structure and msgpack
   schemas. If they make breaking changes, we need to update. Mitigated by
   pinning the submodule to a specific commit.
-- **License risk:** FFXIV_Market has no license (all rights reserved). We're
-  consuming their pre-built data files, which themselves are derived from
-  Teamcraft (MIT) and game data (Square Enix). This is a gray area. If it
-  becomes a concern, we can fork their build scripts (which we can rewrite)
-  and point them at Teamcraft's MIT-licensed data directly.
+- **License:** FFXIV_Market's README states "本專案僅供教育用途" (this
+  project is for educational purposes only). This is a common fair-use
+  declaration in Taiwan for non-commercial projects. Our use is defensible:
+  this is a personal learning project, not commercial, and all underlying
+  game data derives from Square Enix sheets that the community freely
+  extracts and shares. That said, using their pre-built files at scale or
+  commercially would not be defensible. We plan to build our own pipeline
+  from Teamcraft's MIT-licensed data (see alternative above) to eliminate
+  this dependency entirely.
 - **Data freshness:** Msgpack files are rebuilt when FFXIV_Market updates
   their Teamcraft submodule (typically after game patches). We update by
   pulling the latest submodule commit.
 - **ADR-011 is superseded:** XIVAPI v2 is no longer the default for new game
-  data needs. It remains in use only for icons and vendor price verification.
+  data needs. It remains in use only for icons, English fallback names, and
+  vendor price verification.
