@@ -55,36 +55,6 @@ export function getRecipesByIngredient(itemId: number): Recipe[] {
   return byIngredient.get(itemId) ?? []
 }
 
-export type IngredientNode = {
-  itemId: number
-  amount: number
-  recipe: Recipe | null
-  ingredients: IngredientNode[]
-}
-
-export function resolveIngredientTree(
-  itemId: number,
-  amount = 1,
-): IngredientNode | null {
-  const recipes = getRecipesByResult(itemId)
-  if (recipes.length === 0) return null
-
-  // Use first recipe (caller can choose among alternatives via getRecipesByResult)
-  const recipe = recipes[0]!
-  const craftCount = Math.ceil(amount / recipe.yields)
-
-  const ingredients: IngredientNode[] = recipe.ingredients.map(ing => {
-    const totalNeeded = ing.amount * craftCount
-    const subRecipes = getRecipesByResult(ing.id)
-    if (subRecipes.length === 0) {
-      return { itemId: ing.id, amount: totalNeeded, recipe: null, ingredients: [] }
-    }
-    return resolveIngredientTree(ing.id, totalNeeded)!
-  })
-
-  return { itemId, amount, recipe, ingredients }
-}
-
 export async function loadRecipes(
   path = DEFAULT_RECIPES_PATH,
 ): Promise<Recipe[]> {
