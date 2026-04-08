@@ -1,6 +1,6 @@
 // tests/client/vendors.test.ts
 import { test, expect, describe, beforeEach, afterEach, vi } from 'vitest'
-import { fetchVendorInfo, getVendorInfo, _clearCache } from '$lib/client/vendors'
+import { fetchVendorInfo, getVendorInfo, setOnChange, _clearCache } from '$lib/client/vendors'
 
 const originalFetch = globalThis.fetch
 const originalWarn = console.warn
@@ -8,6 +8,7 @@ const originalWarn = console.warn
 afterEach(() => {
   globalThis.fetch = originalFetch
   console.warn = originalWarn
+  setOnChange(null)
 })
 
 beforeEach(() => {
@@ -126,6 +127,33 @@ describe('fetchVendorInfo', () => {
     expect(info).toHaveLength(2)
     expect(info![0]!.zone).toBe('Zone 425')  // fallback
     expect(info![1]!.zone).toBe('Zone 427')
+  })
+
+  test('calls onChange callback after successful fetch', async () => {
+    mockFetchResponses({
+      'get.php': GARLAND_ITEM_RESPONSE,
+      'data.json': GARLAND_DATA_RESPONSE,
+    })
+
+    const cb = vi.fn()
+    setOnChange(cb)
+
+    await fetchVendorInfo(5057)
+    expect(cb).toHaveBeenCalledTimes(1)
+  })
+
+  test('deduplicates concurrent data.json fetches', async () => {
+    mockFetchResponses({
+      'get.php': GARLAND_ITEM_RESPONSE,
+      'data.json': GARLAND_DATA_RESPONSE,
+    })
+
+    // Fetch two different items concurrently
+    await Promise.all([fetchVendorInfo(5057), fetchVendorInfo(5057)])
+
+    const calls = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls
+    const dataCalls = calls.filter(c => String(c[0]).includes('data.json'))
+    expect(dataCalls).toHaveLength(1)
   })
 
   test('only fetches NPC partials that match vendor IDs', async () => {

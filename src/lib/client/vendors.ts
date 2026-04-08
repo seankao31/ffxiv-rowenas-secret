@@ -25,29 +25,41 @@ type GarlandItemResponse = {
 // Cache: itemID → vendor info list
 const cache = new Map<number, VendorInfo[]>()
 
+let onChange: (() => void) | null = null
+
+export function setOnChange(cb: (() => void) | null): void {
+  onChange = cb
+}
+
 // Location index: locationID → zone name (loaded lazily from data.json)
-let locationIndex: Map<number, string> | null = null
+let locationPromise: Promise<Map<number, string>> | null = null
 
-async function loadLocationIndex(): Promise<Map<number, string>> {
-  if (locationIndex) return locationIndex
+function loadLocationIndex(): Promise<Map<number, string>> {
+  if (locationPromise) return locationPromise
 
-  try {
-    const res = await fetch(DATA_API)
-    if (!res.ok) {
-      console.warn(`[vendors] Failed to fetch location index: HTTP ${res.status}`)
-      return new Map()
+  locationPromise = (async () => {
+    try {
+      const res = await fetch(DATA_API)
+      if (!res.ok) {
+        console.warn(`[vendors] Failed to fetch location index: HTTP ${res.status}`)
+        return new Map<number, string>()
+      }
+
+      const data = await res.json() as { locationIndex?: Record<string, { name: string }> }
+      const index = new Map<number, string>()
+      if (!data.locationIndex) return index
+      for (const [id, loc] of Object.entries(data.locationIndex)) {
+        index.set(Number(id), loc.name)
+      }
+      return index
+    } catch (err) {
+      console.warn('[vendors] Failed to fetch location index:', err)
+      locationPromise = null  // allow retry on failure
+      return new Map<number, string>()
     }
+  })()
 
-    const data = await res.json() as { locationIndex: Record<string, { name: string }> }
-    locationIndex = new Map()
-    for (const [id, loc] of Object.entries(data.locationIndex)) {
-      locationIndex.set(Number(id), loc.name)
-    }
-    return locationIndex
-  } catch (err) {
-    console.warn('[vendors] Failed to fetch location index:', err)
-    return new Map()
-  }
+  return locationPromise
 }
 
 function zoneName(locationId: number | undefined, locations: Map<number, string>): string {
@@ -62,7 +74,7 @@ export function getVendorInfo(itemId: number): VendorInfo[] | undefined {
 /** @internal — test-only cache reset */
 export function _clearCache(): void {
   cache.clear()
-  locationIndex = null
+  locationPromise = null
 }
 
 export async function fetchVendorInfo(itemId: number): Promise<void> {
@@ -93,6 +105,7 @@ export async function fetchVendorInfo(itemId: number): Promise<void> {
     }
 
     cache.set(itemId, vendors)
+    onChange?.()
   } catch (err) {
     console.warn(`[vendors] Failed to fetch vendor info for item ${itemId}:`, err)
   }

@@ -13,6 +13,9 @@ async function mockApi(page: Page) {
   })
   // Return empty results for XIVAPI to keep tests offline and quiet
   await page.route('**/v2.xivapi.com/**', route => route.fulfill({ json: { rows: [] } }))
+  // Return empty results for Garland Tools to keep tests offline and quiet
+  await page.route('**/garlandtools.org/**/data.json', route => route.fulfill({ json: { locationIndex: {} } }))
+  await page.route('**/garlandtools.org/**/get.php**', route => route.fulfill({ json: { item: { vendors: [] }, partials: [] } }))
 }
 
 /** Read item names from the first column of each table body row. */

@@ -5,12 +5,15 @@
   import { toggleSort, sortOpportunities, type SortState, type SortColumn } from '$lib/client/sort.ts'
   import { resolveItemName, isFallbackName, setOnChange, getIconUrl, fetchItemMetadata } from '$lib/client/xivapi.ts'
   import { tooltip } from '$lib/client/tooltip.ts'
-  import { fetchVendorInfo, getVendorInfo } from '$lib/client/vendors.ts'
+  import { fetchVendorInfo, getVendorInfo, setOnChange as setVendorOnChange } from '$lib/client/vendors.ts'
 
   const { opportunities }: { opportunities: Opportunity[] } = $props()
 
   let nameGeneration = $state(0)
   setOnChange(() => nameGeneration++)
+
+  let vendorGeneration = $state(0)
+  setVendorOnChange(() => vendorGeneration++)
 
   $effect(() => {
     if (opportunities.length > 0) {
@@ -62,6 +65,7 @@
 {/snippet}
 
 {#snippet npcBadge(itemID: number, size: 'sm' | 'xs')}
+  {@const _ = vendorGeneration}
   {@const vendors = getVendorInfo(itemID)}
   {#if vendors && vendors.length > 0}
     <div class="dropdown dropdown-hover dropdown-end">
