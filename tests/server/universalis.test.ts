@@ -1,5 +1,9 @@
 // tests/server/universalis.test.ts
-import { test, expect, describe, vi, afterEach } from 'vitest'
+import { test, expect, describe, vi, afterEach, beforeAll, afterAll } from 'vitest'
+import { writeFile, mkdir, rm } from 'node:fs/promises'
+import { join } from 'node:path'
+import { tmpdir } from 'node:os'
+import { encode } from '@msgpack/msgpack'
 import {
   Semaphore, OutboundRateLimiter,
   fetchMarketableItems, fetchDCListings, fetchWorldListings,
@@ -371,28 +375,30 @@ describe('fetchHomeWorldCombined', () => {
 })
 
 describe('fetchItemNames', () => {
-  const originalFetch = globalThis.fetch
-  const originalWarn = console.warn
+  const fixtureDir = join(tmpdir(), `rowenas-test-${process.pid}`)
   const originalLog = console.log
 
+  beforeAll(async () => {
+    await mkdir(fixtureDir, { recursive: true })
+  })
+
+  afterAll(async () => {
+    await rm(fixtureDir, { recursive: true })
+  })
+
   afterEach(() => {
-    globalThis.fetch = originalFetch
-    console.warn = originalWarn
     console.log = originalLog
   })
 
   test('decodes msgpack tw-items into id→name map', async () => {
     console.log = vi.fn(() => {}) as typeof console.log
-    const { encode } = await import('@msgpack/msgpack')
-    const mockData = {
+    const fixturePath = join(fixtureDir, 'tw-items-valid.msgpack')
+    await writeFile(fixturePath, encode({
       '2': { tw: '火之碎晶' },
       '7': { tw: '水之碎晶' },
-    }
-    globalThis.fetch = vi.fn(async () =>
-      new Response(encode(mockData), { status: 200 })
-    ) as unknown as typeof fetch
+    }))
 
-    const result = await fetchItemNames()
+    const result = await fetchItemNames(fixturePath)
 
     expect(result.size).toBe(2)
     expect(result.get(2)).toBe('火之碎晶')
@@ -402,17 +408,14 @@ describe('fetchItemNames', () => {
 
   test('skips entries with falsy tw field', async () => {
     console.log = vi.fn(() => {}) as typeof console.log
-    const { encode } = await import('@msgpack/msgpack')
-    const mockData = {
+    const fixturePath = join(fixtureDir, 'tw-items-falsy.msgpack')
+    await writeFile(fixturePath, encode({
       '2': { tw: '火之碎晶' },
       '3': { tw: '' },
       '4': { tw: null },
-    }
-    globalThis.fetch = vi.fn(async () =>
-      new Response(encode(mockData), { status: 200 })
-    ) as unknown as typeof fetch
+    }))
 
-    const result = await fetchItemNames()
+    const result = await fetchItemNames(fixturePath)
 
     expect(result.size).toBe(1)
     expect(result.get(2)).toBe('火之碎晶')
@@ -421,28 +424,17 @@ describe('fetchItemNames', () => {
     expect(console.log).toHaveBeenCalledWith('[universalis] Loaded 1 item names from FFXIV_Market')
   })
 
-  test('returns empty map on HTTP error', async () => {
-    console.warn = vi.fn(() => {}) as typeof console.warn
-    globalThis.fetch = vi.fn(async () =>
-      new Response('', { status: 500 })
-    ) as unknown as typeof fetch
-
-    const result = await fetchItemNames()
-
-    expect(result.size).toBe(0)
-    expect(console.warn).toHaveBeenCalledWith('[universalis] Failed to fetch item names: HTTP 500')
+  test('throws when file does not exist', async () => {
+    await expect(fetchItemNames(join(fixtureDir, 'nonexistent.msgpack')))
+      .rejects.toThrow()
   })
 
-  test('returns empty map on corrupt msgpack payload', async () => {
-    console.warn = vi.fn(() => {}) as typeof console.warn
-    globalThis.fetch = vi.fn(async () =>
-      new Response(new Uint8Array([0xff, 0xfe, 0x00]), { status: 200 })
-    ) as unknown as typeof fetch
+  test('throws on corrupt msgpack payload', async () => {
+    const fixturePath = join(fixtureDir, 'tw-items-corrupt.msgpack')
+    await writeFile(fixturePath, new Uint8Array([0xff, 0xfe, 0x00]))
 
-    const result = await fetchItemNames()
-
-    expect(result.size).toBe(0)
-    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('[universalis] Failed to decode item names:'))
+    await expect(fetchItemNames(fixturePath))
+      .rejects.toThrow()
   })
 })
 

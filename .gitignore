@@ -1,6 +1,3 @@
-# Claude Code local config (machine-specific)
-.claude/
-
 # Local environment overrides
 .env
 
@@ -10,6 +7,9 @@ node_modules/
 # Build output (regenerated via `bun run build`)
 build/
 dist/
+
+# Downloaded game data (regenerated via `bun run download-data`)
+data/
 
 # Git worktrees
 .worktrees/

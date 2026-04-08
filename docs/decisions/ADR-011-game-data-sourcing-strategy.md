@@ -1,6 +1,6 @@
 # ADR-011: Game Data Sourcing Strategy — XIVAPI v2 Incremental, Overhaul Later
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-012](ADR-012-adopt-ffxiv-market-msgpack.md)
 **Date:** 2026-04-07
 
 ## Context

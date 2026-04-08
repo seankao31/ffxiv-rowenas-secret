@@ -155,27 +155,20 @@ Located in the Teamcraft repo at `libs/types/src/lib/list/`:
 - **Repo:** https://github.com/beherw/FFXIV_Market
 - **License:** None (all rights reserved)
 - **Format:** MessagePack files in `public/data/`
+- **Full survey:** See `docs/ffxiv-market-data-survey.md` (ENG-81)
 
 A TW-focused market board dashboard. Pre-builds game data into msgpack files using Teamcraft's `extracts.json` as the upstream source, enriched with TW Chinese names from their own `tw_dataminer/` pipeline (SaintCoinach extraction from the TW game client).
 
-#### Files we care about
+#### Files we use or plan to adopt
 
-| File | Size | Content |
-|------|------|---------|
-| `tw-items.msgpack` | 1.3 MB | `Record<itemID, { tw: string }>` — TW Chinese item names |
+| File | Size | Content | Status |
+|------|------|---------|--------|
+| `tw-items.msgpack` | 1.3 MB | `Record<itemID, { tw: string }>` — TW Chinese item names | **In use** (downloaded at build time, read from local file at startup) |
+| `recipes.msgpack` | 4.4 MB | Recipe array with ingredients, jobs, yields | **Adopt next** (Crafting Optimizer) |
+| `obtainable-methods.msgpack` | 20.4 MB | `Record<itemID, ObtainSource[]>` — all acquisition methods | Adopt for Item Detail |
+| `equipment.msgpack` | 2.5 MB | Equipment level, jobs, slot category | Adopt for Item Detail |
 
-We currently fetch this at server startup for item name display. It is the most complete and up-to-date source of TW Chinese item names we've found.
-
-#### Other available files (for reference)
-
-| File | Size |
-|------|------|
-| `obtainable-methods.msgpack` | 20.4 MB |
-| `npcs.msgpack` | 18.8 MB |
-| `shops.msgpack` | 7.7 MB |
-| `recipes.msgpack` | 4.4 MB |
-| `equipment.msgpack` | 2.5 MB |
-| Full dataset total | ~78.5 MB |
+Full inventory of all 21 files: `docs/ffxiv-market-data-survey.md` §1.
 
 ---
 
@@ -191,6 +184,10 @@ All three sources derive from the same upstream (SaintCoinach game sheets) and r
 
 ## Strategic Notes
 
-- **Current approach:** Use XIVAPI v2 for new data needs (NPC prices, recipes, etc.) on an as-needed basis. This avoids large upfront data infrastructure work.
-- **Future direction:** As we add more pages (crafting, retainer ventures, gathering), the per-sheet XIVAPI fetching will likely need to be replaced with a proper data pipeline. Teamcraft's `extracts.json` is a strong candidate — one file contains everything, MIT licensed, and can be processed into our own schema.
-- **TW Chinese names** remain uniquely available from FFXIV_Market's `tw-items.msgpack`. No other source has comparably complete TW translations. This dependency is the hardest to replace.
+See [ADR-012](decisions/ADR-012-adopt-ffxiv-market-msgpack.md) for the full decision rationale.
+
+- **Primary data source:** FFXIV_Market's pre-built msgpack files for item names, recipes, equipment, and obtainable methods. These are derived from Teamcraft's extracts (MIT licensed upstream) and include TW Chinese — the only source with complete TW translations.
+- **Integration method:** Build-time download script fetches needed files from FFXIV_Market's GitHub. No runtime fetch.
+- **XIVAPI v2 retained for:** Item icons (`Item.Icon`), vendor price verification (`GilShopItem` + `Item.PriceMid`). These are lightweight calls that don't justify pre-building.
+- **Server-side loading:** Unlike FFXIV_Market (a pure SPA), we decode msgpack server-side in SvelteKit loaders. Node.js keeps data in memory; clients never download multi-MB data files.
+- **TW Chinese names** remain uniquely available from FFXIV_Market. No other source has comparably complete TW translations. This dependency is the hardest to replace.
