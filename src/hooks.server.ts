@@ -1,10 +1,17 @@
 import { startScanner } from '$lib/server/scanner'
 import { fetchVendorPrices } from '$lib/server/vendors'
+import { initRecipes } from '$lib/server/recipes'
 import { setVendorPrices } from '$lib/server/cache'
 
 export async function init() {
-  // Vendor prices and scanner load concurrently.
+  // Recipe data and vendor prices load concurrently (both are independent).
+  // Recipe data is local disk I/O — fast and must succeed.
   // If XIVAPI is down after retries, the app runs without vendor arbitrage data.
+  const recipePromise = initRecipes().catch(err => {
+    console.error('[server] Recipe loading failed:', err)
+    process.exit(1)
+  })
+
   fetchVendorPrices()
     .then(prices => {
       if (prices.size > 0) setVendorPrices(prices)
@@ -12,6 +19,8 @@ export async function init() {
     .catch(err => {
       console.error('[server] Vendor price fetch failed after retries:', err)
     })
+
+  await recipePromise
 
   startScanner().catch(err => {
     console.error('[server] Scanner crashed:', err)
