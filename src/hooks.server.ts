@@ -3,7 +3,8 @@ import { fetchVendorPrices } from '$lib/server/vendors'
 import { setVendorPrices } from '$lib/server/cache'
 
 export async function init() {
-  // Fetch vendor prices (non-blocking for scanner — graceful degradation if XIVAPI is down)
+  // Fire-and-forget: vendor prices are non-critical and must not block scanner startup.
+  // If XIVAPI is down, the app runs without NPC arbitrage (empty vendor map).
   fetchVendorPrices()
     .then(prices => {
       if (prices.size > 0) setVendorPrices(prices)
