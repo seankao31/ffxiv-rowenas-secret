@@ -168,7 +168,14 @@ function solveNode(
     }
   }
 
-  memo.set(itemId, { ...node, amount: 1, totalCost: node.unitCost })
+  // Only cache nodes where crafting was fully evaluated (not depth-limited).
+  // A depth-capped node is forced to buy/vendor without considering crafting —
+  // caching it would poison shallower occurrences of the same item that should
+  // explore crafting. With default maxDepth=10 and FFXIV trees at 1-5 levels,
+  // the depth cap rarely fires; this guard is a correctness safety net.
+  if (depth < maxDepth) {
+    memo.set(itemId, { ...node, amount: 1, totalCost: node.unitCost })
+  }
 
   return node
 }

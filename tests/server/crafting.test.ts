@@ -43,6 +43,15 @@ const TEST_RECIPES: Recipe[] = [
     ingredients: [{ id: 702, amount: 1 }] },
   { id: 11, result: 702, job: 8, lvl: 50, yields: 1,
     ingredients: [{ id: 10, amount: 1 }] },
+  // Depth-cap memo regression: 800 → [801, 802]
+  // 801 → 802 → 10 (deep path: 802 at depth 2, capped)
+  // 802 → 10 (shallow path: 802 at depth 1, should still evaluate crafting)
+  { id: 12, result: 800, job: 8, lvl: 50, yields: 1,
+    ingredients: [{ id: 801, amount: 1 }, { id: 802, amount: 1 }] },
+  { id: 13, result: 801, job: 8, lvl: 50, yields: 1,
+    ingredients: [{ id: 802, amount: 1 }] },
+  { id: 14, result: 802, job: 8, lvl: 50, yields: 1,
+    ingredients: [{ id: 10, amount: 1 }] },
 ]
 
 function listing(price: number, worldId = WORLD_A, worldName = 'TestWorld'): Listing {
@@ -305,6 +314,30 @@ describe('solveCraftingCost', () => {
     expect(ing702.action).toBe('buy')
     expect(ing702.unitCost).toBeCloseTo(315)
     expect(ing702.recipe).toBeUndefined()
+  })
+
+  test('depth-capped node is not memoized, so shallower occurrence still evaluates crafting', () => {
+    // Item 800 → [801, 802]. Item 801 → [802]. Item 802 → [10].
+    // With maxDepth=2: DFS processes 801 first, which recurses to 802 at depth 2.
+    // At depth 2, 802 is depth-capped → forced to buy (300×1.05 = 315).
+    // Then 800's second ingredient is 802 at depth 1 — should evaluate crafting.
+    // 802 craft cost: 1×100×1.05 = 105. Buy: 300×1.05 = 315. Craft wins at 105.
+    const cache = new Map([
+      [800, itemData(800, [listing(2000)])],
+      [801, itemData(801, [listing(500)])],
+      [802, itemData(802, [listing(300)])],
+      [10, itemData(10, [listing(100)])],
+    ])
+    const result = solveCraftingCost(800, cache, new Map(), { maxDepth: 2 })!
+    // 802 at depth 1 (direct child of 800): should craft at 105, not buy at 315
+    const ing802 = result.root.recipe!.ingredients.find(n => n.itemId === 802)!
+    expect(ing802.action).toBe('craft')
+    expect(ing802.unitCost).toBeCloseTo(105)
+    // 802 at depth 2 (via 801): should still be depth-capped to buy
+    const ing801 = result.root.recipe!.ingredients.find(n => n.itemId === 801)!
+    const deep802 = ing801.recipe!.ingredients.find(n => n.itemId === 802)!
+    expect(deep802.action).toBe('buy')
+    expect(deep802.unitCost).toBeCloseTo(315)
   })
 
   test('market buy confidence uses exponential decay', () => {

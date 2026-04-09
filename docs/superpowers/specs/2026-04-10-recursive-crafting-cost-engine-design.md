@@ -102,7 +102,7 @@ Recursive solver with memoization via `Map<number, CraftingNode>`.
    - Pick the cheapest recipe
 5. **Pick cheapest action** — min of buy price and craft cost
 6. **Compute confidence:**
-   - Market buy: `confidence(listingAgeHours, SOURCE_TIME_CONSTANT_H)` where `listingAgeHours` is derived from the listing's `lastReviewTime` (reuse 12h constant from scoring.ts)
+   - Market buy: `confidence(ageHours, SOURCE_TIME_CONSTANT_H)` where `ageHours` is derived from `worldUploadTimes[worldID]` for the cheapest listing's world (matches arbitrage scorer pattern; reuse 12h constant from scoring.ts)
    - Vendor: `1.0` (always available, never stale)
    - Craft: min confidence across all ingredients in the chosen recipe
 7. **Cache in memo and return**
