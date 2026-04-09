@@ -96,7 +96,7 @@
 {/snippet}
 
 <div data-testid="table-container" class="flex-1 overflow-auto min-h-0">
-  <table class="table table-pin-rows w-max">
+  <table class="table table-pin-rows w-max lg:w-full">
     <thead>
       <tr>
         <th class="sticky left-0 z-20 bg-base-200">Item</th>
@@ -118,15 +118,17 @@
           <td class="sticky left-0 z-10 bg-base-100 group-hover/row:bg-base-300 border-r border-base-300">
             <div class="flex items-center gap-1.5">
               {#if icon}
-                <img src={icon} alt="" width="32" height="32" class="flex-shrink-0"
+                <img src={icon} alt="" width="32" height="32" class="flex-shrink-0 hidden lg:inline-block"
                   onerror={(e: Event) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
               {/if}
-              <a class="link link-info no-underline hover:underline" href="https://universalis.app/market/{opp.itemID}" target="_blank" rel="noopener">
+              <a class="link link-info no-underline hover:underline max-w-[150px] truncate lg:max-w-none" href="https://universalis.app/market/{opp.itemID}" target="_blank" rel="noopener">
                 {name(opp)}
               </a>
-              {#if !isFallbackName(name(opp))}
-                <CopyButton text={name(opp)} />
-              {/if}
+              <span class="hidden lg:inline-flex">
+                {#if !isFallbackName(name(opp))}
+                  <CopyButton text={name(opp)} />
+                {/if}
+              </span>
             </div>
           </td>
 
