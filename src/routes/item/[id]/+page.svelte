@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fetchItemMetadata, getIconUrl, getEnglishName, setOnChange } from '$lib/client/xivapi.ts'
+  import ListingsTable from '$lib/components/ListingsTable.svelte'
 
   let { data } = $props()
 
@@ -39,9 +40,7 @@
   <div class="card bg-base-200">
     <div class="card-body">
       <h2 class="card-title">Cross-World Listings</h2>
-      <div class="skeleton h-4 w-full"></div>
-      <div class="skeleton h-4 w-3/4"></div>
-      <div class="skeleton h-4 w-5/6"></div>
+      <ListingsTable itemId={data.itemID} />
     </div>
   </div>
 
