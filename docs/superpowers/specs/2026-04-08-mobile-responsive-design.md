@@ -86,7 +86,7 @@ Contains the same `navItems` list as Sidebar. Active state styling matches Sideb
 
 **Landscape (~700-900px):** Most columns visible without scrolling. Sticky column is insurance.
 
-**Portrait (~375px):** User scrolls horizontally. Item name always visible.
+**Portrait (~375px):** User scrolls horizontally. Item column is compacted: icon hidden, name truncated (`max-w-[150px]`), copy button hidden. Full item details remain on desktop.
 
 **Hover row background:** The sticky column's background needs to match the hover state. Use `group-hover` on `<tr>` to keep the sticky cell's background in sync.
 
