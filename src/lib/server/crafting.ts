@@ -19,8 +19,7 @@ export function solveCraftingCost(
     maxDepth?: number
   },
 ): CraftingResult | null {
-  const allRecipes = getRecipesByResult(itemId).filter(r => !r.companyCraft)
-  if (allRecipes.length === 0) return null
+  if (getRecipesByResult(itemId).every(r => r.companyCraft ?? false)) return null
 
   const now = Date.now()
   const memo = new Map<number, CraftingNode>()
@@ -85,18 +84,18 @@ function solveNode(
   }
 
   // Market buy option
-  const itemData = cache.get(itemId)
+  const itemEntry = cache.get(itemId)
   let marketPrice: number | null = null
   let marketWorld: string | null = null
   let marketConfidence = 0
 
-  if (itemData && itemData.listings.length > 0) {
-    const cheapest = itemData.listings.reduce((a, b) =>
+  if (itemEntry && itemEntry.listings.length > 0) {
+    const cheapest = itemEntry.listings.reduce((a, b) =>
       b.pricePerUnit < a.pricePerUnit ? b : a,
     )
     marketPrice = cheapest.pricePerUnit * (1 + MARKET_TAX)
     marketWorld = cheapest.worldName
-    const uploadTime = itemData.worldUploadTimes[cheapest.worldID] ?? 0
+    const uploadTime = itemEntry.worldUploadTimes[cheapest.worldID] ?? 0
     const ageHours = uploadTime > 0 ? (now - uploadTime) / MS_PER_HOUR : Infinity
     marketConfidence = confidence(ageHours, SOURCE_TIME_CONSTANT_H)
   }
