@@ -11,6 +11,15 @@
   let expanded = $state(loadSidebarExpanded())
   let drawerOpen = $state(false)
 
+  $effect(() => {
+    const mql = window.matchMedia('(min-width: 1024px)')
+    const handler = (e: MediaQueryListEvent) => {
+      if (e.matches) drawerOpen = false
+    }
+    mql.addEventListener('change', handler)
+    return () => mql.removeEventListener('change', handler)
+  })
+
   function toggleSidebar() {
     expanded = !expanded
     saveSidebarExpanded(expanded)
