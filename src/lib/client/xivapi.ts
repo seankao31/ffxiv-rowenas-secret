@@ -23,6 +23,10 @@ export function getIconUrl(itemID: number): string | undefined {
   return entry?.iconPath ? buildIconUrl(entry.iconPath) : undefined
 }
 
+export function getEnglishName(itemID: number): string | undefined {
+  return cache.get(itemID)?.name
+}
+
 /** @internal — test-only cache seeding */
 export function _seedCache(itemID: number, data: { name?: string, iconPath?: string }): void {
   cache.set(itemID, data)
