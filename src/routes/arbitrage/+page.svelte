@@ -5,10 +5,13 @@
   import ThresholdControls from '$lib/components/ThresholdControls.svelte'
   import OpportunityTable from '$lib/components/OpportunityTable.svelte'
   import FloatingActionBar from '$lib/components/FloatingActionBar.svelte'
+  import BuyRouteModal from '$lib/components/BuyRouteModal.svelte'
+  import { buildRoute } from '$lib/client/route'
 
   let opportunities = $state<Opportunity[]>([])
   let selectedIds = $state(new Set<number>())
   let showRouteModal = $state(false)
+  const route = $derived(buildRoute(opportunities.filter(o => selectedIds.has(o.itemID))))
   let meta = $state<ScanMeta>({
     scanCompletedAt: 0,
     itemsScanned: 0,
@@ -104,4 +107,8 @@
     onplanroute={() => showRouteModal = true}
     onclear={() => selectedIds = new Set()}
   />
+{/if}
+
+{#if showRouteModal}
+  <BuyRouteModal {route} onclose={() => showRouteModal = false} />
 {/if}
