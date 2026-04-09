@@ -7,7 +7,7 @@ Compiled 2026-04-07.
 
 | Source | What we use | Where |
 |--------|------------|-------|
-| **Universalis API** | Market board listings, sale history, velocity | `src/lib/server/universalis.ts` |
+| **Universalis API** | Market board listings, sale history, velocity | `src/lib/server/universalis.ts` — see also `docs/data-sources/universalis-api-reference.md`, `docs/data-sources/universalis-data-analysis.md` |
 | **XIVAPI v2** | Item icons, English fallback names | `src/lib/client/xivapi.ts` |
 | **FFXIV_Market** (beherw) | Traditional Chinese item names (`tw-items.msgpack`) | `src/lib/server/universalis.ts:fetchItemNames()` |
 
@@ -52,7 +52,7 @@ GET /api/sheet/GilShopItem?after=262144:0&limit=500
 - `Item.PriceLow` — price NPC pays when you sell to them (e.g., 103)
 - These are SaintCoinach field names, community-reverse-engineered, not officially documented
 - **Important:** `PriceMid` exists on all items, but only items appearing in `GilShopItem` are actually sold by NPC vendors. Some non-vendor items have `PriceMid=99999`.
-- **False positives:** 38 items appear in `GilShopItem` with `PriceMid > 0` but are not actually vendor-purchasable (housing permits, removed items, mislinked crafted gear). These are blocklisted in `src/lib/server/vendors.ts`. See `docs/investigations/2026-04-08-vendor-price-verification.md` for the full list.
+- **False positives:** 38 items appear in `GilShopItem` with `PriceMid > 0` but are not actually vendor-purchasable (housing permits, removed items, mislinked crafted gear). These are blocklisted in `src/lib/server/vendors.ts`. See `docs/data-sources/vendor-price-verification.md` for the full list.
 
 ---
 
@@ -155,7 +155,7 @@ Located in the Teamcraft repo at `libs/types/src/lib/list/`:
 - **Repo:** https://github.com/beherw/FFXIV_Market
 - **License:** None (all rights reserved)
 - **Format:** MessagePack files in `public/data/`
-- **Full survey:** See `docs/ffxiv-market-data-survey.md` (ENG-81)
+- **Full survey:** See `docs/data-sources/ffxiv-market-data-survey.md`
 
 A TW-focused market board dashboard. Pre-builds game data into msgpack files using Teamcraft's `extracts.json` as the upstream source, enriched with TW Chinese names from their own `tw_dataminer/` pipeline (SaintCoinach extraction from the TW game client).
 
@@ -168,7 +168,7 @@ A TW-focused market board dashboard. Pre-builds game data into msgpack files usi
 | `obtainable-methods.msgpack` | 20.4 MB | `Record<itemID, ObtainSource[]>` — all acquisition methods | Adopt for Item Detail |
 | `equipment.msgpack` | 2.5 MB | Equipment level, jobs, slot category | Adopt for Item Detail |
 
-Full inventory of all 21 files: `docs/ffxiv-market-data-survey.md` §1.
+Full inventory of all 21 files: `docs/data-sources/ffxiv-market-data-survey.md` §1.
 
 ---
 

@@ -8,7 +8,7 @@
 ADR-011 chose incremental XIVAPI v2 fetching as a temporary measure, deferring
 a proper data pipeline until we understood our full data requirements. After
 surveying FFXIV_Market's pre-built msgpack files (see
-`docs/ffxiv-market-data-survey.md`), we now have that understanding.
+`docs/data-sources/ffxiv-market-data-survey.md`), we now have that understanding.
 
 FFXIV_Market pre-builds 21 msgpack files (~80 MB total) covering item names
 (7 languages), recipes, equipment, obtainable methods, NPCs, shops, quests,

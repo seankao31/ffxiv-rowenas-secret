@@ -4,7 +4,7 @@ const BATCH_SIZE = 500
 const BATCH_MAX_RETRIES = 3
 
 // Items in GilShopItem with PriceMid > 0 that are not actually vendor-purchasable.
-// Verified 2026-04-08 against Garland Tools (see docs/investigations/2026-04-08-vendor-price-verification.md).
+// Verified 2026-04-08 against Garland Tools (see docs/data-sources/vendor-price-verification.md).
 const FALSE_POSITIVE_ITEM_IDS: ReadonlySet<number> = new Set([
   // Stat Hi-Potions — in GilShopItem but no NPC sells them
   4599, 4600, 4601, 4602, 4603,

@@ -7,7 +7,7 @@
 
 The app currently depends on external data for two things: market board data (Universalis) and item names (FFXIV_Market msgpack, per ADR-007). New features — starting with NPC vendor price arbitrage, followed by crafting recipes, retainer ventures, and more — require additional game data: vendor prices, recipe ingredients, gathering info, etc.
 
-This data is static between game patches (every ~3-4 months) and is available from multiple sources that all derive from the same upstream (SaintCoinach reverse-engineered game sheets). See `docs/ffxiv-data-sources.md` for a full comparison of available sources.
+This data is static between game patches (every ~3-4 months) and is available from multiple sources that all derive from the same upstream (SaintCoinach reverse-engineered game sheets). See `docs/data-sources/ffxiv-data-sources.md` for a full comparison of available sources.
 
 ## Decision
 
