@@ -2,6 +2,8 @@ import type { ItemData, ScanMeta, ScanProgress } from '$lib/shared/types.ts'
 
 const itemCache = new Map<number, ItemData>()
 const nameCache = new Map<number, string>()  // itemID → display name
+let nameCacheResolve: (() => void) | null = null
+let nameCachePromise: Promise<void> | null = null
 let vendorPrices = new Map<number, number>()  // itemID → NPC vendor price
 
 let scanMeta: ScanMeta = {
@@ -24,6 +26,19 @@ export function setNameMap(names: Map<number, string>): void {
   for (const [id, name] of names) {
     nameCache.set(id, name)
   }
+  if (names.size > 0 && nameCacheResolve) {
+    nameCacheResolve()
+    nameCacheResolve = null
+    nameCachePromise = null
+  }
+}
+
+export function waitForNameCache(): Promise<void> {
+  if (nameCache.size > 0) return Promise.resolve()
+  if (!nameCachePromise) {
+    nameCachePromise = new Promise<void>(resolve => { nameCacheResolve = resolve })
+  }
+  return nameCachePromise
 }
 
 export function getNameMap(): Map<number, string> {
