@@ -146,4 +146,27 @@ describe('buildRoute', () => {
     expect(route).toHaveLength(1)
     expect(route[0].items).toHaveLength(1)
   })
+
+  it('sorts alt-only groups by item count descending', () => {
+    const selected = [
+      opp({ itemID: 1, sourceWorld: 'Ixion', score: 90,
+            altSourceWorld: 'Unicorn', altBuyPrice: 1200,
+            altSourceConfidence: 0.85, altSourceDataAgeHours: 2 }),
+      opp({ itemID: 2, sourceWorld: 'Ixion', score: 80,
+            altSourceWorld: 'Carbuncle', altBuyPrice: 1100,
+            altSourceConfidence: 0.9, altSourceDataAgeHours: 1 }),
+      opp({ itemID: 3, sourceWorld: 'Ixion', score: 70,
+            altSourceWorld: 'Carbuncle', altBuyPrice: 1050,
+            altSourceConfidence: 0.88, altSourceDataAgeHours: 1.5 }),
+    ]
+    const route = buildRoute(selected)
+
+    // Ixion is primary, Carbuncle has 2 alts, Unicorn has 1 alt
+    const altGroups = route.filter(g => !g.isPrimaryGroup)
+    expect(altGroups).toHaveLength(2)
+    expect(altGroups[0].world).toBe('Carbuncle')
+    expect(altGroups[0].items).toHaveLength(2)
+    expect(altGroups[1].world).toBe('Unicorn')
+    expect(altGroups[1].items).toHaveLength(1)
+  })
 })

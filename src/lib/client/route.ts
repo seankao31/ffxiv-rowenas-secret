@@ -1,5 +1,7 @@
 import type { Opportunity } from '$lib/shared/types'
 
+export type RouteItemState = 'unchecked' | 'bought' | 'missing'
+
 export type RouteItem = {
   itemID: number
   itemName: string
