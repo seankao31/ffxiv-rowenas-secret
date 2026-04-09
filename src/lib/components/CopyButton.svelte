@@ -21,7 +21,7 @@
   onDestroy(() => clearTimeout(timer))
 </script>
 
-<button type="button" class="btn btn-ghost btn-xs opacity-50 hover:opacity-90" aria-label="Copy item name" onclick={copy}>
+<button type="button" class="btn btn-ghost btn-xs opacity-50 hover:opacity-90" aria-label="Copy item name" onclick={(e) => { e.stopPropagation(); copy() }}>
   {#if copied}
     <Check class="w-3.5 h-3.5" strokeWidth={2.5} data-lucide="check" />
   {:else}

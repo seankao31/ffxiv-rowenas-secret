@@ -7,7 +7,13 @@
   import { tooltip } from '$lib/client/tooltip.ts'
   import { fetchVendorInfo, getVendorInfo, setOnChange as setVendorOnChange } from '$lib/client/vendors.ts'
 
-  const { opportunities }: { opportunities: Opportunity[] } = $props()
+  const {
+    opportunities,
+    selectedIds = $bindable(new Set<number>()),
+  }: {
+    opportunities: Opportunity[]
+    selectedIds?: Set<number>
+  } = $props()
 
   let nameGeneration = $state(0)
   setOnChange(() => nameGeneration++)
@@ -57,6 +63,16 @@
 
   function onSort(column: SortColumn) {
     sort = toggleSort(sort, column)
+  }
+
+  function toggleSelection(itemID: number) {
+    const next = new Set(selectedIds)
+    if (next.has(itemID)) {
+      next.delete(itemID)
+    } else {
+      next.add(itemID)
+    }
+    selectedIds = next
   }
 </script>
 
@@ -113,7 +129,10 @@
     <tbody>
       {#each sorted as opp (opp.itemID)}
         {@const icon = iconUrl(opp)}
-        <tr class="group/row hover:bg-base-300">
+        <tr
+          class="group/row hover:bg-base-300 cursor-pointer border-l-3 {selectedIds.has(opp.itemID) ? 'border-primary bg-primary/10' : 'border-transparent'}"
+          onclick={() => toggleSelection(opp.itemID)}
+        >
           <!-- Item -->
           <td class="sticky left-0 z-10 bg-base-100 group-hover/row:bg-base-300 border-r border-base-300">
             <div class="flex items-center gap-1.5">
@@ -121,7 +140,7 @@
                 <img src={icon} alt="" width="32" height="32" class="flex-shrink-0 hidden lg:inline-block"
                   onerror={(e: Event) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
               {/if}
-              <a class="link link-info no-underline hover:underline max-w-[150px] truncate lg:max-w-none" href="https://universalis.app/market/{opp.itemID}" target="_blank" rel="noopener">
+              <a class="link link-info no-underline hover:underline max-w-[150px] truncate lg:max-w-none" href="/item/{opp.itemID}" onclick={(e: MouseEvent) => e.stopPropagation()}>
                 {name(opp)}
               </a>
               <span class="hidden lg:inline-flex">
