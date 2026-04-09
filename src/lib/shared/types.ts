@@ -3,7 +3,7 @@ export type Listing = {
   quantity: number
   worldID: number
   worldName: string
-  lastReviewTime: number  // unix ms — converted from API's seconds on ingestion in fetchDCListings
+  lastReviewTime: number  // unix ms — converted from API's seconds on ingestion
   hq: boolean
 }
 
