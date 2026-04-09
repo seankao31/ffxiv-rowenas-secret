@@ -137,4 +137,13 @@ test.describe('Item detail page', () => {
     await toggle.check()
     await expect(page.locator('text=No listings match the current filters')).toBeVisible()
   })
+
+  test('shows error message when Universalis is unreachable', async ({ page }) => {
+    // Override the Universalis mock to return an error
+    await page.route('**/universalis.app/api/v2/**', route =>
+      route.fulfill({ status: 500, body: 'Internal Server Error' }),
+    )
+    await page.goto(`/item/${ITEM_ID}`)
+    await expect(page.locator('text=Unable to load listings')).toBeVisible()
+  })
 })

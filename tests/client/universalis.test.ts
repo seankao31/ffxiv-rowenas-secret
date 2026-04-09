@@ -76,28 +76,20 @@ describe('fetchItemListings', () => {
     })
   })
 
-  test('returns empty array on network error', async () => {
-    console.warn = vi.fn() as typeof console.warn
+  test('throws on network error', async () => {
     globalThis.fetch = vi.fn(async () => {
       throw new Error('Network error')
     }) as unknown as typeof fetch
 
-    const listings = await fetchItemListings(2394)
-
-    expect(listings).toEqual([])
-    expect(console.warn).toHaveBeenCalled()
+    await expect(fetchItemListings(2394)).rejects.toThrow('Network error')
   })
 
-  test('returns empty array on HTTP error', async () => {
-    console.warn = vi.fn() as typeof console.warn
+  test('throws on HTTP error', async () => {
     globalThis.fetch = vi.fn(async () =>
       new Response('', { status: 500 }),
     ) as unknown as typeof fetch
 
-    const listings = await fetchItemListings(2394)
-
-    expect(listings).toEqual([])
-    expect(console.warn).toHaveBeenCalled()
+    await expect(fetchItemListings(2394)).rejects.toThrow('HTTP 500')
   })
 
   test('returns empty array when listings field is missing', async () => {

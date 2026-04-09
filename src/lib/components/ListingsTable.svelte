@@ -22,13 +22,18 @@
     return result
   })
 
+  // Note: this $effect has no cancellation guard for rapid itemId changes.
+  // Currently safe because SvelteKit destroys the component on route navigation.
+  // If reused in a context with dynamic itemId, add an AbortController or
+  // staleness flag to prevent a slower response from overwriting a newer one.
   $effect(() => {
     loading = true
     error = false
     fetchItemListings(itemId).then(result => {
       listings = result
       loading = false
-    }).catch(() => {
+    }).catch(err => {
+      console.warn('[universalis] Failed to fetch listings:', err)
       error = true
       loading = false
     })
