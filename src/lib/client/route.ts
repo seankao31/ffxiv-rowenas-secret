@@ -31,7 +31,6 @@ export function buildRoute(opportunities: Opportunity[]): RouteWorldGroup[] {
       groups.set(opp.sourceWorld, { isPrimary: true, items: [] })
     }
     const group = groups.get(opp.sourceWorld)!
-    group.isPrimary = true
     group.items.push({
       itemID: opp.itemID,
       itemName: opp.itemName,
