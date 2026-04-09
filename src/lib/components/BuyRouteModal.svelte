@@ -108,7 +108,7 @@
 
   function priceDiffPercent(altPrice: number, primaryPrice: number): string {
     const diff = ((altPrice - primaryPrice) / primaryPrice) * 100
-    return `+${diff.toFixed(0)}%`
+    return `${diff >= 0 ? '+' : ''}${diff.toFixed(0)}%`
   }
 
   function getLinkedBuyWorld(item: RouteItem): string {
@@ -162,7 +162,6 @@
       {#each route as group (group.world)}
         {@const done = isGroupDone(group)}
         {@const doneCount = groupDoneCount(group)}
-        {@const primaryCount = group.items.filter(i => !i.isAlt).length}
         {@const subtotal = group.items.filter(i => !i.isAlt).reduce((s, i) => s + i.profitPerUnit * i.recommendedUnits, 0)}
 
         <div class="border-b border-base-300 {!group.isPrimaryGroup ? 'opacity-60' : ''}" data-testid="world-group">
@@ -189,6 +188,7 @@
             {@const promoted = isPromoted(item)}
             {@const conf = confidenceLabel(item.sourceDataAgeHours)}
             {@const icon = getIconUrl(item.itemID)}
+            {@const displayName = resolveItemName(item.itemID, item.itemName)}
 
             {#if state === 'bought'}
               <!-- Bought state -->
@@ -196,13 +196,16 @@
                 class="flex items-center px-5 py-2.5 pl-11 gap-3 border-l-3 border-transparent opacity-45 cursor-pointer"
                 data-testid="route-item"
                 data-state="bought"
+                role="button"
+                tabindex="0"
                 onclick={() => toggleBought(item)}
+                onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleBought(item) } }}
               >
                 <div class="w-5 h-5 rounded border-2 border-primary bg-primary/30 flex items-center justify-center shrink-0">
                   <span class="text-primary text-xs">✓</span>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <span class="text-sm line-through text-base-content/50">{resolveItemName(item.itemID, item.itemName)}</span>
+                  <span class="text-sm line-through text-base-content/50">{displayName}</span>
                 </div>
                 <span class="text-sm text-base-content/30 tabular-nums">×{item.recommendedUnits}</span>
                 <span class="text-sm text-base-content/30 tabular-nums">{fmt(item.buyPrice)}</span>
@@ -220,7 +223,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
-                    <span class="text-sm line-through text-base-content/40">{resolveItemName(item.itemID, item.itemName)}</span>
+                    <span class="text-sm line-through text-base-content/40">{displayName}</span>
                     {#if item.isAlt}
                       <span class="badge badge-xs badge-warning opacity-50">alt</span>
                     {/if}
@@ -244,7 +247,7 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
-                    <span class="text-sm line-through text-base-content/50">{resolveItemName(item.itemID, item.itemName)}</span>
+                    <span class="text-sm line-through text-base-content/50">{displayName}</span>
                     <span class="badge badge-xs badge-error">missing</span>
                   </div>
                 </div>
@@ -263,7 +266,10 @@
                 class="flex items-center px-5 py-2.5 pl-11 gap-3 border-l-3 cursor-pointer hover:bg-base-200/50 {promoted ? 'border-warning' : 'border-transparent'} {item.isAlt && !promoted ? 'opacity-75' : ''}"
                 data-testid="route-item"
                 data-state="unchecked"
+                role="button"
+                tabindex="0"
                 onclick={() => toggleBought(item)}
+                onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleBought(item) } }}
               >
                 <div class="w-5 h-5 rounded border-2 border-base-content/20 shrink-0"></div>
                 <div class="flex-1 min-w-0">
@@ -272,11 +278,11 @@
                       <img src={icon} alt="" width="20" height="20" class="shrink-0"
                         onerror={(e: Event) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
                     {/if}
-                    <span class="text-sm">{resolveItemName(item.itemID, item.itemName)}</span>
+                    <span class="text-sm">{displayName}</span>
                     {#if item.isAlt}
                       <span class="badge badge-xs badge-warning">alt</span>
                     {/if}
-                    <CopyButton text={resolveItemName(item.itemID, item.itemName)} />
+                    <CopyButton text={displayName} />
                   </div>
                   {#if item.isAlt && item.primaryWorld && item.primaryBuyPrice}
                     <p class="text-xs mt-0.5 pl-7 {promoted ? 'text-warning' : 'text-base-content/35'}">
