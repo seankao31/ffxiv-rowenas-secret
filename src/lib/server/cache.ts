@@ -2,6 +2,7 @@ import type { ItemData, ScanMeta, ScanProgress } from '$lib/shared/types.ts'
 
 const itemCache = new Map<number, ItemData>()
 const nameCache = new Map<number, string>()  // itemID → display name
+let nameCacheSettled = false  // true once setNameMap has been called (success or failure)
 let nameCacheResolve: (() => void) | null = null
 let nameCachePromise: Promise<void> | null = null
 let vendorPrices = new Map<number, number>()  // itemID → NPC vendor price
@@ -26,15 +27,18 @@ export function setNameMap(names: Map<number, string>): void {
   for (const [id, name] of names) {
     nameCache.set(id, name)
   }
-  if (names.size > 0 && nameCacheResolve) {
-    nameCacheResolve()
-    nameCacheResolve = null
-    nameCachePromise = null
+  if (!nameCacheSettled) {
+    nameCacheSettled = true
+    if (nameCacheResolve) {
+      nameCacheResolve()
+      nameCacheResolve = null
+      nameCachePromise = null
+    }
   }
 }
 
 export function waitForNameCache(): Promise<void> {
-  if (nameCache.size > 0) return Promise.resolve()
+  if (nameCacheSettled) return Promise.resolve()
   if (!nameCachePromise) {
     nameCachePromise = new Promise<void>(resolve => { nameCacheResolve = resolve })
   }
@@ -76,4 +80,11 @@ export function setVendorPrices(prices: Map<number, number>): void {
 
 export function getVendorPrices(): Map<number, number> {
   return vendorPrices
+}
+
+// Test-only: reset name cache loading state so waitForNameCache works fresh between tests
+export function _resetNameCacheState(): void {
+  nameCacheSettled = false
+  nameCacheResolve = null
+  nameCachePromise = null
 }

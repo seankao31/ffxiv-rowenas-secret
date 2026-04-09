@@ -221,7 +221,7 @@ export async function startScanner(): Promise<void> {
   // Fetch all item names from FFXIV_Market's TW msgpack data
   setScanProgress({ phase: 'Loading item names…', completedBatches: 0, totalBatches: 0 })
   const names = await fetchItemNames()
-  if (names.size > 0) setNameMap(names)
+  setNameMap(names)
 
   while (true) {
     try {

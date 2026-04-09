@@ -1,11 +1,12 @@
 import { test, expect, describe, afterEach } from 'vitest'
-import { setNameMap, waitForNameCache } from '$lib/server/cache'
+import { setNameMap, waitForNameCache, _resetNameCacheState } from '$lib/server/cache'
 
 // Import the load function from the route module
 import { load } from '../../src/routes/item/[id]/+page.server'
 
 afterEach(() => {
   setNameMap(new Map())
+  _resetNameCacheState()
 })
 
 describe('item detail load', () => {
@@ -54,6 +55,20 @@ describe('waitForNameCache', () => {
 
     // Populate the cache — promise resolves
     setNameMap(new Map([[1, 'test']]))
+    await promise
+    expect(resolved).toBe(true)
+  })
+
+  test('resolves when cache loading fails (empty map)', async () => {
+    let resolved = false
+    const promise = waitForNameCache().then(() => { resolved = true })
+
+    // Not yet resolved — setNameMap hasn't been called
+    await Promise.resolve()
+    expect(resolved).toBe(false)
+
+    // Simulate failed load — empty map still resolves the promise
+    setNameMap(new Map())
     await promise
     expect(resolved).toBe(true)
   })
