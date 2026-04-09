@@ -4,8 +4,11 @@
   import StatusBar from '$lib/components/StatusBar.svelte'
   import ThresholdControls from '$lib/components/ThresholdControls.svelte'
   import OpportunityTable from '$lib/components/OpportunityTable.svelte'
+  import FloatingActionBar from '$lib/components/FloatingActionBar.svelte'
 
   let opportunities = $state<Opportunity[]>([])
+  let selectedIds = $state(new Set<number>())
+  let showRouteModal = $state(false)
   let meta = $state<ScanMeta>({
     scanCompletedAt: 0,
     itemsScanned: 0,
@@ -90,6 +93,15 @@
     <p class="p-8 text-base-content/50 text-center">No opportunities found with current filters.</p>
   {:else}
     <p class="mt-3 mb-1 text-base-content/50 text-sm shrink-0">Showing {opportunities.length} opportunities</p>
-    <OpportunityTable {opportunities} />
+    <OpportunityTable {opportunities} bind:selectedIds />
   {/if}
 </main>
+
+{#if !showRouteModal}
+  <FloatingActionBar
+    {selectedIds}
+    {opportunities}
+    onplanroute={() => showRouteModal = true}
+    onclear={() => selectedIds = new Set()}
+  />
+{/if}
