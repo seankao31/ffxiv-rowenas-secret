@@ -84,3 +84,35 @@ export type Opportunity = {
   activeCompetitorCount: number
   fairShareVelocity: number
 }
+
+export type CraftAction = 'craft' | 'buy' | 'vendor'
+
+export type CraftingNode = {
+  itemId: number
+  amount: number
+  action: CraftAction
+  unitCost: number
+  totalCost: number
+  confidence: number
+  recipe?: {
+    recipeId: number
+    job: number
+    level: number
+    yields: number
+    ingredients: CraftingNode[]
+  }
+  marketPrice: number | null
+  vendorPrice: number | null
+  craftCost: number | null
+  marketWorld: string | null
+}
+
+export type CraftingResult = {
+  root: CraftingNode
+  totalCost: number
+  confidence: number
+  cheapestListing: { price: number; world: string } | null
+  realisticSellPrice: number | null
+  profitVsBuy: number | null
+  profitVsSell: number | null
+}

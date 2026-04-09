@@ -1,20 +1,20 @@
 import type { ItemData, Opportunity, ThresholdParams } from '$lib/shared/types.ts'
 
-const HOME_WORLD_ID = 4030
-const MARKET_TAX = 0.05
+export const HOME_WORLD_ID = 4030
+export const MARKET_TAX = 0.05
 // Time constants match spec pseudocode: exp(-age / τ)
 // home τ=3h → at 3h, confidence≈0.368; at 6h≈0.135 (steep — financial risk)
 // source τ=12h → at 12h, confidence≈0.368 (gentle — trip risk only)
-const HOME_TIME_CONSTANT_H = 3
-const SOURCE_TIME_CONSTANT_H = 12
-const MS_PER_HOUR = 3_600_000
+export const HOME_TIME_CONSTANT_H = 3
+export const SOURCE_TIME_CONSTANT_H = 12
+export const MS_PER_HOUR = 3_600_000
 // Turnover (liquidity) discount: penalises slow-selling items in the score.
 // Items selling in ≤ IDEAL days get no penalty; beyond that, exponential decay with τ.
 // τ=3 → at 3d to sell ≈ 51%, at 7d ≈ 14%.  Affects ranking only, not expectedDailyProfit.
 const TURNOVER_IDEAL_DAYS = 1
 const TURNOVER_TIME_CONSTANT_DAYS = 3
 
-function confidence(ageHours: number, timeConstantHours: number): number {
+export function confidence(ageHours: number, timeConstantHours: number): number {
   return Math.exp(-ageHours / timeConstantHours)
 }
 
