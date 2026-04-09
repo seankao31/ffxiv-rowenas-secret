@@ -1,6 +1,6 @@
 # Recursive Crafting Cost Engine Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Final review includes cross-model verification via codex-review-gate.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking. Final review includes cross-model verification via codex-review-gate.
 
 **Goal:** Implement a recursive crafting cost solver that determines the cheapest way to obtain any craftable item by comparing craft vs. buy vs. vendor at each node.
 
@@ -17,7 +17,7 @@
 
 The crafting module needs `confidence()`, `MARKET_TAX`, `SOURCE_TIME_CONSTANT_H`, `MS_PER_HOUR`, and `HOME_WORLD_ID` from scoring.ts. Currently module-private.
 
-- [ ] **Step 1: Add `export` to constants and confidence function**
+- [x] **Step 1: Add `export` to constants and confidence function**
 
 In `src/lib/server/scoring.ts`, change lines 3–4 and 8–10:
 
@@ -40,12 +40,12 @@ export function confidence(ageHours: number, timeConstantHours: number): number 
 
 Leave `TURNOVER_IDEAL_DAYS` and `TURNOVER_TIME_CONSTANT_DAYS` unexported — only scoring uses them.
 
-- [ ] **Step 2: Verify existing tests pass**
+- [x] **Step 2: Verify existing tests pass**
 
 Run: `bun run test -- tests/server/scoring.test.ts`
 Expected: All 18 tests pass — no functional change.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/server/scoring.ts
@@ -59,7 +59,7 @@ git commit -m "refactor(ENG-64): export confidence function and constants from s
 **Files:**
 - Modify: `src/lib/shared/types.ts`
 
-- [ ] **Step 1: Append crafting types**
+- [x] **Step 1: Append crafting types**
 
 Add at the end of `src/lib/shared/types.ts`:
 
@@ -97,12 +97,12 @@ export type CraftingResult = {
 }
 ```
 
-- [ ] **Step 2: Verify all existing tests pass**
+- [x] **Step 2: Verify all existing tests pass**
 
 Run: `bun run test`
 Expected: All 151 tests pass.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/shared/types.ts
@@ -119,7 +119,7 @@ git commit -m "feat(ENG-64): add CraftingNode and CraftingResult types"
 
 Creates both files. Tests null return for uncraftable items and a simple one-level craft with buy-only ingredients. The initial implementation handles market pricing and recipe evaluation but stubs out vendor, memoization, confidence, depth cap, and job levels.
 
-- [ ] **Step 1: Write test file with fixtures, helpers, and first tests**
+- [x] **Step 1: Write test file with fixtures, helpers, and first tests**
 
 Create `tests/server/crafting.test.ts`:
 
@@ -254,12 +254,12 @@ describe('solveCraftingCost', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: FAIL — module `$lib/server/crafting` does not exist.
 
-- [ ] **Step 3: Write the solver implementation**
+- [x] **Step 3: Write the solver implementation**
 
 Create `src/lib/server/crafting.ts`:
 
@@ -389,12 +389,12 @@ function solveNode(
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: 3 tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/server/crafting.ts tests/server/crafting.test.ts
@@ -409,7 +409,7 @@ git commit -m "feat(ENG-64): add crafting cost solver with basic craft-vs-buy"
 - Modify: `src/lib/server/crafting.ts`
 - Modify: `tests/server/crafting.test.ts`
 
-- [ ] **Step 1: Write failing test for vendor preference**
+- [x] **Step 1: Write failing test for vendor preference**
 
 Add to `tests/server/crafting.test.ts` inside the `describe('solveCraftingCost')` block:
 
@@ -447,12 +447,12 @@ Add to `tests/server/crafting.test.ts` inside the `describe('solveCraftingCost')
   })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: FAIL — vendor test expects `action: 'vendor'` but gets `action: 'buy'` (vendor not implemented yet).
 
-- [ ] **Step 3: Add vendor pricing to solveNode**
+- [x] **Step 3: Add vendor pricing to solveNode**
 
 In `src/lib/server/crafting.ts`, in the `solveNode` function, after the market buy section and before the craft option section, add:
 
@@ -473,12 +473,12 @@ And update the node construction to use the real `vendorPrice`:
     vendorPrice,
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: All 5 tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/server/crafting.ts tests/server/crafting.test.ts
@@ -494,7 +494,7 @@ git commit -m "feat(ENG-64): add vendor pricing as third option in solver"
 
 The implementation already handles yields division and recursion. This task verifies with explicit tests.
 
-- [ ] **Step 1: Write tests for yields and recursion**
+- [x] **Step 1: Write tests for yields and recursion**
 
 Add to `tests/server/crafting.test.ts`:
 
@@ -552,12 +552,12 @@ Add to `tests/server/crafting.test.ts`:
   })
 ```
 
-- [ ] **Step 2: Run tests to verify they pass**
+- [x] **Step 2: Run tests to verify they pass**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: All 8 tests pass — no new implementation needed.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/server/crafting.test.ts
@@ -572,7 +572,7 @@ git commit -m "test(ENG-64): add yields and recursive craft-vs-buy tests"
 - Modify: `src/lib/server/crafting.ts`
 - Modify: `tests/server/crafting.test.ts`
 
-- [ ] **Step 1: Write tests for multi-recipe and job levels**
+- [x] **Step 1: Write tests for multi-recipe and job levels**
 
 Add to `tests/server/crafting.test.ts`:
 
@@ -661,12 +661,12 @@ Add to `tests/server/crafting.test.ts`:
 
 Wait, that last test is getting messy. Let me remove it and keep the tests clean.
 
-- [ ] **Step 2: Run tests to verify job level tests fail**
+- [x] **Step 2: Run tests to verify job level tests fail**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: FAIL — job level filtering not implemented yet.
 
-- [ ] **Step 3: Add job level filtering to solveNode**
+- [x] **Step 3: Add job level filtering to solveNode**
 
 In `src/lib/server/crafting.ts`, in the `solveNode` function, update the recipe filtering:
 
@@ -682,12 +682,12 @@ To:
     .filter(r => !jobLevels || (jobLevels[r.job] !== undefined && r.lvl <= jobLevels[r.job]!))
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: All tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/server/crafting.ts tests/server/crafting.test.ts
@@ -702,7 +702,7 @@ git commit -m "feat(ENG-64): add multi-recipe selection and job level filtering"
 - Modify: `src/lib/server/crafting.ts`
 - Modify: `tests/server/crafting.test.ts`
 
-- [ ] **Step 1: Write tests for diamond dependency and depth cap**
+- [x] **Step 1: Write tests for diamond dependency and depth cap**
 
 Add to `tests/server/crafting.test.ts`:
 
@@ -756,12 +756,12 @@ Add to `tests/server/crafting.test.ts`:
   })
 ```
 
-- [ ] **Step 2: Run test to verify depth cap test fails**
+- [x] **Step 2: Run test to verify depth cap test fails**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: FAIL — depth cap test fails because solver recurses past maxDepth.
 
-- [ ] **Step 3: Add memoization and depth cap to solveNode**
+- [x] **Step 3: Add memoization and depth cap to solveNode**
 
 In `src/lib/server/crafting.ts`, at the beginning of `solveNode` (after the function signature), add the memo check:
 
@@ -789,12 +789,12 @@ At the end of solveNode, before `return node`, add the memo set:
   memo.set(itemId, { ...node, amount: 1, totalCost: node.unitCost })
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: All tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/server/crafting.ts tests/server/crafting.test.ts
@@ -809,7 +809,7 @@ git commit -m "feat(ENG-64): add memoization and depth cap to solver"
 - Modify: `src/lib/server/crafting.ts`
 - Modify: `tests/server/crafting.test.ts`
 
-- [ ] **Step 1: Write confidence tests**
+- [x] **Step 1: Write confidence tests**
 
 Add to `tests/server/crafting.test.ts`. First add time constants near the top:
 
@@ -890,12 +890,12 @@ Then add tests:
   })
 ```
 
-- [ ] **Step 2: Run test to verify confidence tests fail**
+- [x] **Step 2: Run test to verify confidence tests fail**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: FAIL — confidence is hardcoded to 1.
 
-- [ ] **Step 3: Implement confidence in solveNode**
+- [x] **Step 3: Implement confidence in solveNode**
 
 In `src/lib/server/crafting.ts`, update `solveNode` to compute confidence:
 
@@ -944,12 +944,12 @@ Track craft confidence when evaluating recipes:
   }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: All tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/server/crafting.ts tests/server/crafting.test.ts
@@ -964,7 +964,7 @@ git commit -m "feat(ENG-64): add confidence scoring with exponential decay"
 - Modify: `src/lib/server/crafting.ts`
 - Modify: `tests/server/crafting.test.ts`
 
-- [ ] **Step 1: Write tests for reference prices and edge cases**
+- [x] **Step 1: Write tests for reference prices and edge cases**
 
 Add to `tests/server/crafting.test.ts`. First add HOME constant near the top:
 
@@ -1061,12 +1061,12 @@ Then add tests:
   })
 ```
 
-- [ ] **Step 2: Run test to verify reference price tests fail**
+- [x] **Step 2: Run test to verify reference price tests fail**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: FAIL — `cheapestListing` is null, `profitVsBuy` is null (not yet implemented).
 
-- [ ] **Step 3: Implement reference prices in solveCraftingCost**
+- [x] **Step 3: Implement reference prices in solveCraftingCost**
 
 In `src/lib/server/crafting.ts`, in `solveCraftingCost`, replace the hardcoded nulls with actual computation. After computing `root`, add:
 
@@ -1109,17 +1109,17 @@ In `src/lib/server/crafting.ts`, in `solveCraftingCost`, replace the hardcoded n
   }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: All tests pass.
 
-- [ ] **Step 5: Run full test suite**
+- [x] **Step 5: Run full test suite**
 
 Run: `bun run test`
 Expected: All tests pass (existing + new crafting tests).
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/server/crafting.ts tests/server/crafting.test.ts
@@ -1130,16 +1130,16 @@ git commit -m "feat(ENG-64): add reference prices, comparisons, and edge cases"
 
 ### Final Review
 
-- [ ] **Step 1: Run full test suite**
+- [x] **Step 1: Run full test suite**
 
 Run: `bun run test`
 Expected: All tests pass.
 
-- [ ] **Step 2: Code review via codex-review-gate**
+- [x] **Step 2: Code review via codex-review-gate**
 
 Invoke `codex-review-gate` skill for cross-model review of the implementation.
 
-- [ ] **Step 3: Final commit if any review fixes needed**
+- [x] **Step 3: Final commit if any review fixes needed**
 
 ```bash
 git add -A
