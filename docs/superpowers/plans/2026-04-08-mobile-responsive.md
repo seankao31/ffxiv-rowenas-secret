@@ -35,7 +35,7 @@
 
 Note: We do NOT add a mobile project to `playwright.config.ts` — that would run all existing e2e tests at mobile viewport, causing failures. Instead, each describe block sets its own viewport via `test.use()`.
 
-- [ ] **Step 1: Write failing e2e tests for mobile navigation**
+- [x] **Step 1: Write failing e2e tests for mobile navigation**
 
 Create `tests/e2e/mobile-layout.test.ts`:
 
@@ -110,13 +110,13 @@ test.describe('desktop layout unchanged', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bun run test:e2e tests/e2e/mobile-layout.test.ts`
 
 Expected: All tests fail — no hamburger button, no drawer, sidebar still visible on mobile.
 
-- [ ] **Step 3: Commit failing tests**
+- [x] **Step 3: Commit failing tests**
 
 ```bash
 git add tests/e2e/mobile-layout.test.ts
@@ -130,7 +130,7 @@ git commit -m "test(ENG-48): add failing e2e tests for mobile navigation layout"
 **Files:**
 - Create: `src/lib/components/NavDrawer.svelte`
 
-- [ ] **Step 1: Create the NavDrawer component**
+- [x] **Step 1: Create the NavDrawer component**
 
 Create `src/lib/components/NavDrawer.svelte`:
 
@@ -200,7 +200,7 @@ Key details:
 - `onclose` called on navigation click and Escape key
 - `data-testid` attributes for Playwright tests
 
-- [ ] **Step 2: Commit NavDrawer**
+- [x] **Step 2: Commit NavDrawer**
 
 ```bash
 git add src/lib/components/NavDrawer.svelte
@@ -215,7 +215,7 @@ git commit -m "feat(ENG-48): add NavDrawer component for mobile navigation"
 - Modify: `src/lib/components/TopBar.svelte`
 - Modify: `src/routes/+layout.svelte`
 
-- [ ] **Step 1: Add hamburger button to TopBar**
+- [x] **Step 1: Add hamburger button to TopBar**
 
 Modify `src/lib/components/TopBar.svelte`. Add `Menu` icon import from lucide-svelte, accept an `onmenuclick` prop, and render the hamburger button:
 
@@ -255,7 +255,7 @@ Changes:
 - Version + tool name hidden on mobile (`hidden lg:inline`)
 - Padding: `px-3 lg:px-4`
 
-- [ ] **Step 2: Modify layout to wire everything together**
+- [x] **Step 2: Modify layout to wire everything together**
 
 Modify `src/routes/+layout.svelte`:
 
@@ -315,19 +315,19 @@ Changes:
 - Footer padding: `px-3 lg:px-8`
 - TopBar receives `onmenuclick` to open drawer
 
-- [ ] **Step 3: Run navigation e2e tests**
+- [x] **Step 3: Run navigation e2e tests**
 
 Run: `bun run test:e2e tests/e2e/mobile-layout.test.ts`
 
 Expected: All 7 tests pass (mobile: sidebar hidden, hamburger visible, drawer opens/closes; desktop: sidebar visible, hamburger hidden).
 
-- [ ] **Step 4: Run full test suite to check for regressions**
+- [x] **Step 4: Run full test suite to check for regressions**
 
 Run: `bun run test` and `bun run test:e2e`
 
 Expected: All existing tests still pass. The desktop e2e tests in `opportunity-table.test.ts` use `Desktop Chrome` project and should be unaffected.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/components/TopBar.svelte src/routes/+layout.svelte
@@ -342,7 +342,7 @@ git commit -m "feat(ENG-48): wire mobile layout — hamburger, drawer, hide side
 - Modify: `tests/e2e/mobile-layout.test.ts`
 - Modify: `src/lib/components/ThresholdControls.svelte`
 
-- [ ] **Step 1: Add failing e2e test for stacked controls**
+- [x] **Step 1: Add failing e2e test for stacked controls**
 
 Append to the `'mobile layout'` describe block in `tests/e2e/mobile-layout.test.ts`:
 
@@ -364,13 +364,13 @@ test('threshold controls stack vertically on mobile', async ({ page }) => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `bun run test:e2e tests/e2e/mobile-layout.test.ts -g "threshold controls"`
 
 Expected: Fails — controls currently use `flex-wrap` at all sizes, and `min-w-40` may cause side-by-side layout.
 
-- [ ] **Step 3: Make ThresholdControls responsive**
+- [x] **Step 3: Make ThresholdControls responsive**
 
 Modify `src/lib/components/ThresholdControls.svelte`:
 
@@ -393,13 +393,13 @@ Change the header button padding (line 22) from `px-4` to `px-3 lg:px-4`:
 <button class="w-full py-2.5 px-3 lg:px-4 bg-transparent border-none text-base-content cursor-pointer text-left text-sm" onclick={() => (open = !open)}>
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `bun run test:e2e tests/e2e/mobile-layout.test.ts -g "threshold controls"`
 
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/e2e/mobile-layout.test.ts src/lib/components/ThresholdControls.svelte
@@ -413,7 +413,7 @@ git commit -m "feat(ENG-48): stack threshold controls vertically on mobile"
 **Files:**
 - Modify: `src/lib/components/StatusBar.svelte`
 
-- [ ] **Step 1: Make StatusBar padding responsive**
+- [x] **Step 1: Make StatusBar padding responsive**
 
 In `src/lib/components/StatusBar.svelte`, change all three status containers from `px-4` to `px-3 lg:px-4`:
 
@@ -432,13 +432,13 @@ Line 38 (normal status):
 <div class="py-2 px-3 lg:px-4 bg-base-200 text-base-content/60 text-sm">
 ```
 
-- [ ] **Step 2: Run full test suite**
+- [x] **Step 2: Run full test suite**
 
 Run: `bun run test` and `bun run test:e2e`
 
 Expected: All tests pass — this is a padding-only change.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/components/StatusBar.svelte
@@ -453,7 +453,7 @@ git commit -m "feat(ENG-48): responsive padding on StatusBar"
 - Modify: `tests/e2e/mobile-layout.test.ts`
 - Modify: `src/lib/components/OpportunityTable.svelte`
 
-- [ ] **Step 1: Add failing e2e test for sticky column**
+- [x] **Step 1: Add failing e2e test for sticky column**
 
 Append to the `'mobile layout'` describe block in `tests/e2e/mobile-layout.test.ts`:
 
@@ -482,13 +482,13 @@ test('table scrolls horizontally on mobile', async ({ page }) => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bun run test:e2e tests/e2e/mobile-layout.test.ts -g "item column|table scrolls"`
 
 Expected: Fails — no `data-testid="table-container"`, no sticky positioning.
 
-- [ ] **Step 3: Implement sticky first column**
+- [x] **Step 3: Implement sticky first column**
 
 Modify `src/lib/components/OpportunityTable.svelte`:
 
@@ -532,19 +532,19 @@ to:
 <tr class="group/row hover:bg-base-300">
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun run test:e2e tests/e2e/mobile-layout.test.ts -g "item column|table scrolls"`
 
 Expected: PASS
 
-- [ ] **Step 5: Run full test suite for regressions**
+- [x] **Step 5: Run full test suite for regressions**
 
 Run: `bun run test` and `bun run test:e2e`
 
 Expected: All tests pass. Existing `opportunity-table.test.ts` tests target desktop viewport and should be unaffected by sticky CSS. Check that `td:first-child` locators in existing tests still work with the added classes.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add tests/e2e/mobile-layout.test.ts src/lib/components/OpportunityTable.svelte
@@ -557,7 +557,7 @@ git commit -m "feat(ENG-48): sticky Item column and horizontal scroll on table"
 
 This is not a code task — it's a manual verification step using Playwright's browser tools.
 
-- [ ] **Step 1: Start dev server and visually verify mobile layout**
+- [x] **Step 1: Start dev server and visually verify mobile layout**
 
 Run `bun run dev` in the worktree, then use Playwright MCP tools to verify at 390×844 (portrait) and 844×390 (landscape):
 
@@ -579,16 +579,16 @@ Desktop (1280×800) check:
 - Sidebar visible, hamburger hidden
 - Layout unchanged from before
 
-- [ ] **Step 2: Fix any visual issues found**
+- [x] **Step 2: Fix any visual issues found**
 
 If any visual issues are found, fix them and re-run the relevant e2e tests.
 
-- [ ] **Step 3: Final full test run**
+- [x] **Step 3: Final full test run**
 
 Run: `bun run test` and `bun run test:e2e`
 
 Expected: All tests pass.
 
-- [ ] **Step 4: Commit any fixes**
+- [x] **Step 4: Commit any fixes**
 
 If fixes were made, commit them with a descriptive message.
