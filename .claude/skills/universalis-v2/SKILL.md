@@ -6,7 +6,7 @@ description: Use when writing code that calls the Universalis v2 API — market 
 # Universalis v2 API Skill
 
 Base URL: `https://universalis.app/api/v2`. No authentication required.
-Full reference with response schemas: `docs/universalis-api-reference.md`.
+Full reference with response schemas: `docs/data-sources/universalis-api-reference.md`.
 
 ## Rate Limits
 
@@ -96,7 +96,7 @@ The API uses **inconsistent units**. Getting this wrong causes silent data corru
 
 - **`lastUploadTime`** — When an upload client last submitted data for this world/item. Stored per `(worldId, itemId)` in the `MarketItem` table. For DC queries, `max(lastUploadTime)` across worlds.
 - **`worldUploadTimes`** — DC/region queries only. Map of `{ worldId: lastUploadTime(ms) }`. Each value is that world's per-item upload time. Null for single-world queries.
-- **`lastReviewTime`** — Per-listing timestamp. **Post-Dawntrail (7.0, June 2024), this is effectively the upload time.** The game packet no longer contains this field. Dalamud sends `DateTime.UtcNow`; Teamcraft sends `0` (Universalis falls back to `UtcNow`). Pre-7.0 data had real values (seconds-ago offset from when seller last opened retainer sale list). See `docs/universalis-api-reference.md` for full provenance chain with source code references.
+- **`lastReviewTime`** — Per-listing timestamp. **Post-Dawntrail (7.0, June 2024), this is effectively the upload time.** The game packet no longer contains this field. Dalamud sends `DateTime.UtcNow`; Teamcraft sends `0` (Universalis falls back to `UtcNow`). Pre-7.0 data had real values (seconds-ago offset from when seller last opened retainer sale list). See `docs/data-sources/universalis-api-reference.md` for full provenance chain with source code references.
 
 ## Listing Schema (Key Fields)
 

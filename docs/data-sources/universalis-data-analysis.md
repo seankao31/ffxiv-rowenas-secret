@@ -18,11 +18,9 @@ Universalis is crowdsourced — data freshness depends entirely on PC players ru
 - Worlds with higher console-to-PC ratios will have staler data
 - Our DC (陸行鳥) is a TW datacenter — unclear what the console/PC ratio is, but TW players likely lean PC
 
-## lastReviewTime Discovery (ENG-94)
+## lastReviewTime Is Fake Post-7.0
 
-### Finding
-
-**`lastReviewTime` is effectively the same as `lastUploadTime` for all post-7.0 data.** Square Enix removed the underlying game packet field in Dawntrail (7.0, June 2024).
+**`lastReviewTime` is effectively the same as `lastUploadTime` for all post-Dawntrail (7.0, June 2024) data.** Square Enix removed the underlying game packet field.
 
 ### Evidence chain
 
@@ -37,11 +35,10 @@ Universalis is crowdsourced — data freshness depends entirely on PC players ru
 3. **Universalis server** (`MarketBoardUploadBehavior.cs:309-314`):
    - Falls back to `DateTime.UtcNow` when `lastReviewTimeSeconds` is 0 or null
 
-### Implications for ENG-94
+### Implications
 
-1. The `types.ts` comment saying `worldUploadTimes` is "Derived: max(lastReviewTime) across all listings per worldID" is **wrong**. `worldUploadTimes` comes from `MarketItem.lastUploadTime` in PostgreSQL, populated when the controller merges per-world data (`CurrentlyShownControllerBase.cs:372`).
-2. Using `lastReviewTime` vs `worldUploadTimes` for confidence scoring is a **distinction without a difference** for current data — they both reflect upload time.
-3. No code changes needed in `scoring.ts` or `crafting.ts` — either timestamp works equally well. The `types.ts` comment should be corrected.
+- `worldUploadTimes` comes from `MarketItem.lastUploadTime` in PostgreSQL, populated when the controller merges per-world data (`CurrentlyShownControllerBase.cs:372`) — it is NOT derived from `lastReviewTime`.
+- For current data, `lastReviewTime ≈ lastUploadTime`. They are interchangeable as freshness signals.
 
 ## Endpoint Analysis Per Feature
 
