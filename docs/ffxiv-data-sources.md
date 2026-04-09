@@ -7,7 +7,7 @@ Compiled 2026-04-07.
 
 | Source | What we use | Where |
 |--------|------------|-------|
-| **Universalis API** | Market board listings, sale history, velocity | `src/lib/server/universalis.ts` |
+| **Universalis API** | Market board listings, sale history, velocity | `src/lib/server/universalis.ts` — see also `docs/universalis-api-reference.md`, `docs/universalis-data-analysis.md` |
 | **XIVAPI v2** | Item icons, English fallback names | `src/lib/client/xivapi.ts` |
 | **FFXIV_Market** (beherw) | Traditional Chinese item names (`tw-items.msgpack`) | `src/lib/server/universalis.ts:fetchItemNames()` |
 
