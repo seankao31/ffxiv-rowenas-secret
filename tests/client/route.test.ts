@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildRoute, type RouteWorldGroup } from '$lib/client/route'
+import { buildRoute } from '$lib/client/route'
 import type { Opportunity } from '$lib/shared/types'
 
 function opp(overrides: Partial<Opportunity> & Pick<Opportunity, 'itemID' | 'sourceWorld' | 'score'>): Opportunity {
@@ -27,10 +27,10 @@ describe('buildRoute', () => {
     const route = buildRoute(selected)
 
     expect(route).toHaveLength(2)
-    expect(route[0].world).toBe('Ixion')
-    expect(route[0].items).toHaveLength(2)
-    expect(route[1].world).toBe('Carbuncle')
-    expect(route[1].items).toHaveLength(1)
+    expect(route[0]!.world).toBe('Ixion')
+    expect(route[0]!.items).toHaveLength(2)
+    expect(route[1]!.world).toBe('Carbuncle')
+    expect(route[1]!.items).toHaveLength(1)
   })
 
   it('sorts world groups by primary item count descending', () => {
@@ -42,9 +42,9 @@ describe('buildRoute', () => {
     ]
     const route = buildRoute(selected)
 
-    expect(route[0].world).toBe('Ixion')
-    expect(route[0].items).toHaveLength(3)
-    expect(route[1].world).toBe('Unicorn')
+    expect(route[0]!.world).toBe('Ixion')
+    expect(route[0]!.items).toHaveLength(3)
+    expect(route[1]!.world).toBe('Unicorn')
   })
 
   it('sorts items within a group by score descending', () => {
@@ -54,7 +54,7 @@ describe('buildRoute', () => {
       opp({ itemID: 3, sourceWorld: 'Ixion', score: 70 }),
     ]
     const route = buildRoute(selected)
-    const scores = route[0].items.map(i => i.score)
+    const scores = route[0]!.items.map(i => i.score)
 
     expect(scores).toEqual([90, 70, 50])
   })
@@ -86,11 +86,33 @@ describe('buildRoute', () => {
     const route = buildRoute(selected)
 
     expect(route).toHaveLength(2)
-    expect(route[0].world).toBe('Ixion')
-    expect(route[0].isPrimaryGroup).toBe(true)
-    expect(route[1].world).toBe('Unicorn')
-    expect(route[1].isPrimaryGroup).toBe(false)
-    expect(route[1].items[0].isAlt).toBe(true)
+    expect(route[0]!.world).toBe('Ixion')
+    expect(route[0]!.isPrimaryGroup).toBe(true)
+    expect(route[1]!.world).toBe('Unicorn')
+    expect(route[1]!.isPrimaryGroup).toBe(false)
+    expect(route[1]!.items[0]!.isAlt).toBe(true)
+  })
+
+  it('sorts primary groups by primary row count, not total row count with alts', () => {
+    // Items 1 and 2 are primary on Ixion, with alts on Carbuncle.
+    // Item 3 is primary on Carbuncle (no alt).
+    // Ixion has 2 primaries + 0 alts = 2 total.
+    // Carbuncle has 1 primary + 2 alts = 3 total.
+    // Ixion must rank ahead because primary count, not total count, decides order.
+    const selected = [
+      opp({ itemID: 1, sourceWorld: 'Ixion', score: 90,
+            altSourceWorld: 'Carbuncle', altBuyPrice: 1100,
+            altSourceConfidence: 0.9, altSourceDataAgeHours: 1 }),
+      opp({ itemID: 2, sourceWorld: 'Ixion', score: 80,
+            altSourceWorld: 'Carbuncle', altBuyPrice: 1100,
+            altSourceConfidence: 0.9, altSourceDataAgeHours: 1 }),
+      opp({ itemID: 3, sourceWorld: 'Carbuncle', score: 70 }),
+    ]
+    const route = buildRoute(selected)
+
+    expect(route).toHaveLength(2)
+    expect(route[0]!.world).toBe('Ixion')
+    expect(route[1]!.world).toBe('Carbuncle')
   })
 
   it('places primary groups before alt-only groups', () => {
@@ -103,8 +125,8 @@ describe('buildRoute', () => {
 
     // Ixion (primary) should come before Aaa-First-Alpha (alt-only)
     // even though alphabetically Aaa comes first
-    expect(route[0].world).toBe('Ixion')
-    expect(route[1].world).toBe('Aaa-First-Alpha')
+    expect(route[0]!.world).toBe('Ixion')
+    expect(route[1]!.world).toBe('Aaa-First-Alpha')
   })
 
   it('skips alt entry when altSourceWorld === sourceWorld', () => {
@@ -115,8 +137,8 @@ describe('buildRoute', () => {
     const route = buildRoute(selected)
 
     expect(route).toHaveLength(1)
-    expect(route[0].items).toHaveLength(1)
-    expect(route[0].items[0].isAlt).toBe(false)
+    expect(route[0]!.items).toHaveLength(1)
+    expect(route[0]!.items[0]!.isAlt).toBe(false)
   })
 
   it('places primary items before alt items within a group', () => {
@@ -129,8 +151,8 @@ describe('buildRoute', () => {
     const route = buildRoute(selected)
     const carbuncle = route.find(g => g.world === 'Carbuncle')!
     // Primary (item 2) first, then alt (item 1)
-    expect(carbuncle.items[0].isAlt).toBe(false)
-    expect(carbuncle.items[1].isAlt).toBe(true)
+    expect(carbuncle.items[0]!.isAlt).toBe(false)
+    expect(carbuncle.items[1]!.isAlt).toBe(true)
   })
 
   it('returns empty array for empty input', () => {
@@ -144,7 +166,7 @@ describe('buildRoute', () => {
     const route = buildRoute(selected)
 
     expect(route).toHaveLength(1)
-    expect(route[0].items).toHaveLength(1)
+    expect(route[0]!.items).toHaveLength(1)
   })
 
   it('sorts alt-only groups by item count descending', () => {
@@ -164,9 +186,9 @@ describe('buildRoute', () => {
     // Ixion is primary, Carbuncle has 2 alts, Unicorn has 1 alt
     const altGroups = route.filter(g => !g.isPrimaryGroup)
     expect(altGroups).toHaveLength(2)
-    expect(altGroups[0].world).toBe('Carbuncle')
-    expect(altGroups[0].items).toHaveLength(2)
-    expect(altGroups[1].world).toBe('Unicorn')
-    expect(altGroups[1].items).toHaveLength(1)
+    expect(altGroups[0]!.world).toBe('Carbuncle')
+    expect(altGroups[0]!.items).toHaveLength(2)
+    expect(altGroups[1]!.world).toBe('Unicorn')
+    expect(altGroups[1]!.items).toHaveLength(1)
   })
 })

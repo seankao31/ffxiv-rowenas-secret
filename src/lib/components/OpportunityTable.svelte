@@ -3,7 +3,7 @@
   import CopyButton from '$lib/components/CopyButton.svelte'
   import { Info, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-svelte'
   import { toggleSort, sortOpportunities, type SortState, type SortColumn } from '$lib/client/sort.ts'
-  import { resolveItemName, isFallbackName, setOnChange, getIconUrl, fetchItemMetadata } from '$lib/client/xivapi.ts'
+  import { resolveItemName, isFallbackName, subscribe, getIconUrl, fetchItemMetadata } from '$lib/client/xivapi.ts'
   import { tooltip } from '$lib/client/tooltip.ts'
   import { fetchVendorInfo, getVendorInfo, setOnChange as setVendorOnChange } from '$lib/client/vendors.ts'
 
@@ -18,7 +18,7 @@
   } = $props()
 
   let nameGeneration = $state(0)
-  setOnChange(() => nameGeneration++)
+  $effect(() => subscribe(() => nameGeneration++))
 
   let vendorGeneration = $state(0)
   setVendorOnChange(() => vendorGeneration++)
@@ -66,10 +66,6 @@
   function onSort(column: SortColumn) {
     sort = toggleSort(sort, column)
   }
-
-  function toggleSelection(itemID: number) {
-    ontoggle(itemID)
-  }
 </script>
 
 {#snippet infoIcon()}
@@ -80,7 +76,8 @@
   {@const _ = vendorGeneration}
   {@const vendors = getVendorInfo(itemID)}
   {#if vendors && vendors.length > 0}
-    <div class="dropdown dropdown-hover dropdown-end">
+    <!-- Stop propagation so clicking the NPC badge doesn't toggle row selection. -->
+    <div class="dropdown dropdown-hover dropdown-end" onclick={(e: MouseEvent) => e.stopPropagation()} role="presentation">
       <div tabindex="0" role="button" class="badge badge-{size} badge-soft badge-info cursor-help">NPC</div>
       <div tabindex="0" class="dropdown-content z-10 shadow-md bg-base-200 rounded-box p-2 w-56">
         {#each vendors as v}
@@ -89,7 +86,7 @@
       </div>
     </div>
   {:else}
-    <span class="badge badge-{size} badge-soft badge-info">NPC</span>
+    <span class="badge badge-{size} badge-soft badge-info" onclick={(e: MouseEvent) => e.stopPropagation()} role="presentation">NPC</span>
   {/if}
 {/snippet}
 
@@ -127,7 +124,7 @@
         {@const icon = iconUrl(opp)}
         <tr
           class="group/row hover:bg-base-300 cursor-pointer border-l-3 {selectedIds.has(opp.itemID) ? 'border-primary bg-primary/10' : 'border-transparent'}"
-          onclick={() => toggleSelection(opp.itemID)}
+          onclick={() => ontoggle(opp.itemID)}
         >
           <!-- Item -->
           <td class="sticky left-0 z-10 group-hover/row:bg-base-300 border-r border-base-300 {selectedIds.has(opp.itemID) ? 'bg-primary/10' : 'bg-base-100'}">

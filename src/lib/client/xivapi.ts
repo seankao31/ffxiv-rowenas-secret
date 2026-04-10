@@ -45,10 +45,22 @@ type XivApiItemRow = {
   }
 }
 
-let onChange: (() => void) | null = null
+// Multi-subscriber change signal: each component subscribes independently
+// and receives an unsubscribe handle. Previously this was a single-listener
+// sink, so two live components (e.g. the table and the buy-route modal)
+// would clobber each other's listeners.
+const listeners = new Set<() => void>()
 
-export function setOnChange(cb: (() => void) | null): void {
-  onChange = cb
+export function subscribe(cb: () => void): () => void {
+  listeners.add(cb)
+  return () => {
+    listeners.delete(cb)
+  }
+}
+
+/** @internal — test-only listener reset */
+export function _clearListeners(): void {
+  listeners.clear()
 }
 
 export async function fetchItemMetadata(itemIDs: number[]): Promise<void> {
@@ -69,7 +81,7 @@ export async function fetchItemMetadata(itemIDs: number[]): Promise<void> {
         iconPath: row.fields.Icon?.path,
       })
     }
-    onChange?.()
+    for (const cb of listeners) cb()
   } catch (err) {
     console.warn('[xivapi] Failed to fetch item metadata:', err)
   }

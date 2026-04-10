@@ -69,7 +69,7 @@ test.describe('Buy Route', () => {
     await expect(modal).toBeVisible()
     // Should have world groups
     const groups = modal.locator('[data-testid="world-group"]')
-    await expect(groups).toHaveCount(2) // Carbuncle + Kujata (each has primary, and each has alt of the other)
+    await expect(groups).toHaveCount(2) // Alpha (primary Carbuncle) + Beta (primary Kujata) = 2 groups
   })
 
   test('modal closes on Escape', async ({ page }) => {

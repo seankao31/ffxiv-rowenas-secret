@@ -93,9 +93,11 @@ export function buildRoute(opportunities: Opportunity[]): RouteWorldGroup[] {
     }
   }
 
-  const byItemCount = (a: RouteWorldGroup, b: RouteWorldGroup) => b.items.length - a.items.length
-  primaryGroups.sort(byItemCount)
-  altOnlyGroups.sort(byItemCount)
+  // Order primary groups by their *primary* row count — alt rows are
+  // satellites of items rooted in other worlds and shouldn't inflate rank.
+  const primaryRowCount = (g: RouteWorldGroup) => g.items.filter(i => !i.isAlt).length
+  primaryGroups.sort((a, b) => primaryRowCount(b) - primaryRowCount(a))
+  altOnlyGroups.sort((a, b) => b.items.length - a.items.length)
 
   return [...primaryGroups, ...altOnlyGroups]
 }

@@ -1,5 +1,5 @@
 import { test, expect, describe, beforeEach, afterEach, vi } from 'vitest'
-import { buildIconUrl, resolveItemName, isFallbackName, getIconUrl, _seedCache, _clearCache, fetchItemMetadata, setOnChange } from '$lib/client/xivapi'
+import { buildIconUrl, resolveItemName, isFallbackName, getIconUrl, _seedCache, _clearCache, _clearListeners, fetchItemMetadata, subscribe } from '$lib/client/xivapi'
 
 const originalFetch = globalThis.fetch
 const originalWarn = console.warn
@@ -7,7 +7,7 @@ const originalWarn = console.warn
 afterEach(() => {
   globalThis.fetch = originalFetch
   console.warn = originalWarn
-  setOnChange(null)
+  _clearListeners()
 })
 
 beforeEach(() => {
@@ -160,9 +160,11 @@ describe('fetchItemMetadata', () => {
     expect(warnSpy.mock.calls[0]![0]).toContain('Failed to fetch item metadata')
   })
 
-  test('invokes onChange callback after successful fetch', async () => {
-    const onChangeSpy = vi.fn(() => {})
-    setOnChange(onChangeSpy)
+  test('notifies all subscribers after successful fetch', async () => {
+    const spyA = vi.fn(() => {})
+    const spyB = vi.fn(() => {})
+    subscribe(spyA)
+    subscribe(spyB)
     globalThis.fetch = vi.fn(() => Promise.resolve({
       ok: true,
       json: () => Promise.resolve({
@@ -178,7 +180,33 @@ describe('fetchItemMetadata', () => {
 
     await fetchItemMetadata([5057])
 
-    expect(onChangeSpy).toHaveBeenCalledTimes(1)
+    expect(spyA).toHaveBeenCalledTimes(1)
+    expect(spyB).toHaveBeenCalledTimes(1)
+  })
+
+  test('unsubscribe removes only that listener', async () => {
+    const spyA = vi.fn(() => {})
+    const spyB = vi.fn(() => {})
+    const unsubA = subscribe(spyA)
+    subscribe(spyB)
+    unsubA()
+    globalThis.fetch = vi.fn(() => Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({
+        rows: [{
+          row_id: 5057,
+          fields: {
+            Name: 'Iron Ingot',
+            Icon: { id: 20801, path: 'ui/icon/020000/020801.tex', path_hr1: 'ui/icon/020000/020801_hr1.tex' },
+          },
+        }],
+      }),
+    })) as unknown as typeof fetch
+
+    await fetchItemMetadata([5057])
+
+    expect(spyA).not.toHaveBeenCalled()
+    expect(spyB).toHaveBeenCalledTimes(1)
   })
 
   test('handles rows with missing Icon or Name fields gracefully', async () => {

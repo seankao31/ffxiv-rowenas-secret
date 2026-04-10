@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { fetchItemMetadata, getIconUrl, getEnglishName, setOnChange } from '$lib/client/xivapi.ts'
+  import { fetchItemMetadata, getIconUrl, getEnglishName, subscribe } from '$lib/client/xivapi.ts'
   import ListingsTable from '$lib/components/ListingsTable.svelte'
 
   let { data } = $props()
 
   let nameGeneration = $state(0)
-  setOnChange(() => nameGeneration++)
+  $effect(() => subscribe(() => nameGeneration++))
 
   $effect(() => {
     fetchItemMetadata([data.itemID])
