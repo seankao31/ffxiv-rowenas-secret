@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { resolveItemName, getIconUrl } from '$lib/client/xivapi.ts'
+  import { resolveItemName, getIconUrl, setOnChange, fetchItemMetadata } from '$lib/client/xivapi.ts'
   import CopyButton from './CopyButton.svelte'
   import type { RouteWorldGroup, RouteItem, RouteItemState } from '$lib/client/route'
 
@@ -10,6 +10,26 @@
     route: RouteWorldGroup[]
     onclose: () => void
   } = $props()
+
+  // Re-render when the xivapi metadata cache updates. Without this, items
+  // whose metadata arrives after the modal opens would stay as fallback
+  // names/missing icons until the modal closes and reopens.
+  let nameGeneration = $state(0)
+  setOnChange(() => nameGeneration++)
+
+  $effect(() => {
+    const ids = route.flatMap(g => g.items.map(i => i.itemID))
+    if (ids.length > 0) fetchItemMetadata(ids)
+  })
+
+  const displayNameOf = (item: RouteItem) => {
+    void nameGeneration
+    return resolveItemName(item.itemID, item.itemName)
+  }
+  const iconOf = (item: RouteItem) => {
+    void nameGeneration
+    return getIconUrl(item.itemID)
+  }
 
   // Track item states: key is `${itemID}-${isAlt ? 'alt' : 'primary'}`.
   // State resets on each modal open because the parent remounts this
@@ -169,8 +189,8 @@
             {@const dismissed = isDismissed(item)}
             {@const promoted = isPromoted(item)}
             {@const conf = confidenceLabel(item.sourceDataAgeHours)}
-            {@const icon = getIconUrl(item.itemID)}
-            {@const displayName = resolveItemName(item.itemID, item.itemName)}
+            {@const icon = iconOf(item)}
+            {@const displayName = displayNameOf(item)}
 
             {#if state === 'bought'}
               <!-- Bought state -->

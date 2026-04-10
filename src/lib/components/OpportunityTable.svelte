@@ -76,7 +76,8 @@
   {@const _ = vendorGeneration}
   {@const vendors = getVendorInfo(itemID)}
   {#if vendors && vendors.length > 0}
-    <div class="dropdown dropdown-hover dropdown-end">
+    <!-- Stop propagation so clicking the NPC badge doesn't toggle row selection. -->
+    <div class="dropdown dropdown-hover dropdown-end" onclick={(e: MouseEvent) => e.stopPropagation()} role="presentation">
       <div tabindex="0" role="button" class="badge badge-{size} badge-soft badge-info cursor-help">NPC</div>
       <div tabindex="0" class="dropdown-content z-10 shadow-md bg-base-200 rounded-box p-2 w-56">
         {#each vendors as v}
@@ -85,7 +86,7 @@
       </div>
     </div>
   {:else}
-    <span class="badge badge-{size} badge-soft badge-info">NPC</span>
+    <span class="badge badge-{size} badge-soft badge-info" onclick={(e: MouseEvent) => e.stopPropagation()} role="presentation">NPC</span>
   {/if}
 {/snippet}
 
