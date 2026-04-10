@@ -4,8 +4,14 @@
   import StatusBar from '$lib/components/StatusBar.svelte'
   import ThresholdControls from '$lib/components/ThresholdControls.svelte'
   import OpportunityTable from '$lib/components/OpportunityTable.svelte'
+  import FloatingActionBar from '$lib/components/FloatingActionBar.svelte'
+  import BuyRouteModal from '$lib/components/BuyRouteModal.svelte'
+  import { buildRoute } from '$lib/client/route'
 
   let opportunities = $state<Opportunity[]>([])
+  let selectedIds = $state(new Set<number>())
+  let showRouteModal = $state(false)
+  const route = $derived(buildRoute(opportunities.filter(o => selectedIds.has(o.itemID))))
   let meta = $state<ScanMeta>({
     scanCompletedAt: 0,
     itemsScanned: 0,
@@ -90,6 +96,27 @@
     <p class="p-8 text-base-content/50 text-center">No opportunities found with current filters.</p>
   {:else}
     <p class="mt-3 mb-1 text-base-content/50 text-sm shrink-0">Showing {opportunities.length} opportunities</p>
-    <OpportunityTable {opportunities} />
+    <OpportunityTable {opportunities} {selectedIds} ontoggle={(id) => {
+      const next = new Set(selectedIds)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      selectedIds = next
+    }} />
   {/if}
 </main>
+
+{#if !showRouteModal}
+  <FloatingActionBar
+    {selectedIds}
+    {opportunities}
+    onplanroute={() => showRouteModal = true}
+    onclear={() => selectedIds = new Set()}
+  />
+{/if}
+
+{#if showRouteModal}
+  <BuyRouteModal {route} onclose={() => showRouteModal = false} />
+{/if}

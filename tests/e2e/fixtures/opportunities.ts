@@ -10,6 +10,8 @@ export const opportunities: Opportunity[] = [
     expectedDailyProfit: 1500, score: 90,
     homeDataAgeHours: 0.5, homeConfidence: 0.9,
     sourceDataAgeHours: 0.3, sourceConfidence: 0.95,
+    altSourceWorld: 'Kujata', altSourceWorldID: 49, altBuyPrice: 550,
+    altExpectedDailyProfit: 1400, altSourceConfidence: 0.9, altSourceDataAgeHours: 0.5,
     activeCompetitorCount: 2, fairShareVelocity: 3.0,
   },
   {
@@ -21,6 +23,8 @@ export const opportunities: Opportunity[] = [
     expectedDailyProfit: 300, score: 80,
     homeDataAgeHours: 1.2, homeConfidence: 0.8,
     sourceDataAgeHours: 0.8, sourceConfidence: 0.85,
+    altSourceWorld: 'Carbuncle', altSourceWorldID: 45, altBuyPrice: 230,
+    altExpectedDailyProfit: 280, altSourceConfidence: 0.8, altSourceDataAgeHours: 1.0,
     activeCompetitorCount: 5, fairShareVelocity: 1.0,
   },
   {
