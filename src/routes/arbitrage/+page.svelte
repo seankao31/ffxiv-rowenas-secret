@@ -96,7 +96,15 @@
     <p class="p-8 text-base-content/50 text-center">No opportunities found with current filters.</p>
   {:else}
     <p class="mt-3 mb-1 text-base-content/50 text-sm shrink-0">Showing {opportunities.length} opportunities</p>
-    <OpportunityTable {opportunities} bind:selectedIds />
+    <OpportunityTable {opportunities} {selectedIds} ontoggle={(id) => {
+      const next = new Set(selectedIds)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      selectedIds = next
+    }} />
   {/if}
 </main>
 

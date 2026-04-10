@@ -9,10 +9,12 @@
 
   const {
     opportunities,
-    selectedIds = $bindable(new Set<number>()),
+    selectedIds,
+    ontoggle,
   }: {
     opportunities: Opportunity[]
-    selectedIds?: Set<number>
+    selectedIds: Set<number>
+    ontoggle: (itemID: number) => void
   } = $props()
 
   let nameGeneration = $state(0)
@@ -66,13 +68,7 @@
   }
 
   function toggleSelection(itemID: number) {
-    const next = new Set(selectedIds)
-    if (next.has(itemID)) {
-      next.delete(itemID)
-    } else {
-      next.add(itemID)
-    }
-    selectedIds = next
+    ontoggle(itemID)
   }
 </script>
 
