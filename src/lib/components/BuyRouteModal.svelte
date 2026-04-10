@@ -11,19 +11,22 @@
     onclose: () => void
   } = $props()
 
-  // Track item states: key is `${itemID}-${isAlt ? 'alt' : 'primary'}`
+  // Track item states: key is `${itemID}-${isAlt ? 'alt' : 'primary'}`.
+  // State resets on each modal open because the parent remounts this
+  // component via `{#if showRouteModal}` — no cross-open persistence.
   let itemStates = $state(new Map<string, RouteItemState>())
 
   function itemKey(item: RouteItem): string {
     return `${item.itemID}-${item.isAlt ? 'alt' : 'primary'}`
   }
 
-  function linkedKey(item: RouteItem): string | null {
-    // Find the matching entry (if primary, find alt; if alt, find primary)
+  // Find the matching entry (if primary, find alt; if alt, find primary).
+  // Returns both its state-map key and the world group containing it.
+  function findLinked(item: RouteItem): { key: string; world: string } | null {
     for (const group of route) {
       for (const other of group.items) {
         if (other.itemID === item.itemID && other.isAlt !== item.isAlt) {
-          return itemKey(other)
+          return { key: itemKey(other), world: group.world }
         }
       }
     }
@@ -35,30 +38,18 @@
   }
 
   function getLinkedState(item: RouteItem): RouteItemState {
-    const key = linkedKey(item)
-    return key ? (itemStates.get(key) ?? 'unchecked') : 'unchecked'
+    const linked = findLinked(item)
+    return linked ? (itemStates.get(linked.key) ?? 'unchecked') : 'unchecked'
   }
 
-  function toggleBought(item: RouteItem) {
+  function toggleState(item: RouteItem, target: 'bought' | 'missing') {
     const key = itemKey(item)
     const current = itemStates.get(key) ?? 'unchecked'
     const next = new Map(itemStates)
-    if (current === 'bought') {
+    if (current === target) {
       next.delete(key)
     } else {
-      next.set(key, 'bought')
-    }
-    itemStates = next
-  }
-
-  function toggleMissing(item: RouteItem) {
-    const key = itemKey(item)
-    const current = itemStates.get(key) ?? 'unchecked'
-    const next = new Map(itemStates)
-    if (current === 'missing') {
-      next.delete(key)
-    } else {
-      next.set(key, 'missing')
+      next.set(key, target)
     }
     itemStates = next
   }
@@ -87,6 +78,8 @@
     return groupDoneCount(group) === group.items.length
   }
 
+  // Counts and totals use primary rows only; alts are duplicate entries
+  // for the same selected item and would double-count if included.
   const totalItems = $derived(route.reduce((sum, g) => sum + g.items.filter(i => !i.isAlt).length, 0))
   const totalWorlds = $derived(route.length)
   const totalProfit = $derived(
@@ -109,17 +102,6 @@
   function priceDiffPercent(altPrice: number, primaryPrice: number): string {
     const diff = ((altPrice - primaryPrice) / primaryPrice) * 100
     return `${diff >= 0 ? '+' : ''}${diff.toFixed(0)}%`
-  }
-
-  function getLinkedBuyWorld(item: RouteItem): string {
-    for (const group of route) {
-      for (const other of group.items) {
-        if (other.itemID === item.itemID && other.isAlt !== item.isAlt) {
-          return group.world
-        }
-      }
-    }
-    return ''
   }
 
   function onkeydown(e: KeyboardEvent) {
@@ -198,8 +180,8 @@
                 data-state="bought"
                 role="button"
                 tabindex="0"
-                onclick={() => toggleBought(item)}
-                onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleBought(item) } }}
+                onclick={() => toggleState(item, 'bought')}
+                onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleState(item, 'bought') } }}
               >
                 <div class="w-5 h-5 rounded border-2 border-primary bg-primary/30 flex items-center justify-center shrink-0">
                   <span class="text-primary text-xs">✓</span>
@@ -229,7 +211,7 @@
                     {/if}
                   </div>
                   <p class="text-xs text-base-content/25 pl-0 mt-0.5">
-                    Bought on {item.isAlt ? item.primaryWorld : getLinkedBuyWorld(item)}
+                    Bought on {item.isAlt ? item.primaryWorld : findLinked(item)?.world}
                   </p>
                 </div>
                 <span class="text-sm text-base-content/20 tabular-nums">{fmt(item.buyPrice)}</span>
@@ -255,7 +237,7 @@
                 <button
                   type="button"
                   class="btn btn-ghost btn-xs text-error/60"
-                  onclick={(e: MouseEvent) => { e.stopPropagation(); toggleMissing(item) }}
+                  onclick={(e: MouseEvent) => { e.stopPropagation(); toggleState(item, 'missing') }}
                   aria-label="Undo missing"
                 >✕</button>
               </div>
@@ -268,8 +250,8 @@
                 data-state="unchecked"
                 role="button"
                 tabindex="0"
-                onclick={() => toggleBought(item)}
-                onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleBought(item) } }}
+                onclick={() => toggleState(item, 'bought')}
+                onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleState(item, 'bought') } }}
               >
                 <div class="w-5 h-5 rounded border-2 border-base-content/20 shrink-0"></div>
                 <div class="flex-1 min-w-0">
@@ -300,7 +282,7 @@
                 <button
                   type="button"
                   class="btn btn-ghost btn-xs text-error/40 hover:text-error/80"
-                  onclick={(e: MouseEvent) => { e.stopPropagation(); toggleMissing(item) }}
+                  onclick={(e: MouseEvent) => { e.stopPropagation(); toggleState(item, 'missing') }}
                   aria-label="Mark as missing"
                 >✕</button>
               </div>
