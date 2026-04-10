@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { resolveItemName, getIconUrl, setOnChange, fetchItemMetadata } from '$lib/client/xivapi.ts'
+  import { resolveItemName, getIconUrl, subscribe, fetchItemMetadata } from '$lib/client/xivapi.ts'
   import CopyButton from './CopyButton.svelte'
   import type { RouteWorldGroup, RouteItem, RouteItemState } from '$lib/client/route'
 
@@ -13,9 +13,10 @@
 
   // Re-render when the xivapi metadata cache updates. Without this, items
   // whose metadata arrives after the modal opens would stay as fallback
-  // names/missing icons until the modal closes and reopens.
+  // names/missing icons until the modal closes and reopens. The effect
+  // returns the unsubscribe handle so we don't leak the listener on close.
   let nameGeneration = $state(0)
-  setOnChange(() => nameGeneration++)
+  $effect(() => subscribe(() => nameGeneration++))
 
   $effect(() => {
     const ids = route.flatMap(g => g.items.map(i => i.itemID))

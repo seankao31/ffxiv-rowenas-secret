@@ -3,7 +3,7 @@
   import CopyButton from '$lib/components/CopyButton.svelte'
   import { Info, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-svelte'
   import { toggleSort, sortOpportunities, type SortState, type SortColumn } from '$lib/client/sort.ts'
-  import { resolveItemName, isFallbackName, setOnChange, getIconUrl, fetchItemMetadata } from '$lib/client/xivapi.ts'
+  import { resolveItemName, isFallbackName, subscribe, getIconUrl, fetchItemMetadata } from '$lib/client/xivapi.ts'
   import { tooltip } from '$lib/client/tooltip.ts'
   import { fetchVendorInfo, getVendorInfo, setOnChange as setVendorOnChange } from '$lib/client/vendors.ts'
 
@@ -18,7 +18,7 @@
   } = $props()
 
   let nameGeneration = $state(0)
-  setOnChange(() => nameGeneration++)
+  $effect(() => subscribe(() => nameGeneration++))
 
   let vendorGeneration = $state(0)
   setVendorOnChange(() => vendorGeneration++)
