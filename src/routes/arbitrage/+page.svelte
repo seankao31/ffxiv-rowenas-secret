@@ -50,6 +50,10 @@
         flash = true
       }
       opportunities = result.opportunities
+      // Drop selections for items that dropped out of the result set,
+      // so they don't come back pre-selected if the same itemID reappears later.
+      const present = new Set(result.opportunities.map(o => o.itemID))
+      selectedIds = new Set([...selectedIds].filter(id => present.has(id)))
       meta = result.meta
       loading = false
     } catch (e) {
