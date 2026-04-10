@@ -27,7 +27,7 @@ describe('fetchItemListings', () => {
     const listings = await fetchItemListings(2394)
 
     expect(globalThis.fetch).toHaveBeenCalledOnce()
-    const url = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][0] as string
+    const url = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0]![0] as string
     expect(url).toContain('/api/v2/')
     expect(url).toContain('%E9%99%B8%E8%A1%8C%E9%B3%A5') // DC_NAME '陸行鳥' URL-encoded
     expect(url).toContain('2394')
@@ -53,9 +53,9 @@ describe('fetchItemListings', () => {
 
     const listings = await fetchItemListings(2394)
 
-    expect(listings[0].pricePerUnit).toBe(200)
-    expect(listings[1].pricePerUnit).toBe(500)
-    expect(listings[2].pricePerUnit).toBe(800)
+    expect(listings[0]!.pricePerUnit).toBe(200)
+    expect(listings[1]!.pricePerUnit).toBe(500)
+    expect(listings[2]!.pricePerUnit).toBe(800)
   })
 
   test('maps all Listing fields correctly', async () => {
