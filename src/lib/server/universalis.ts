@@ -8,6 +8,10 @@ const BATCH_SIZE = 100
 const REQUEST_TIMEOUT_MS = 10_000
 const MAX_RETRIES = 3
 const USER_AGENT = process.env['UNIVERSALIS_USER_AGENT'] || 'FFXIV-Rowenas-Secret/1.0'
+// Number of recent sale entries to request from CurrentlyShown for the home world.
+// Default is 5 — too few for a stable median sell-price clamp. Universalis also
+// computes regularSaleVelocity over the returned entries, so this affects velocity.
+const HOME_HISTORY_ENTRIES = 20
 
 export class Semaphore {
   private count: number
@@ -115,14 +119,16 @@ async function fetchBatched<T>(
   endpoint: string,
   transformItems: (items: Record<string, unknown>) => T[],
   onBatchDone?: ProgressCallback,
+  query?: string,
 ): Promise<T[]> {
   const batches = chunk(itemIds, BATCH_SIZE)
+  const suffix = query ? `?${query}` : ''
   let completed = 0
   const results = await Promise.all(
     batches.map(async batch => {
       const ids = batch.join(',')
       const data = await fetchWithRetry(
-        `${BASE_URL}/${encodeURIComponent(endpoint)}/${ids}`
+        `${BASE_URL}/${encodeURIComponent(endpoint)}/${ids}${suffix}`
       ) as BatchResponse | null
       completed++
       onBatchDone?.(completed, batches.length)
@@ -302,6 +308,7 @@ export async function fetchHomeWorldCombined(
       },
     })),
     onBatchDone,
+    `entries=${HOME_HISTORY_ENTRIES}`,
   )
   return {
     dcResults: combined.map(c => c.dc),
@@ -329,6 +336,7 @@ export async function fetchHomeListings(
       lastUploadTime: item.lastUploadTime ?? 0,
     })),
     onBatchDone,
+    `entries=${HOME_HISTORY_ENTRIES}`,
   )
 }
 
