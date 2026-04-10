@@ -64,6 +64,22 @@
     debounceTimer = setTimeout(loadData, 500)
   }
 
+  // Reassign to trigger $state reactivity — Svelte 5's proxy doesn't wrap Sets,
+  // so mutating via .add()/.delete() won't schedule updates.
+  function toggleSelected(id: number) {
+    const next = new Set(selectedIds)
+    if (next.has(id)) {
+      next.delete(id)
+    } else {
+      next.add(id)
+    }
+    selectedIds = next
+  }
+
+  function clearSelected() {
+    selectedIds = new Set()
+  }
+
   $effect(() => {
     const ms = coldStart ? 2_000 : 30_000
     untrack(() => loadData())
@@ -96,15 +112,7 @@
     <p class="p-8 text-base-content/50 text-center">No opportunities found with current filters.</p>
   {:else}
     <p class="mt-3 mb-1 text-base-content/50 text-sm shrink-0">Showing {opportunities.length} opportunities</p>
-    <OpportunityTable {opportunities} {selectedIds} ontoggle={(id) => {
-      const next = new Set(selectedIds)
-      if (next.has(id)) {
-        next.delete(id)
-      } else {
-        next.add(id)
-      }
-      selectedIds = next
-    }} />
+    <OpportunityTable {opportunities} {selectedIds} ontoggle={toggleSelected} />
   {/if}
 </main>
 
@@ -113,7 +121,7 @@
     {selectedIds}
     {opportunities}
     onplanroute={() => showRouteModal = true}
-    onclear={() => selectedIds = new Set()}
+    onclear={clearSelected}
   />
 {/if}
 

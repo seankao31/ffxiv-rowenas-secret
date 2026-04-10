@@ -66,10 +66,6 @@
   function onSort(column: SortColumn) {
     sort = toggleSort(sort, column)
   }
-
-  function toggleSelection(itemID: number) {
-    ontoggle(itemID)
-  }
 </script>
 
 {#snippet infoIcon()}
@@ -127,7 +123,7 @@
         {@const icon = iconUrl(opp)}
         <tr
           class="group/row hover:bg-base-300 cursor-pointer border-l-3 {selectedIds.has(opp.itemID) ? 'border-primary bg-primary/10' : 'border-transparent'}"
-          onclick={() => toggleSelection(opp.itemID)}
+          onclick={() => ontoggle(opp.itemID)}
         >
           <!-- Item -->
           <td class="sticky left-0 z-10 group-hover/row:bg-base-300 border-r border-base-300 {selectedIds.has(opp.itemID) ? 'bg-primary/10' : 'bg-base-100'}">
