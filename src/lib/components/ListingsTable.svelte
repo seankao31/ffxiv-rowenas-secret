@@ -55,7 +55,7 @@
   }
 </script>
 
-<div class="flex items-center gap-2 mb-3">
+<div class="flex items-center gap-2 mb-3 shrink-0">
   <select class="select select-sm" bind:value={selectedWorld}>
     <option value="all">All Worlds</option>
     {#each DC_WORLDS as world (world.id)}
@@ -82,7 +82,7 @@
     {listings.length === 0 ? 'No listings found' : 'No listings match the current filters'}
   </p>
 {:else}
-  <div class="overflow-x-auto">
+  <div data-testid="listings-scroll-container" class="flex-1 overflow-auto min-h-0">
     <table class="table table-sm">
       <thead>
         <tr>
