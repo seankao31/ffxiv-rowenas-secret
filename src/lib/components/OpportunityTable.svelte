@@ -168,7 +168,7 @@
           <td class="tabular-nums">
             <div class="flex items-baseline gap-2.5">
               <span class="w-[70px] text-right flex-shrink-0">{fmt(opp.buyPrice)}</span>
-              <span class="text-xs" style="color: {ageColor(opp.sourceConfidence)}">
+              <span class="text-xs whitespace-nowrap" style="color: {ageColor(opp.sourceConfidence)}">
                 {#if isNPC(opp.sourceWorld)}NPC{:else}{ageLabel(opp.sourceDataAgeHours)}{/if}
               </span>
             </div>
@@ -176,7 +176,7 @@
               <div class="flex items-baseline gap-2.5 mt-1">
                 <span class="w-[70px] text-right flex-shrink-0 text-xs text-base-content/50">{fmt(opp.altBuyPrice)}</span>
                 {#if opp.altSourceConfidence !== undefined && opp.altSourceDataAgeHours !== undefined}
-                  <span class="text-xs" style="color: {ageColor(opp.altSourceConfidence)}">
+                  <span class="text-xs whitespace-nowrap" style="color: {ageColor(opp.altSourceConfidence)}">
                     {#if isNPC(opp.altSourceWorld ?? '')}NPC{:else}{ageLabel(opp.altSourceDataAgeHours)}{/if}
                   </span>
                 {/if}
@@ -188,7 +188,7 @@
           <td class="tabular-nums">
             <div class="flex items-baseline gap-2.5">
               <span class="w-[70px] text-right flex-shrink-0">{fmt(opp.sellPrice)}</span>
-              <span class="text-xs" style="color: {ageColor(opp.homeConfidence)}">{ageLabel(opp.homeDataAgeHours)}</span>
+              <span class="text-xs whitespace-nowrap" style="color: {ageColor(opp.homeConfidence)}">{ageLabel(opp.homeDataAgeHours)}</span>
             </div>
             {#if opp.listingPrice !== opp.sellPrice}
               <div class="flex items-baseline gap-2.5 mt-1">

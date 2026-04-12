@@ -154,6 +154,19 @@ test.describe('OpportunityTable', () => {
     await expect(unitsCol).toContainText('8 / ∞')
   })
 
+  test('buy and sell column age labels do not wrap to multiple lines', async ({ page }) => {
+    const firstRow = page.locator('table tbody tr').first()
+    const buyCol = firstRow.locator('td').nth(2)
+    const sellCol = firstRow.locator('td').nth(3)
+
+    // The age label spans in Buy and Sell columns must have whitespace-nowrap
+    // to prevent "18min ago" style text from breaking across two lines.
+    const buyAgeSpan = buyCol.locator('div').first().locator('span').last()
+    const sellAgeSpan = sellCol.locator('div').first().locator('span').last()
+    await expect(buyAgeSpan).toHaveClass(/whitespace-nowrap/)
+    await expect(sellAgeSpan).toHaveClass(/whitespace-nowrap/)
+  })
+
   test('selected row keeps selection styling visible under hover', async ({ page }) => {
     const firstRow = page.locator('table tbody tr').first()
 
