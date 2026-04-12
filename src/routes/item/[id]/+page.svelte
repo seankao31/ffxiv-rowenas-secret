@@ -18,7 +18,7 @@
 </script>
 
 <!-- Item Header -->
-<div class="flex items-center gap-3 py-4">
+<div class="flex items-center gap-3 py-4 shrink-0">
   {#if iconUrl}
     <img src={iconUrl} alt="" width="40" height="40" class="flex-shrink-0"
       onerror={(e: Event) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
@@ -36,10 +36,10 @@
 </div>
 
 <!-- Listings | History -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-  <div class="card bg-base-200">
-    <div class="card-body">
-      <h2 class="card-title">Cross-World Listings</h2>
+<div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
+  <div class="card bg-base-200 min-h-0 flex flex-col">
+    <div class="card-body flex flex-col min-h-0">
+      <h2 class="card-title shrink-0">Cross-World Listings</h2>
       <ListingsTable itemId={data.itemID} />
     </div>
   </div>
@@ -55,7 +55,7 @@
 </div>
 
 <!-- Price Statistics -->
-<div class="card bg-base-200 mt-4">
+<div class="card bg-base-200 mt-4 shrink-0">
   <div class="card-body">
     <h2 class="card-title">Price Statistics</h2>
     <div class="skeleton h-4 w-full"></div>

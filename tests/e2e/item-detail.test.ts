@@ -4,12 +4,33 @@ const ITEM_ID = 2394
 const EN_NAME = 'Bronze Ornamental Hammer'
 const ICON_PATH = '/i/052000/052653.tex'
 
+function makeListing(i: number) {
+  const worlds = [
+    { id: 4028, name: '伊弗利特' },
+    { id: 4030, name: '利維坦' },
+    { id: 4031, name: '鳳凰' },
+  ]
+  const world = worlds[i % worlds.length]!
+  return {
+    lastReviewTime: Math.floor(Date.now() / 1000) - (i + 1) * 600,
+    pricePerUnit: 100 + i * 50,
+    quantity: 1 + (i % 10),
+    worldID: world.id,
+    worldName: world.name,
+    hq: i % 3 === 0,
+  }
+}
+
 const UNIVERSALIS_RESPONSE = {
   listings: [
     { lastReviewTime: Math.floor(Date.now() / 1000) - 3600, pricePerUnit: 200, quantity: 5, worldID: 4028, worldName: '伊弗利特', hq: true },
     { lastReviewTime: Math.floor(Date.now() / 1000) - 7200, pricePerUnit: 500, quantity: 10, worldID: 4030, worldName: '利維坦', hq: false },
     { lastReviewTime: Math.floor(Date.now() / 1000) - 1800, pricePerUnit: 800, quantity: 1, worldID: 4031, worldName: '鳳凰', hq: false },
   ],
+}
+
+const MANY_LISTINGS_RESPONSE = {
+  listings: Array.from({ length: 50 }, (_, i) => makeListing(i)),
 }
 
 const XIVAPI_RESPONSE = {
@@ -136,6 +157,30 @@ test.describe('Item detail page', () => {
     const toggle = page.locator('input[type="checkbox"]')
     await toggle.check()
     await expect(page.locator('text=No listings match the current filters')).toBeVisible()
+  })
+
+  test('listings section scrolls independently without overlapping footer', async ({ page }) => {
+    // Override with many listings to force overflow
+    await page.route('**/universalis.app/api/v2/**', route =>
+      route.fulfill({ json: MANY_LISTINGS_RESPONSE }),
+    )
+    await page.goto(`/item/${ITEM_ID}`)
+    await expect(page.locator('table tbody tr').first()).toBeVisible()
+
+    const footer = page.locator('footer')
+    await expect(footer).toBeVisible()
+
+    // The footer should be within the viewport (not pushed off-screen by listings)
+    const footerBox = await footer.boundingBox()
+    const viewport = page.viewportSize()!
+    expect(footerBox).not.toBeNull()
+    expect(footerBox!.y + footerBox!.height).toBeLessThanOrEqual(viewport.height)
+
+    // The listings table wrapper should be a scroll container
+    const listingsCard = page.locator('[data-testid="listings-scroll-container"]')
+    await expect(listingsCard).toBeVisible()
+    const overflow = await listingsCard.evaluate(el => getComputedStyle(el).overflowY)
+    expect(overflow).toMatch(/auto|scroll/)
   })
 
   test('shows error message when Universalis is unreachable', async ({ page }) => {
