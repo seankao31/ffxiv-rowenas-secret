@@ -4,13 +4,13 @@ import { getAllItems, getVendorPrices, isCacheReady, getScanProgress } from '$li
 import { solveCraftingCost } from '$lib/server/crafting'
 
 export const GET: RequestHandler = ({ params }) => {
-  if (!isCacheReady()) {
-    return json({ ready: false, progress: getScanProgress() }, { status: 202 })
-  }
-
   const id = Number(params.id)
   if (!Number.isInteger(id) || id <= 0) {
     return json({ error: 'id must be a positive integer' }, { status: 400 })
+  }
+
+  if (!isCacheReady()) {
+    return json({ ready: false, progress: getScanProgress() }, { status: 202 })
   }
 
   const result = solveCraftingCost(id, getAllItems(), getVendorPrices())
