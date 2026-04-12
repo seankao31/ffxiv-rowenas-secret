@@ -32,10 +32,6 @@ New pages, routes, and visual changes must include:
 
 Unit tests alone are not sufficient for UI work.
 
-## UI changes and responsive design
-
-When modifying UI elements, always consider responsive/mobile behavior (RWD), even for minor fixes.
-
 ## Git workflow
 
 - **Rebase before merge.** When integrating a feature branch into main, rebase the branch onto main first so the merge is a fast-forward. Keep history linear.

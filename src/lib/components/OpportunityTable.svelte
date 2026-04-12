@@ -123,11 +123,11 @@
       {#each sorted as opp (opp.itemID)}
         {@const icon = iconUrl(opp)}
         <tr
-          class="group/row cursor-pointer border-l-3 {selectedIds.has(opp.itemID) ? 'border-primary bg-primary/10 hover:bg-primary/20' : 'border-transparent hover:bg-base-300'}"
+          class="group/row hover:bg-base-300 cursor-pointer border-l-3 {selectedIds.has(opp.itemID) ? 'border-primary bg-primary/10' : 'border-transparent'}"
           onclick={() => ontoggle(opp.itemID)}
         >
           <!-- Item -->
-          <td class="sticky left-0 z-10 border-r border-base-300 {selectedIds.has(opp.itemID) ? 'bg-primary/10 group-hover/row:bg-primary/20' : 'bg-base-100 group-hover/row:bg-base-300'}">
+          <td class="sticky left-0 z-10 group-hover/row:bg-base-300 border-r border-base-300 {selectedIds.has(opp.itemID) ? 'bg-primary/10' : 'bg-base-100'}">
             <div class="flex items-center gap-1.5">
               {#if icon}
                 <img src={icon} alt="" width="32" height="32" class="flex-shrink-0 hidden lg:inline-block"
