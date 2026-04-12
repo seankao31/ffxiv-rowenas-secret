@@ -123,11 +123,11 @@
       {#each sorted as opp (opp.itemID)}
         {@const icon = iconUrl(opp)}
         <tr
-          class="group/row hover:bg-base-300 cursor-pointer border-l-3 {selectedIds.has(opp.itemID) ? 'border-primary bg-primary/10' : 'border-transparent'}"
+          class="group/row cursor-pointer border-l-3 {selectedIds.has(opp.itemID) ? 'border-primary bg-primary/10 hover:bg-primary/20' : 'border-transparent hover:bg-base-300'}"
           onclick={() => ontoggle(opp.itemID)}
         >
           <!-- Item -->
-          <td class="sticky left-0 z-10 group-hover/row:bg-base-300 border-r border-base-300 {selectedIds.has(opp.itemID) ? 'bg-primary/10' : 'bg-base-100'}">
+          <td class="sticky left-0 z-10 border-r border-base-300 {selectedIds.has(opp.itemID) ? 'bg-primary/10 group-hover/row:bg-primary/20' : 'bg-base-100 group-hover/row:bg-base-300'}">
             <div class="flex items-center gap-1.5">
               {#if icon}
                 <img src={icon} alt="" width="32" height="32" class="flex-shrink-0 hidden lg:inline-block"
@@ -168,7 +168,7 @@
           <td class="tabular-nums">
             <div class="flex items-baseline gap-2.5">
               <span class="w-[70px] text-right flex-shrink-0">{fmt(opp.buyPrice)}</span>
-              <span class="text-xs" style="color: {ageColor(opp.sourceConfidence)}">
+              <span class="text-xs whitespace-nowrap" style="color: {ageColor(opp.sourceConfidence)}">
                 {#if isNPC(opp.sourceWorld)}NPC{:else}{ageLabel(opp.sourceDataAgeHours)}{/if}
               </span>
             </div>
@@ -176,7 +176,7 @@
               <div class="flex items-baseline gap-2.5 mt-1">
                 <span class="w-[70px] text-right flex-shrink-0 text-xs text-base-content/50">{fmt(opp.altBuyPrice)}</span>
                 {#if opp.altSourceConfidence !== undefined && opp.altSourceDataAgeHours !== undefined}
-                  <span class="text-xs" style="color: {ageColor(opp.altSourceConfidence)}">
+                  <span class="text-xs whitespace-nowrap" style="color: {ageColor(opp.altSourceConfidence)}">
                     {#if isNPC(opp.altSourceWorld ?? '')}NPC{:else}{ageLabel(opp.altSourceDataAgeHours)}{/if}
                   </span>
                 {/if}
@@ -188,7 +188,7 @@
           <td class="tabular-nums">
             <div class="flex items-baseline gap-2.5">
               <span class="w-[70px] text-right flex-shrink-0">{fmt(opp.sellPrice)}</span>
-              <span class="text-xs" style="color: {ageColor(opp.homeConfidence)}">{ageLabel(opp.homeDataAgeHours)}</span>
+              <span class="text-xs whitespace-nowrap" style="color: {ageColor(opp.homeConfidence)}">{ageLabel(opp.homeDataAgeHours)}</span>
             </div>
             {#if opp.listingPrice !== opp.sellPrice}
               <div class="flex items-baseline gap-2.5 mt-1">
