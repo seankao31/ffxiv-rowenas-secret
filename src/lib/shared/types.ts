@@ -16,7 +16,8 @@ export type SaleRecord = {
 
 export type ItemData = {
   itemID: number
-  // worldID → unix ms. Derived: max(lastReviewTime) across all listings per worldID.
+  // worldID → unix ms. Per-world timestamp of when market data was last uploaded for this item.
+  // From Universalis worldUploadTimes (DC queries) or synthesized from lastUploadTime (per-world queries).
   // Only worlds that have at least one listing in Phase 1 appear here.
   worldUploadTimes: Record<number, number>
   // Authoritative home freshness from Phase 2 lastUploadTime.
