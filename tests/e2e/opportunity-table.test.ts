@@ -153,4 +153,20 @@ test.describe('OpportunityTable', () => {
     const unitsCol = npcRow.locator('td').nth(5)
     await expect(unitsCol).toContainText('8 / ∞')
   })
+
+  test('selected row keeps selection styling visible under hover', async ({ page }) => {
+    const firstRow = page.locator('table tbody tr').first()
+
+    // Before selection: row uses the default hover background
+    await expect(firstRow).toHaveClass(/hover:bg-base-300/)
+
+    // Click to select
+    await firstRow.click()
+
+    // After selection: default hover must not override the selection background
+    const classes = await firstRow.getAttribute('class')
+    expect(classes).not.toContain('hover:bg-base-300')
+    // Selection-aware hover should be present instead
+    expect(classes).toContain('hover:bg-primary')
+  })
 })
