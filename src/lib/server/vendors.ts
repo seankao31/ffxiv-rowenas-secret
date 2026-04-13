@@ -31,12 +31,10 @@ type SheetResponse = {
 
 type ItemPriceRow = {
   row_id: number
-  fields: {
-    PriceMid?: number
-  }
+  fields: Record<string, number | undefined>
 }
 
-import { chunk } from './universalis'
+import { chunk, fetchMarketableItems } from './universalis'
 
 async function fetchVendorItemIds(): Promise<Set<number>> {
   const itemIds = new Set<number>()
@@ -71,7 +69,7 @@ async function fetchVendorItemIds(): Promise<Set<number>> {
   return itemIds
 }
 
-async function fetchItemPrices(itemIds: number[]): Promise<Map<number, number>> {
+async function fetchItemPrices(itemIds: number[], field: string = 'PriceMid'): Promise<Map<number, number>> {
   const prices = new Map<number, number>()
   const batches = chunk(itemIds, BATCH_SIZE)
 
@@ -80,7 +78,7 @@ async function fetchItemPrices(itemIds: number[]): Promise<Map<number, number>> 
     let success = false
 
     for (let attempt = 0; attempt < BATCH_MAX_RETRIES; attempt++) {
-      const res = await fetch(`${XIVAPI_BASE}/sheet/Item?rows=${batch.join(',')}&fields=PriceMid`)
+      const res = await fetch(`${XIVAPI_BASE}/sheet/Item?rows=${batch.join(',')}&fields=${field}`)
       if (!res.ok) {
         lastStatus = res.status
         console.warn(`[vendors] Item price batch failed (attempt ${attempt + 1}/${BATCH_MAX_RETRIES}): HTTP ${res.status}`)
@@ -89,7 +87,7 @@ async function fetchItemPrices(itemIds: number[]): Promise<Map<number, number>> 
 
       const data = (await res.json()) as { rows: ItemPriceRow[] }
       for (const row of data.rows) {
-        const price = row.fields.PriceMid
+        const price = row.fields[field]
         if (price && price > 0) {
           prices.set(row.row_id, price)
         }
@@ -117,5 +115,18 @@ export async function fetchVendorPrices(): Promise<Map<number, number>> {
 
   const prices = await fetchItemPrices([...vendorItemIds])
   console.log(`[vendors] Loaded ${prices.size} vendor prices`)
+  return prices
+}
+
+export async function fetchVendorSellPrices(): Promise<Map<number, number>> {
+  console.log('[vendors] Fetching marketable items for vendor sell prices...')
+  const marketableIds = await fetchMarketableItems()
+  if (marketableIds.length === 0) {
+    console.warn('[vendors] No marketable items found for vendor sell prices')
+    return new Map()
+  }
+  console.log(`[vendors] Fetching PriceLow for ${marketableIds.length} marketable items...`)
+  const prices = await fetchItemPrices(marketableIds, 'PriceLow')
+  console.log(`[vendors] Loaded ${prices.size} vendor sell prices`)
   return prices
 }

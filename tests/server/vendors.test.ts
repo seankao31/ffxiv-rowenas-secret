@@ -1,6 +1,6 @@
 // tests/server/vendors.test.ts
 import { test, expect, describe, afterEach, vi } from 'vitest'
-import { fetchVendorPrices } from '$lib/server/vendors'
+import { fetchVendorPrices, fetchVendorSellPrices } from '$lib/server/vendors'
 
 const originalFetch = globalThis.fetch
 const originalWarn = console.warn
@@ -293,6 +293,84 @@ describe('fetchVendorPrices', () => {
     ) as unknown as typeof fetch
 
     const prices = await fetchVendorPrices()
+    expect(prices.size).toBe(0)
+  })
+})
+
+describe('fetchVendorSellPrices', () => {
+  test('fetches marketable items then PriceLow from Item sheet', async () => {
+    suppressLogs()
+    globalThis.fetch = vi.fn((url: string | URL) => {
+      const urlStr = String(url)
+      if (urlStr.includes('/marketable')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([5057, 4718]),
+        } as unknown as Response)
+      }
+      if (urlStr.includes('sheet/Item') && urlStr.includes('PriceLow')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            rows: [
+              { row_id: 5057, fields: { PriceLow: 25 } },
+              { row_id: 4718, fields: { PriceLow: 50 } },
+            ],
+          }),
+        } as unknown as Response)
+      }
+      return Promise.resolve({ ok: false, status: 404 } as Response)
+    }) as unknown as typeof fetch
+
+    const prices = await fetchVendorSellPrices()
+    expect(prices.size).toBe(2)
+    expect(prices.get(5057)).toBe(25)
+    expect(prices.get(4718)).toBe(50)
+  })
+
+  test('skips items with PriceLow of zero', async () => {
+    suppressLogs()
+    globalThis.fetch = vi.fn((url: string | URL) => {
+      const urlStr = String(url)
+      if (urlStr.includes('/marketable')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([5057, 4718]),
+        } as unknown as Response)
+      }
+      if (urlStr.includes('sheet/Item')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            rows: [
+              { row_id: 5057, fields: { PriceLow: 25 } },
+              { row_id: 4718, fields: { PriceLow: 0 } },
+            ],
+          }),
+        } as unknown as Response)
+      }
+      return Promise.resolve({ ok: false, status: 404 } as Response)
+    }) as unknown as typeof fetch
+
+    const prices = await fetchVendorSellPrices()
+    expect(prices.size).toBe(1)
+    expect(prices.get(5057)).toBe(25)
+  })
+
+  test('returns empty map when no marketable items', async () => {
+    suppressLogs()
+    globalThis.fetch = vi.fn((url: string | URL) => {
+      const urlStr = String(url)
+      if (urlStr.includes('/marketable')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([]),
+        } as unknown as Response)
+      }
+      return Promise.resolve({ ok: false, status: 404 } as Response)
+    }) as unknown as typeof fetch
+
+    const prices = await fetchVendorSellPrices()
     expect(prices.size).toBe(0)
   })
 })
