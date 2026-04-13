@@ -23,6 +23,7 @@ FFXIV cross-world market board arbitrage dashboard for the 陸行鳥 Data Center
 | Crafting Optimizer | Cheapest way to craft an item — cross-world sourcing, recursive craft-vs-buy |
 | Craft-for-Profit Rankings | Rank craftable items by profitability vs. selling price and velocity |
 | Retainer Venture Optimizer | Most profitable retainer venture dispatches by job, level, and loot prices |
+| Monetization & Analytics | Google Ads, Google Analytics, traffic tracking, and revenue |
 
 ## Testing: visual and e2e
 

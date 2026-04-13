@@ -29,3 +29,11 @@ docs/deployment.md
 # Playwright
 test-results/
 playwright-report/
+
+# Linear dependency graph artifacts
+manifest.json
+graph.dot
+graph.svg
+
+# Temporary screenshots
+*.png
