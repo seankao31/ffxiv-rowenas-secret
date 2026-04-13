@@ -15,3 +15,6 @@ This directory contains ADRs documenting significant design decisions made durin
 | [ADR-009](./ADR-009-frontend-testing-strategy.md) | Frontend Testing Strategy — vitest + Playwright | Accepted |
 | [ADR-010](./ADR-010-sveltekit-migration.md) | SvelteKit Migration — Replace Express with SvelteKit | Accepted |
 | [ADR-011](./ADR-011-game-data-sourcing-strategy.md) | Game Data Sourcing Strategy — XIVAPI v2 Incremental, Overhaul Later | Accepted |
+| [ADR-012](./ADR-012-adopt-ffxiv-market-msgpack.md) | Adopt FFXIV_Market Msgpack for Game Data | Accepted |
+| [ADR-013](./ADR-013-buy-route-client-side-transform.md) | Buy Route as Client-Side Transform | Accepted |
+| [ADR-014](./ADR-014-fixture-data-dev-mode.md) | Fixture Data Dev Mode | Accepted |
