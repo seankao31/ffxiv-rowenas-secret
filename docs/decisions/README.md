@@ -18,3 +18,4 @@ This directory contains ADRs documenting significant design decisions made durin
 | [ADR-012](./ADR-012-adopt-ffxiv-market-msgpack.md) | Adopt FFXIV_Market Msgpack for Game Data | Accepted |
 | [ADR-013](./ADR-013-buy-route-client-side-transform.md) | Buy Route as Client-Side Transform | Accepted |
 | [ADR-014](./ADR-014-fixture-data-dev-mode.md) | Fixture Data Dev Mode | Accepted |
+| [ADR-015](./ADR-015-vendor-sell-two-pass-scoring.md) | Two-Pass Scoring for Vendor-Sell Opportunities | Accepted |
