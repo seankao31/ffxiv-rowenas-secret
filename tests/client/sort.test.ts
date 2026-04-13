@@ -59,6 +59,7 @@ function opp(overrides: Partial<Opportunity> & { score: number }): Opportunity {
     availableUnits: 0, recommendedUnits: 0, expectedDailyProfit: 0,
     homeDataAgeHours: 0, homeConfidence: 1, sourceDataAgeHours: 0, sourceConfidence: 1,
     activeCompetitorCount: 0, fairShareVelocity: 0,
+    sellDestination: 'mb' as const,
     ...overrides,
   }
 }

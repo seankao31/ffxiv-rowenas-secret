@@ -247,7 +247,10 @@ export function scoreOpportunities(
         const profitPerUnit = vendorSellPrice - effectiveBuyPrice
         if (profitPerUnit <= 0) continue
 
-        const uploadTime = item.worldUploadTimes[worldID] ?? 0
+        // Use authoritative homeLastUploadTime for home world (same as MB-sell pass).
+        const uploadTime = worldID === HOME_WORLD_ID
+          ? item.homeLastUploadTime
+          : (item.worldUploadTimes[worldID] ?? 0)
         const sourceAgeHours = uploadTime > 0 ? (now - uploadTime) / MS_PER_HOUR : Infinity
         const sourceConf = confidence(sourceAgeHours, SOURCE_TIME_CONSTANT_H)
         const worldScore = profitPerUnit * sourceConf
