@@ -77,6 +77,7 @@ const fixtureDir = join(tmpdir(), `rowenas-crafting-test-${process.pid}`)
 const originalLog = console.log
 
 let solveCraftingCost: typeof import('$lib/server/crafting').solveCraftingCost
+let solveCraftCostBatch: typeof import('$lib/server/crafting').solveCraftCostBatch
 
 beforeAll(async () => {
   console.log = vi.fn(() => {}) as typeof console.log
@@ -85,6 +86,7 @@ beforeAll(async () => {
   await initRecipes(join(fixtureDir, 'recipes.msgpack'))
   const mod = await import('$lib/server/crafting')
   solveCraftingCost = mod.solveCraftingCost
+  solveCraftCostBatch = mod.solveCraftCostBatch
 })
 
 afterAll(async () => {
@@ -485,5 +487,99 @@ describe('solveCraftingCost', () => {
     // Recipe 2 wins
     expect(result.root.recipe!.recipeId).toBe(2)
     expect(result.root.unitCost).toBe(525)
+  })
+})
+
+describe('solveCraftCostBatch', () => {
+  test('returns CraftCostEntry for each craftable item', () => {
+    const cache = new Map([
+      [100, itemData(100, [listing(600)])],
+      [10, itemData(10, [listing(100)])],
+      [11, itemData(11, [listing(100)])],
+      [12, itemData(12, [listing(200)])],
+      [200, itemData(200, [listing(250)])],
+      [13, itemData(13, [listing(100)])],
+    ])
+    const results = solveCraftCostBatch(cache, new Map())
+
+    // Item 100: craft at 525 (recipe 1: 3×100×1.05 + 2×100×1.05 = 525)
+    const entry100 = results.get(100)!
+    expect(entry100).toBeDefined()
+    expect(entry100.recipeId).toBe(1)
+    expect(entry100.craftCost).toBe(525)
+    expect(entry100.job).toBe(8)
+    expect(entry100.level).toBe(50)
+
+    // Item 200: craft at 210 (6×100×1.05 / 3 yields = 210)
+    const entry200 = results.get(200)!
+    expect(entry200).toBeDefined()
+    expect(entry200.craftCost).toBe(210)
+  })
+
+  test('excludes items where buy is cheaper than craft', () => {
+    const cache = new Map([
+      [100, itemData(100, [listing(10)])],  // very cheap to buy
+      [10, itemData(10, [listing(500)])],
+      [11, itemData(11, [listing(500)])],
+      [12, itemData(12, [listing(500)])],
+    ])
+    const results = solveCraftCostBatch(cache, new Map())
+    // Item 100: buy at 10.5 is cheaper than any recipe → action='buy', no entry
+    expect(results.has(100)).toBe(false)
+  })
+
+  test('excludes companyCraft-only items', () => {
+    const cache = new Map([
+      [600, itemData(600, [listing(100)])],
+      [10, itemData(10, [listing(50)])],
+    ])
+    const results = solveCraftCostBatch(cache, new Map())
+    // Item 600 only has companyCraft recipe
+    expect(results.has(600)).toBe(false)
+  })
+
+  test('shared memo: diamond dependency solved once', () => {
+    const cache = new Map([
+      [400, itemData(400, [listing(2000)])],
+      [401, itemData(401, [listing(300)])],
+      [402, itemData(402, [listing(400)])],
+      [500, itemData(500, [listing(100)])],
+    ])
+    const results = solveCraftCostBatch(cache, new Map())
+    // 401: craft 2×105=210 < buy 315
+    // 402: craft 3×105=315 < buy 420
+    // 400: craft 210+315=525 < buy 2100
+    expect(results.get(400)!.craftCost).toBe(525)
+    expect(results.get(401)!.craftCost).toBeCloseTo(210)
+    expect(results.get(402)!.craftCost).toBeCloseTo(315)
+  })
+
+  test('no depth cap: deep DAG fully resolved', () => {
+    const cache = new Map([
+      [700, itemData(700, [listing(1000)])],
+      [701, itemData(701, [listing(500)])],
+      [702, itemData(702, [listing(300)])],
+      [10, itemData(10, [listing(100)])],
+    ])
+    const results = solveCraftCostBatch(cache, new Map())
+    // 702: craft 1×105=105 < buy 315
+    // 701: craft 1×105=105 < buy 525
+    // 700: craft 1×105=105 < buy 1050
+    expect(results.get(702)!.craftCost).toBeCloseTo(105)
+    expect(results.get(701)!.craftCost).toBeCloseTo(105)
+    expect(results.get(700)!.craftCost).toBeCloseTo(105)
+  })
+
+  test('uses vendor prices when cheaper', () => {
+    const cache = new Map([
+      [100, itemData(100, [listing(600)])],
+      [10, itemData(10, [listing(100)])],
+      [11, itemData(11, [listing(200)])],
+      [12, itemData(12, [listing(200)])],
+    ])
+    const vendors = new Map([[11, 80]])
+    const results = solveCraftCostBatch(cache, vendors)
+    // Recipe 1: 3×105 + 2×80 = 315+160 = 475
+    expect(results.get(100)!.craftCost).toBe(475)
   })
 })
