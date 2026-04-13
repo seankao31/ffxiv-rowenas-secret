@@ -26,13 +26,15 @@ Existing `SaleRecord` (server-side, home-world only) stays untouched.
 
 New function: `fetchItemSaleHistory(itemId: number): Promise<Sale[]>`
 
-- Calls `GET {BASE_URL}/history/{DC_NAME}/{itemId}` with `entriesWithin=604800` (7 days in seconds)
+- Calls `GET {BASE_URL}/history/{DC_NAME}/{itemId}` with `entriesToReturn=200`
 - Maps response `entries` to `Sale[]`
 - Converts `timestamp` from seconds to milliseconds (addressing ENG-94 deferred follow-up #4)
 - Returns sales sorted by `timestamp` descending (most recent first)
 - On failure: throws (caller handles error state)
 
-Uses the History endpoint rather than CurrentlyShown because the default 5 entries from CurrentlyShown is insufficient for meaningful 7-day stats. History endpoint returns `MinimizedSaleView` (no `total` field — computed in the table).
+Uses the History endpoint rather than CurrentlyShown because the default 5 entries from CurrentlyShown is insufficient for meaningful stats. History endpoint returns `MinimizedSaleView` (no `total` field — computed in the table).
+
+Entry count (200) rather than time window: unpopular items may have very few sales in 7 days, so a fixed entry count ensures the table always shows meaningful history regardless of trade frequency. The stats component filters by time window (24h/7d) internally from whatever entries are returned.
 
 ## SaleHistoryTable Component
 
@@ -89,7 +91,7 @@ All computed from the `Sale[]` array, filtered by time window:
 | Median price | Middle value of sorted prices |
 | Avg price | `sum(price * qty) / sum(qty)` (revenue-weighted) |
 | Volume (24h) | `sum(qty)` for sales within last 24 hours |
-| Volume (7d) | `sum(qty)` for all sales (entire dataset, since fetch is 7-day scoped) |
+| Volume (7d) | `sum(qty)` for sales within last 7 days |
 | NQ velocity (24h / 7d) | Volume of `hq === false` sales in each window |
 | HQ velocity (24h / 7d) | Volume of `hq === true` sales in each window |
 
