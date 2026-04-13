@@ -26,8 +26,12 @@ async function main() {
   console.log('[snapshot] Loading item names...')
   const names = await fetchItemNames()
 
+  // Only sample items that have TW names (the TW game version lags behind global)
+  const namedItemIds = allItemIds.filter(id => names.has(id))
+  console.log(`[snapshot] ${namedItemIds.length} items have TW names`)
+
   // Take a random sample to get diverse items
-  const shuffled = allItemIds.slice().sort(() => Math.random() - 0.5)
+  const shuffled = namedItemIds.slice().sort(() => Math.random() - 0.5)
   const sampleIds = shuffled.slice(0, TARGET_ITEMS)
   console.log(`[snapshot] Scanning ${sampleIds.length} items...`)
 
@@ -65,8 +69,7 @@ async function main() {
     )
     items.push(itemData)
 
-    const name = names.get(home.itemID)
-    if (name) nameEntries[String(home.itemID)] = name
+    nameEntries[String(home.itemID)] = names.get(home.itemID)!
   }
 
   const snapshot = { items, names: nameEntries }
