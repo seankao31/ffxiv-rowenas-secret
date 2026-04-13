@@ -1,12 +1,22 @@
 <script lang="ts">
   import '../app.css'
   import { Heart } from 'lucide-svelte'
+  import { afterNavigate } from '$app/navigation'
   import TopBar from '$lib/components/TopBar.svelte'
   import Sidebar from '$lib/components/Sidebar.svelte'
   import NavDrawer from '$lib/components/NavDrawer.svelte'
   import { loadSidebarExpanded, saveSidebarExpanded } from '$lib/client/sidebar.ts'
 
   let { children } = $props()
+
+  afterNavigate(() => {
+    if (typeof gtag === 'function') {
+      gtag('event', 'page_view', {
+        page_title: document.title,
+        page_location: location.href,
+      })
+    }
+  })
 
   let expanded = $state(loadSidebarExpanded())
   let drawerOpen = $state(false)
