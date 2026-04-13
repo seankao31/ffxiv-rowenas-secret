@@ -19,7 +19,7 @@
 - Modify: `src/lib/client/universalis.ts` (add `fetchItemSaleHistory` function)
 - Modify: `tests/client/universalis.test.ts` (add tests for new function)
 
-- [ ] **Step 1: Add the `Sale` type**
+- [x] **Step 1: Add the `Sale` type**
 
 In `src/lib/shared/types.ts`, add after the `Listing` type:
 
@@ -35,7 +35,7 @@ export type Sale = {
 }
 ```
 
-- [ ] **Step 2: Write failing tests for `fetchItemSaleHistory`**
+- [x] **Step 2: Write failing tests for `fetchItemSaleHistory`**
 
 In `tests/client/universalis.test.ts`, add a new `describe` block after the existing `fetchItemListings` tests. Import `fetchItemSaleHistory` alongside the existing import:
 
@@ -154,12 +154,12 @@ describe('fetchItemSaleHistory', () => {
 })
 ```
 
-- [ ] **Step 3: Run tests to verify they fail**
+- [x] **Step 3: Run tests to verify they fail**
 
 Run: `bun run test -- tests/client/universalis.test.ts`
 Expected: FAIL — `fetchItemSaleHistory` is not exported from `$lib/client/universalis`
 
-- [ ] **Step 4: Implement `fetchItemSaleHistory`**
+- [x] **Step 4: Implement `fetchItemSaleHistory`**
 
 In `src/lib/client/universalis.ts`, add the History API response type and the fetch function:
 
@@ -203,12 +203,12 @@ export async function fetchItemSaleHistory(itemId: number): Promise<Sale[]> {
 }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `bun run test -- tests/client/universalis.test.ts`
 Expected: All tests PASS (both existing `fetchItemListings` and new `fetchItemSaleHistory`)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/shared/types.ts src/lib/client/universalis.ts tests/client/universalis.test.ts
@@ -228,7 +228,7 @@ Both `ListingsTable` and the new `SaleHistoryTable` need `formatRelativeTime` an
 - Modify: `src/lib/components/ListingsTable.svelte` (remove inline helpers, import from format.ts)
 - Create: `tests/client/format.test.ts`
 
-- [ ] **Step 1: Write failing tests for format helpers**
+- [x] **Step 1: Write failing tests for format helpers**
 
 Create `tests/client/format.test.ts`:
 
@@ -280,12 +280,12 @@ describe('formatRelativeTime', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bun run test -- tests/client/format.test.ts`
 Expected: FAIL — module `$lib/client/format` does not exist
 
-- [ ] **Step 3: Create `src/lib/client/format.ts`**
+- [x] **Step 3: Create `src/lib/client/format.ts`**
 
 ```ts
 export function formatNumber(n: number): string {
@@ -304,12 +304,12 @@ export function formatRelativeTime(unixMs: number): string {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun run test -- tests/client/format.test.ts`
 Expected: All PASS
 
-- [ ] **Step 5: Update `ListingsTable.svelte` to import from format module**
+- [x] **Step 5: Update `ListingsTable.svelte` to import from format module**
 
 In `src/lib/components/ListingsTable.svelte`, replace the inline `formatNumber` and `formatRelativeTime` functions with imports:
 
@@ -321,12 +321,12 @@ import { formatNumber, formatRelativeTime } from '$lib/client/format'
 
 Remove the two function definitions (`formatNumber` and `formatRelativeTime`) from the script block.
 
-- [ ] **Step 6: Run full test suite to verify no regressions**
+- [x] **Step 6: Run full test suite to verify no regressions**
 
 Run: `bun run test`
 Expected: All tests PASS
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/lib/client/format.ts tests/client/format.test.ts src/lib/components/ListingsTable.svelte
@@ -345,7 +345,7 @@ Extract stat computation into a pure TypeScript module for easy unit testing.
 - Create: `src/lib/client/price-stats.ts`
 - Create: `tests/client/price-stats.test.ts`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create `tests/client/price-stats.test.ts`:
 
@@ -496,12 +496,12 @@ describe('computePriceStats', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bun run test -- tests/client/price-stats.test.ts`
 Expected: FAIL — module `$lib/client/price-stats` does not exist
 
-- [ ] **Step 3: Implement `computePriceStats`**
+- [x] **Step 3: Implement `computePriceStats`**
 
 Create `src/lib/client/price-stats.ts`:
 
@@ -565,17 +565,17 @@ export function computePriceStats(sales: Sale[]): PriceStatsResult | null {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun run test -- tests/client/price-stats.test.ts`
 Expected: All PASS
 
-- [ ] **Step 5: Run full test suite**
+- [x] **Step 5: Run full test suite**
 
 Run: `bun run test`
 Expected: All tests PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/client/price-stats.ts tests/client/price-stats.test.ts
@@ -593,7 +593,7 @@ Ref: ENG-62"
 
 This is a Svelte component — use the `svelte-file-editor` subagent type. The component receives `Sale[]`, `loading`, and `error` as props and renders a scrollable table. No internal fetch, no filters.
 
-- [ ] **Step 1: Create `SaleHistoryTable.svelte`**
+- [x] **Step 1: Create `SaleHistoryTable.svelte`**
 
 Create `src/lib/components/SaleHistoryTable.svelte`. Use the `svelte:svelte-file-editor` subagent to create this file, providing the full spec:
 
@@ -613,12 +613,12 @@ Create `src/lib/components/SaleHistoryTable.svelte`. Use the `svelte:svelte-file
 
 Reference `src/lib/components/ListingsTable.svelte` for exact markup style (DaisyUI table classes, text alignment, etc).
 
-- [ ] **Step 2: Verify the component compiles**
+- [x] **Step 2: Verify the component compiles**
 
 Run: `bun run build 2>&1 | tail -5`
 Expected: Build succeeds (component is created but not yet used in a page — just checking for syntax errors)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/components/SaleHistoryTable.svelte
@@ -634,7 +634,7 @@ Ref: ENG-62"
 **Files:**
 - Create: `src/lib/components/PriceStats.svelte`
 
-- [ ] **Step 1: Create `PriceStats.svelte`**
+- [x] **Step 1: Create `PriceStats.svelte`**
 
 Create `src/lib/components/PriceStats.svelte`. Use the `svelte:svelte-file-editor` subagent.
 
@@ -660,12 +660,12 @@ Stats to display:
   - Volume (24h): `stats.volume24h` with HQ/NQ breakdown: `{stats.hqVolume24h} HQ / {stats.nqVolume24h} NQ`
   - Volume (7d): `stats.volume7d` with HQ/NQ breakdown: `{stats.hqVolume7d} HQ / {stats.nqVolume7d} NQ`
 
-- [ ] **Step 2: Verify the component compiles**
+- [x] **Step 2: Verify the component compiles**
 
 Run: `bun run build 2>&1 | tail -5`
 Expected: Build succeeds
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/components/PriceStats.svelte
@@ -681,7 +681,7 @@ Ref: ENG-62"
 **Files:**
 - Modify: `src/routes/item/[id]/+page.svelte`
 
-- [ ] **Step 1: Update the page to fetch history and render both components**
+- [x] **Step 1: Update the page to fetch history and render both components**
 
 Modify `src/routes/item/[id]/+page.svelte`. Use the `svelte:svelte-file-editor` subagent.
 
@@ -741,17 +741,17 @@ Replace the Price Statistics skeleton card with:
 </div>
 ```
 
-- [ ] **Step 2: Verify it builds**
+- [x] **Step 2: Verify it builds**
 
 Run: `bun run build 2>&1 | tail -5`
 Expected: Build succeeds
 
-- [ ] **Step 3: Run full test suite**
+- [x] **Step 3: Run full test suite**
 
 Run: `bun run test`
 Expected: All tests PASS
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/routes/item/[id]/+page.svelte
@@ -767,7 +767,7 @@ Ref: ENG-62"
 **Files:**
 - Modify: `tests/e2e/item-detail.test.ts`
 
-- [ ] **Step 1: Update the API mock to handle both Universalis endpoints**
+- [x] **Step 1: Update the API mock to handle both Universalis endpoints**
 
 The existing `mockApi` function uses a catch-all `**/universalis.app/api/v2/**` route. Now we need to differentiate between the CurrentlyShown endpoint (listings) and the History endpoint (sale history).
 
@@ -812,7 +812,7 @@ await page.route('**/universalis.app/api/v2/**', route =>
 
 **Important:** The History route must be registered **before** the catch-all route. Playwright matches routes in registration order — the first match wins.
 
-- [ ] **Step 2: Add sale history table tests**
+- [x] **Step 2: Add sale history table tests**
 
 Add a new `test.describe` block inside the existing outer describe:
 
@@ -870,7 +870,7 @@ test.describe('Sale history', () => {
 })
 ```
 
-- [ ] **Step 3: Add price stats tests**
+- [x] **Step 3: Add price stats tests**
 
 ```ts
 test.describe('Price statistics', () => {
@@ -903,17 +903,17 @@ test.describe('Price statistics', () => {
 })
 ```
 
-- [ ] **Step 4: Run e2e tests**
+- [x] **Step 4: Run e2e tests**
 
 Run: `bunx playwright test tests/e2e/item-detail.test.ts`
 Expected: All PASS
 
-- [ ] **Step 5: Run full test suite (unit + e2e)**
+- [x] **Step 5: Run full test suite (unit + e2e)**
 
 Run: `bun run test && bunx playwright test`
 Expected: All PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add tests/e2e/item-detail.test.ts
@@ -926,13 +926,13 @@ Ref: ENG-62"
 
 ### Task 8: Visual verification and cleanup
 
-- [ ] **Step 1: Start dev server**
+- [x] **Step 1: Start dev server**
 
 Run: `FIXTURE_DATA=true bun run dev -- --port 5174`
 
 Note: Use port 5174 to avoid conflicting with any existing dev server. Track the PID to kill it later.
 
-- [ ] **Step 2: Visual verification via Playwright MCP**
+- [x] **Step 2: Visual verification via Playwright MCP**
 
 Navigate to `http://localhost:5174/item/2394` (or any item ID that has fixture data) and take a screenshot. Verify:
 - Sale History table renders in the right column with correct columns
@@ -940,10 +940,10 @@ Navigate to `http://localhost:5174/item/2394` (or any item ID that has fixture d
 - Layout is correct on desktop (two-column grid)
 - Check mobile viewport (resize to 375px width) for responsive behavior
 
-- [ ] **Step 3: Kill dev server**
+- [x] **Step 3: Kill dev server**
 
 Kill the dev server process started in Step 1.
 
-- [ ] **Step 4: Final commit if any visual fixes were needed**
+- [x] **Step 4: Final commit if any visual fixes were needed**
 
 Only if visual verification revealed issues that needed fixing.
