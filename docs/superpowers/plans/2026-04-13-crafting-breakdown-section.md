@@ -1,6 +1,6 @@
 # Crafting Breakdown Section Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Final review includes cross-model verification via codex-review-gate.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking. Final review includes cross-model verification via codex-review-gate.
 
 **Goal:** Add a Crafting tab to the `/item/[id]` page showing cost breakdown, recursive recipe tree, and per-node confidence indicators for craftable items.
 
@@ -30,7 +30,7 @@
 **Files:**
 - Modify: `src/routes/item/[id]/+page.server.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/server/item-page-load.test.ts`:
 
@@ -58,12 +58,12 @@ describe('getRecipesByResult for hasRecipe check', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it passes**
+- [x] **Step 2: Run test to verify it passes**
 
 Run: `bun run test tests/server/item-page-load.test.ts`
 Expected: PASS — `getRecipesByResult` already exists, this confirms the function we'll use in the load function.
 
-- [ ] **Step 3: Modify the server load function**
+- [x] **Step 3: Modify the server load function**
 
 Edit `src/routes/item/[id]/+page.server.ts`:
 
@@ -85,12 +85,12 @@ export async function load({ params }: { params: { id: string } }) {
 }
 ```
 
-- [ ] **Step 4: Run all tests to confirm no regressions**
+- [x] **Step 4: Run all tests to confirm no regressions**
 
 Run: `bun run test`
 Expected: All tests PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/routes/item/[id]/+page.server.ts tests/server/item-page-load.test.ts
@@ -106,7 +106,7 @@ Ref: ENG-66"
 **Files:**
 - Modify: `src/routes/item/[id]/+page.svelte`
 
-- [ ] **Step 1: Write the failing e2e test for tabs**
+- [x] **Step 1: Write the failing e2e test for tabs**
 
 Create `tests/e2e/crafting-breakdown.test.ts` with the tab structure tests only:
 
@@ -191,12 +191,12 @@ test.describe('Item detail page — tabs', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bunx playwright test tests/e2e/crafting-breakdown.test.ts`
 Expected: FAIL — no tab elements exist yet.
 
-- [ ] **Step 3: Implement tab bar in the page**
+- [x] **Step 3: Implement tab bar in the page**
 
 Edit `src/routes/item/[id]/+page.svelte`. Replace the entire file:
 
@@ -316,17 +316,17 @@ Edit `src/routes/item/[id]/+page.svelte`. Replace the entire file:
 {/if}
 ```
 
-- [ ] **Step 4: Run e2e tests to verify tabs work**
+- [x] **Step 4: Run e2e tests to verify tabs work**
 
 Run: `bunx playwright test tests/e2e/crafting-breakdown.test.ts`
 Expected: All tab tests PASS.
 
-- [ ] **Step 5: Run existing item-detail e2e tests to check for regressions**
+- [x] **Step 5: Run existing item-detail e2e tests to check for regressions**
 
 Run: `bunx playwright test tests/e2e/item-detail.test.ts`
 Expected: All PASS — existing tests navigate to the page with Market as default tab, so content should be unchanged.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/routes/item/[id]/+page.svelte tests/e2e/crafting-breakdown.test.ts
@@ -342,7 +342,7 @@ Ref: ENG-66"
 **Files:**
 - Create: `src/lib/components/CraftingTreeNode.svelte`
 
-- [ ] **Step 1: Write the failing e2e test for tree nodes**
+- [x] **Step 1: Write the failing e2e test for tree nodes**
 
 Add to `tests/e2e/crafting-breakdown.test.ts`:
 
@@ -488,12 +488,12 @@ test.describe('Item detail page — crafting breakdown', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bunx playwright test tests/e2e/crafting-breakdown.test.ts`
 Expected: FAIL — CraftingTreeNode component doesn't exist yet.
 
-- [ ] **Step 3: Create the CraftingTreeNode component**
+- [x] **Step 3: Create the CraftingTreeNode component**
 
 Create `src/lib/components/CraftingTreeNode.svelte`:
 
@@ -643,7 +643,7 @@ Create `src/lib/components/CraftingTreeNode.svelte`:
 
 **Note:** The component displays `node.itemId` as the item name. This is a temporary placeholder — item names come from the XIVAPI cache populated by `fetchItemMetadata`. The `$effect` triggers the fetch, and a future step can add `nameGeneration` reactivity if needed. For now, the parent component (`CraftingBreakdown`) will handle name resolution by batch-fetching all item IDs in the tree.
 
-- [ ] **Step 4: Commit (component not yet wired up — tests still fail)**
+- [x] **Step 4: Commit (component not yet wired up — tests still fail)**
 
 ```bash
 git add src/lib/components/CraftingTreeNode.svelte
@@ -659,7 +659,7 @@ Ref: ENG-66"
 **Files:**
 - Create: `src/lib/components/CraftingBreakdown.svelte`
 
-- [ ] **Step 1: Create the CraftingBreakdown component**
+- [x] **Step 1: Create the CraftingBreakdown component**
 
 Create `src/lib/components/CraftingBreakdown.svelte`:
 
@@ -852,7 +852,7 @@ Create `src/lib/components/CraftingBreakdown.svelte`:
 </div>
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add src/lib/components/CraftingBreakdown.svelte
@@ -868,7 +868,7 @@ Ref: ENG-66"
 **Files:**
 - Modify: `src/routes/item/[id]/+page.svelte`
 
-- [ ] **Step 1: Import and render CraftingBreakdown in the Crafting tab**
+- [x] **Step 1: Import and render CraftingBreakdown in the Crafting tab**
 
 Edit `src/routes/item/[id]/+page.svelte`. Add the import:
 
@@ -884,17 +884,17 @@ Replace the placeholder in the crafting tab section:
 {/if}
 ```
 
-- [ ] **Step 2: Run all crafting breakdown e2e tests**
+- [x] **Step 2: Run all crafting breakdown e2e tests**
 
 Run: `bunx playwright test tests/e2e/crafting-breakdown.test.ts`
 Expected: All PASS.
 
-- [ ] **Step 3: Run full e2e suite for regressions**
+- [x] **Step 3: Run full e2e suite for regressions**
 
 Run: `bunx playwright test`
 Expected: All PASS.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/routes/item/[id]/+page.svelte
@@ -912,7 +912,7 @@ The tree currently shows item IDs instead of names. The `CraftingBreakdown` comp
 **Files:**
 - Modify: `src/lib/components/CraftingTreeNode.svelte`
 
-- [ ] **Step 1: Add e2e test for item names in tree**
+- [x] **Step 1: Add e2e test for item names in tree**
 
 Add to the `crafting breakdown` describe block in `tests/e2e/crafting-breakdown.test.ts`:
 
@@ -925,12 +925,12 @@ test('tree nodes show item names after metadata loads', async ({ page }) => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `bunx playwright test tests/e2e/crafting-breakdown.test.ts --grep "item names"`
 Expected: FAIL — node shows item ID, not name.
 
-- [ ] **Step 3: Add name reactivity to CraftingTreeNode**
+- [x] **Step 3: Add name reactivity to CraftingTreeNode**
 
 Edit `src/lib/components/CraftingTreeNode.svelte`. Add `nameGeneration` prop and name derivation to the script block:
 
@@ -958,7 +958,7 @@ Edit `src/lib/components/CraftingTreeNode.svelte`. Add `nameGeneration` prop and
 
 Replace all occurrences of `{node.itemId}` in the template with `{displayName}` (in the `<a>` tags and `<span>` for vendor names).
 
-- [ ] **Step 4: Also update the XIVAPI mock to return data for all items in the tree**
+- [x] **Step 4: Also update the XIVAPI mock to return data for all items in the tree**
 
 Update the `XIVAPI_RESPONSE` in the test file to include rows for all item IDs used in `CRAFT_API_RESPONSE`:
 
@@ -990,12 +990,12 @@ const XIVAPI_RESPONSE = {
 }
 ```
 
-- [ ] **Step 5: Run tests**
+- [x] **Step 5: Run tests**
 
 Run: `bunx playwright test tests/e2e/crafting-breakdown.test.ts`
 Expected: All PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/components/CraftingTreeNode.svelte tests/e2e/crafting-breakdown.test.ts
@@ -1011,13 +1011,13 @@ Ref: ENG-66"
 **Files:**
 - Possibly modify: `src/lib/components/CraftingBreakdown.svelte`, `src/lib/components/CraftingTreeNode.svelte`
 
-- [ ] **Step 1: Start the dev server with fixture data**
+- [x] **Step 1: Start the dev server with fixture data**
 
 Run: `FIXTURE_DATA=true bun run dev`
 
 Navigate to a craftable item's page (e.g., `/item/2394?tab=crafting`) using Playwright MCP tools.
 
-- [ ] **Step 2: Take screenshots and verify against the mockup**
+- [x] **Step 2: Take screenshots and verify against the mockup**
 
 Use `mcp__plugin_playwright_playwright__browser_take_screenshot` to capture the Crafting tab. Compare visually against `docs/superpowers/specs/2026-04-13-crafting-breakdown-mockup.png`.
 
@@ -1030,7 +1030,7 @@ Check:
 - Expand/collapse works for craft and buy-with-recipe nodes
 - Disabled Crafting tab on a non-craftable item
 
-- [ ] **Step 3: Verify mobile responsiveness**
+- [x] **Step 3: Verify mobile responsiveness**
 
 Resize the viewport to 375px width and take a screenshot. Check:
 - Summary card stacks vertically
@@ -1038,16 +1038,16 @@ Resize the viewport to 375px width and take a screenshot. Check:
 - Tree indentation is reasonable (not overflowing)
 - Tab bar is full-width
 
-- [ ] **Step 4: Fix any visual issues found**
+- [x] **Step 4: Fix any visual issues found**
 
 Apply CSS tweaks as needed. Run e2e tests after any changes.
 
-- [ ] **Step 5: Run full test suite**
+- [x] **Step 5: Run full test suite**
 
 Run: `bunx playwright test && bun run test`
 Expected: All PASS.
 
-- [ ] **Step 6: Commit any polish changes**
+- [x] **Step 6: Commit any polish changes**
 
 ```bash
 git add -u
@@ -1056,7 +1056,7 @@ git commit -m "fix(ui): polish crafting breakdown layout and spacing
 Ref: ENG-66"
 ```
 
-- [ ] **Step 7: Kill dev server**
+- [x] **Step 7: Kill dev server**
 
 Ensure the `FIXTURE_DATA=true bun run dev` process is terminated.
 
@@ -1064,15 +1064,15 @@ Ensure the `FIXTURE_DATA=true bun run dev` process is terminated.
 
 ### Task 8: Final review
 
-- [ ] **Step 1: Run full test suite**
+- [x] **Step 1: Run full test suite**
 
 Run: `bun run test && bunx playwright test`
 Expected: All PASS.
 
-- [ ] **Step 2: Cross-model code review via codex-review-gate**
+- [x] **Step 2: Cross-model code review via codex-review-gate**
 
 Invoke `codex-review-gate` skill for final review of all changes on the branch.
 
-- [ ] **Step 3: Assess if adversarial review is warranted**
+- [x] **Step 3: Assess if adversarial review is warranted**
 
 Given this is a self-contained UI feature with no security-sensitive changes, standard review should suffice.
