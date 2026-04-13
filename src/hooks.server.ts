@@ -2,6 +2,7 @@ import { startScanner } from '$lib/server/scanner'
 import { fetchVendorPrices } from '$lib/server/vendors'
 import { initRecipes } from '$lib/server/recipes'
 import { setVendorPrices } from '$lib/server/cache'
+import { seedFixtureData } from '$lib/server/fixtures/seed'
 
 export async function init() {
   // Recipe data and vendor prices load concurrently (both are independent).
@@ -22,8 +23,12 @@ export async function init() {
 
   await recipePromise
 
-  startScanner().catch(err => {
-    console.error('[server] Scanner crashed:', err)
-    process.exit(1)
-  })
+  if (process.env['FIXTURE_DATA']) {
+    seedFixtureData()
+  } else {
+    startScanner().catch(err => {
+      console.error('[server] Scanner crashed:', err)
+      process.exit(1)
+    })
+  }
 }
