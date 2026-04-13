@@ -1,6 +1,7 @@
 import { fetchMarketableItems, fetchDCListings, fetchHomeListings, fetchWorldListings, fetchHomeWorldCombined, fetchItemNames, DC_WORLDS, HOME_WORLD_ID } from './universalis.ts'
-import { setItem, setNameMap, setScanMeta, getScanMeta, setScanProgress } from './cache.ts'
+import { setItem, setNameMap, setScanMeta, getScanMeta, setScanProgress, getAllItems, getVendorPrices, setCraftCosts } from './cache.ts'
 import type { ItemData, Listing, SaleRecord } from '$lib/shared/types.ts'
+import { solveCraftCostBatch } from './crafting.ts'
 const SCAN_COOLDOWN_MS = 60_000
 
 type ScanStrategy = 'dc' | 'per-world'
@@ -106,6 +107,12 @@ async function runScanCycle(itemIds: number[]): Promise<void> {
 
   const elapsed = ((now - cycleStart) / 1000).toFixed(1)
   console.log(`[scanner] Scan complete: ${updated} items in ${elapsed}s`)
+
+  const batchStart = Date.now()
+  const craftCosts = solveCraftCostBatch(getAllItems(), getVendorPrices())
+  setCraftCosts(craftCosts)
+  const batchElapsed = ((Date.now() - batchStart) / 1000).toFixed(1)
+  console.log(`[scanner] Craft cost batch: ${craftCosts.size} items in ${batchElapsed}s`)
 }
 
 async function runScanCyclePerWorld(itemIds: number[]): Promise<void> {
@@ -202,6 +209,12 @@ async function runScanCyclePerWorld(itemIds: number[]): Promise<void> {
 
   const elapsed = ((now - cycleStart) / 1000).toFixed(1)
   console.log(`[scanner] Scan complete: ${updated} items in ${elapsed}s`)
+
+  const batchStart = Date.now()
+  const craftCosts = solveCraftCostBatch(getAllItems(), getVendorPrices())
+  setCraftCosts(craftCosts)
+  const batchElapsed = ((Date.now() - batchStart) / 1000).toFixed(1)
+  console.log(`[scanner] Craft cost batch: ${craftCosts.size} items in ${batchElapsed}s`)
 }
 
 export async function startScanner(): Promise<void> {
