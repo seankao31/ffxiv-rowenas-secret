@@ -93,7 +93,7 @@
 </script>
 
 <svelte:head>
-  <title>套利儀表板 — 羅薇娜的商業機密</title>
+  <title>Arbitrage — 羅薇娜的商業機密</title>
 </svelte:head>
 
 {#if meta.scanCompletedAt > 0}
