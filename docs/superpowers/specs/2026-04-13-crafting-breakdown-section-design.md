@@ -3,6 +3,10 @@
 **Linear:** ENG-66
 **Date:** 2026-04-13
 
+## Mockup
+
+![Crafting breakdown mockup](2026-04-13-crafting-breakdown-mockup.png)
+
 ## Overview
 
 Add a Crafting tab to the `/item/[id]` page showing a cost breakdown, recipe tree with craft/buy/vendor decisions, and per-node confidence indicators. Only enabled for craftable items. Data sourced from `GET /api/craft/[id]` (ENG-65).
