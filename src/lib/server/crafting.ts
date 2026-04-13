@@ -1,4 +1,4 @@
-import { getRecipesByResult } from '$lib/server/recipes'
+import { getRecipesByResult, getAllRecipeResultIds } from '$lib/server/recipes'
 import {
   MARKET_TAX,
   SOURCE_TIME_CONSTANT_H,
@@ -6,7 +6,7 @@ import {
   HOME_WORLD_ID,
   confidence,
 } from '$lib/server/scoring'
-import type { ItemData, CraftingNode, CraftingResult, CraftAction } from '$lib/shared/types'
+import type { ItemData, CraftingNode, CraftingResult, CraftAction, CraftCostEntry } from '$lib/shared/types'
 
 const DEFAULT_MAX_DEPTH = 10
 
@@ -64,6 +64,35 @@ export function solveCraftingCost(
       ? realisticSellPrice * (1 - MARKET_TAX) - root.totalCost
       : null,
   }
+}
+
+export function solveCraftCostBatch(
+  cache: Map<number, ItemData>,
+  vendorPrices: Map<number, number>,
+): Map<number, CraftCostEntry> {
+  const now = Date.now()
+  const memo = new Map<number, CraftingNode>()
+  const results = new Map<number, CraftCostEntry>()
+
+  for (const itemId of getAllRecipeResultIds()) {
+    const recipes = getRecipesByResult(itemId)
+    if (recipes.every(r => r.companyCraft ?? false)) continue
+
+    const node = solveNode(itemId, 1, cache, vendorPrices, undefined, memo, now, 0, Infinity)
+
+    if (node.action === 'craft' && node.recipe) {
+      results.set(itemId, {
+        itemId,
+        recipeId: node.recipe.recipeId,
+        job: node.recipe.job,
+        level: node.recipe.level,
+        craftCost: node.unitCost,
+        confidence: node.confidence,
+      })
+    }
+  }
+
+  return results
 }
 
 function solveNode(
