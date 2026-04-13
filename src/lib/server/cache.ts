@@ -92,6 +92,16 @@ export function getCraftCosts(): Map<number, CraftCostEntry> {
   return craftCostCache
 }
 
+let vendorSellPrices = new Map<number, number>()  // itemID → NPC vendor sell price (PriceLow)
+
+export function setVendorSellPrices(prices: Map<number, number>): void {
+  vendorSellPrices = prices
+}
+
+export function getVendorSellPrices(): Map<number, number> {
+  return vendorSellPrices
+}
+
 // Test-only: reset name cache loading state so waitForNameCache works fresh between tests
 export function _resetNameCacheState(): void {
   nameCacheSettled = false

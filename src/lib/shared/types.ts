@@ -84,6 +84,8 @@ export type Opportunity = {
 
   activeCompetitorCount: number
   fairShareVelocity: number
+
+  sellDestination: 'mb' | 'vendor'
 }
 
 export type CraftAction = 'craft' | 'buy' | 'vendor'

@@ -176,6 +176,7 @@ export function scoreOpportunities(
     const opp: Opportunity = {
       itemID: item.itemID,
       itemName: nameMap.get(item.itemID) ?? `Item #${item.itemID}`,
+      sellDestination: 'mb' as const,
 
       buyPrice: Math.round(best.effectiveBuyPrice),
       sellPrice: realisticSellPrice,
