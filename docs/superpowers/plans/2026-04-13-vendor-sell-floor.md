@@ -1,6 +1,6 @@
 # Vendor Sell Floor Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Final review includes cross-model verification via codex-review-gate.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking. Final review includes cross-model verification via codex-review-gate.
 
 **Goal:** Add NPC vendor sell price (`Item.PriceLow`) as an alternative sell destination in the arbitrage scanner, so players can spot risk-free "buy on MB, sell to NPC" opportunities.
 
@@ -19,7 +19,7 @@
 - Modify: `src/lib/server/cache.ts`
 - Modify: `tests/e2e/fixtures/opportunities.ts`
 
-- [ ] **Step 1: Add `sellDestination` field to Opportunity type**
+- [x] **Step 1: Add `sellDestination` field to Opportunity type**
 
 In `src/lib/shared/types.ts`, add after line 86 (`fairShareVelocity: number`):
 
@@ -27,7 +27,7 @@ In `src/lib/shared/types.ts`, add after line 86 (`fairShareVelocity: number`):
   sellDestination: 'mb' | 'vendor'
 ```
 
-- [ ] **Step 2: Add vendor sell price storage to cache**
+- [x] **Step 2: Add vendor sell price storage to cache**
 
 In `src/lib/server/cache.ts`, add a new map and getter/setter (same pattern as `vendorPrices`):
 
@@ -43,21 +43,21 @@ export function getVendorSellPrices(): Map<number, number> {
 }
 ```
 
-- [ ] **Step 3: Add `sellDestination: 'mb'` to existing scoring output**
+- [x] **Step 3: Add `sellDestination: 'mb'` to existing scoring output**
 
 In `src/lib/server/scoring.ts`, add `sellDestination: 'mb' as const,` to the `opp` object (around line 176).
 
-- [ ] **Step 4: Add `sellDestination: 'mb'` to e2e fixture data**
+- [x] **Step 4: Add `sellDestination: 'mb'` to e2e fixture data**
 
 In `tests/e2e/fixtures/opportunities.ts`, add `sellDestination: 'mb' as const,` to every existing fixture item (6 items).
 
-- [ ] **Step 5: Run tests to verify nothing breaks**
+- [x] **Step 5: Run tests to verify nothing breaks**
 
 Run: `bun run test`
 
 Expected: All 208 tests pass. The type change is additive — existing code just needs the new field.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/shared/types.ts src/lib/server/cache.ts src/lib/server/scoring.ts tests/e2e/fixtures/opportunities.ts
@@ -74,7 +74,7 @@ Ref: ENG-111"
 - Modify: `src/lib/server/vendors.ts`
 - Modify: `tests/server/vendors.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Add to `tests/server/vendors.test.ts`:
 
@@ -160,13 +160,13 @@ describe('fetchVendorSellPrices', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bun run test tests/server/vendors.test.ts`
 
 Expected: FAIL — `fetchVendorSellPrices` is not exported.
 
-- [ ] **Step 3: Generalize `fetchItemPrices` to accept a field parameter**
+- [x] **Step 3: Generalize `fetchItemPrices` to accept a field parameter**
 
 In `src/lib/server/vendors.ts`:
 
@@ -197,7 +197,7 @@ Update the field access:
 const price = row.fields[field]
 ```
 
-- [ ] **Step 4: Add `fetchVendorSellPrices` function**
+- [x] **Step 4: Add `fetchVendorSellPrices` function**
 
 Add to `src/lib/server/vendors.ts`:
 
@@ -224,19 +224,19 @@ export async function fetchVendorSellPrices(): Promise<Map<number, number>> {
 }
 ```
 
-- [ ] **Step 5: Run tests to verify they pass**
+- [x] **Step 5: Run tests to verify they pass**
 
 Run: `bun run test tests/server/vendors.test.ts`
 
 Expected: All tests pass (existing + new).
 
-- [ ] **Step 6: Run full test suite**
+- [x] **Step 6: Run full test suite**
 
 Run: `bun run test`
 
 Expected: All tests pass. The `fetchItemPrices` refactor is internal; existing `fetchVendorPrices` calls it with default `'PriceMid'`.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/lib/server/vendors.ts tests/server/vendors.test.ts
@@ -253,7 +253,7 @@ Ref: ENG-111"
 - Modify: `src/lib/server/scoring.ts`
 - Modify: `tests/server/scoring.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Add to `tests/server/scoring.test.ts`:
 
@@ -387,13 +387,13 @@ describe('vendor-sell scoring', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bun run test tests/server/scoring.test.ts`
 
 Expected: FAIL — `scoreOpportunities` doesn't accept a 5th parameter, and no vendor-sell evaluation exists.
 
-- [ ] **Step 3: Implement vendor-sell scoring**
+- [x] **Step 3: Implement vendor-sell scoring**
 
 In `src/lib/server/scoring.ts`:
 
@@ -528,19 +528,19 @@ export function scoreOpportunities(
   }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun run test tests/server/scoring.test.ts`
 
 Expected: All tests pass (existing + new vendor-sell tests).
 
-- [ ] **Step 5: Run full test suite**
+- [x] **Step 5: Run full test suite**
 
 Run: `bun run test`
 
 Expected: All tests pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/server/scoring.ts tests/server/scoring.test.ts
@@ -557,7 +557,7 @@ Ref: ENG-111"
 - Modify: `src/routes/api/opportunities/+server.ts`
 - Modify: `src/hooks.server.ts`
 
-- [ ] **Step 1: Update API route to pass vendor sell prices**
+- [x] **Step 1: Update API route to pass vendor sell prices**
 
 In `src/routes/api/opportunities/+server.ts`, add `getVendorSellPrices` to the import:
 
@@ -571,7 +571,7 @@ Update the `scoreOpportunities` call (line 25):
 const opportunities = scoreOpportunities(getAllItems(), getNameMap(), params, getVendorPrices(), getVendorSellPrices())
 ```
 
-- [ ] **Step 2: Wire vendor sell price loading at startup**
+- [x] **Step 2: Wire vendor sell price loading at startup**
 
 In `src/hooks.server.ts`, add imports:
 
@@ -592,13 +592,13 @@ Add the fetch call in `init()` (same pattern as `fetchVendorPrices` — fire-and
     })
 ```
 
-- [ ] **Step 3: Run full test suite**
+- [x] **Step 3: Run full test suite**
 
 Run: `bun run test`
 
 Expected: All tests pass.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/routes/api/opportunities/+server.ts src/hooks.server.ts
@@ -614,7 +614,7 @@ Ref: ENG-111"
 **Files:**
 - Modify: `src/lib/components/OpportunityTable.svelte:187-198`
 
-- [ ] **Step 1: Update sell column to show NPC badge for vendor-sell**
+- [x] **Step 1: Update sell column to show NPC badge for vendor-sell**
 
 In `src/lib/components/OpportunityTable.svelte`, replace the sell column (lines 187-198):
 
@@ -637,13 +637,13 @@ In `src/lib/components/OpportunityTable.svelte`, replace the sell column (lines 
           </td>
 ```
 
-- [ ] **Step 2: Run full test suite**
+- [x] **Step 2: Run full test suite**
 
 Run: `bun run test`
 
 Expected: All tests pass.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/components/OpportunityTable.svelte
@@ -659,7 +659,7 @@ Ref: ENG-111"
 **Files:**
 - Modify: `tests/e2e/opportunity-table.test.ts`
 
-- [ ] **Step 1: Add vendor-sell e2e tests**
+- [x] **Step 1: Add vendor-sell e2e tests**
 
 Add a new describe block in `tests/e2e/opportunity-table.test.ts`:
 
@@ -705,13 +705,13 @@ test.describe('vendor-sell display', () => {
 })
 ```
 
-- [ ] **Step 2: Run e2e tests**
+- [x] **Step 2: Run e2e tests**
 
 Run: `bunx playwright test tests/e2e/opportunity-table.test.ts`
 
 Expected: All tests pass (existing + new vendor-sell tests).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/e2e/opportunity-table.test.ts
@@ -724,11 +724,11 @@ Ref: ENG-111"
 
 ### Task 7: Visual verification
 
-- [ ] **Step 1: Start dev server with fixture data**
+- [x] **Step 1: Start dev server with fixture data**
 
 Run: `FIXTURE_DATA=true bun run dev`
 
-- [ ] **Step 2: Verify the arbitrage table visually**
+- [x] **Step 2: Verify the arbitrage table visually**
 
 Use Playwright MCP to navigate to `/arbitrage` and take a screenshot. Verify:
 
@@ -737,6 +737,6 @@ Use Playwright MCP to navigate to `/arbitrage` and take a screenshot. Verify:
 
 Note: fixture data may not include vendor sell prices (requires XIVAPI availability at startup). If no vendor-sell rows appear, verify the NPC badge rendering by temporarily modifying fixture data or checking the e2e test screenshots.
 
-- [ ] **Step 3: Kill the dev server**
+- [x] **Step 3: Kill the dev server**
 
 Track the PID and kill it explicitly.
