@@ -39,6 +39,9 @@
         throw new Error(body.error ?? `Request failed with status ${res.status}`)
       }
       const data = await res.json()
+      // Await metadata before setting result so the XIVAPI name cache is populated
+      // when tree nodes first render. Without this, nodes mount showing "Item #ID"
+      // because the subscribe notification fires before they register listeners.
       const ids = collectItemIds(data.root)
       await fetchItemMetadata([...new Set(ids)])
       result = data
