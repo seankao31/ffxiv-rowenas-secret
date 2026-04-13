@@ -80,6 +80,8 @@ export function solveCraftCostBatch(
 
     const node = solveNode(itemId, 1, cache, vendorPrices, undefined, memo, now, 0, Infinity)
 
+    // Only store items where crafting wins — buy-optimal items are irrelevant to
+    // craft-for-profit rankings. The rankings scorer (ENG-70) computes profit at query time.
     if (node.action === 'craft' && node.recipe) {
       results.set(itemId, {
         itemId,
