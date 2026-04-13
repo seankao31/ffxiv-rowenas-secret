@@ -28,6 +28,9 @@ Then open `http://localhost:3000` in your browser. The first scan takes about 1.
 ```sh
 # Start the dev server
 bun run dev
+
+# Start with pre-seeded cache data (skips Universalis scanner)
+FIXTURE_DATA=true bun run dev
 ```
 
 ## Tests
