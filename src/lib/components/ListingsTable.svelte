@@ -2,6 +2,7 @@
   import type { Listing } from '$lib/shared/types'
   import { DC_WORLDS } from '$lib/shared/universalis'
   import { fetchItemListings } from '$lib/client/universalis'
+  import { formatNumber, formatRelativeTime } from '$lib/client/format'
 
   let { itemId }: { itemId: number } = $props()
 
@@ -39,20 +40,6 @@
     })
   })
 
-  function formatNumber(n: number): string {
-    return n.toLocaleString()
-  }
-
-  function formatRelativeTime(unixMs: number): string {
-    const seconds = Math.floor((Date.now() - unixMs) / 1000)
-    if (seconds < 60) return `${seconds}s ago`
-    const minutes = Math.floor(seconds / 60)
-    if (minutes < 60) return `${minutes}m ago`
-    const hours = Math.floor(minutes / 60)
-    if (hours < 24) return `${hours}h ago`
-    const days = Math.floor(hours / 24)
-    return `${days}d ago`
-  }
 </script>
 
 <div class="flex items-center gap-2 mb-3 shrink-0">

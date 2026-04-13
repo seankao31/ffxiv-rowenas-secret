@@ -1,6 +1,10 @@
 <script lang="ts">
   import { fetchItemMetadata, getIconUrl, getEnglishName, subscribe } from '$lib/client/xivapi.ts'
+  import { fetchItemSaleHistory } from '$lib/client/universalis'
+  import type { Sale } from '$lib/shared/types'
   import ListingsTable from '$lib/components/ListingsTable.svelte'
+  import SaleHistoryTable from '$lib/components/SaleHistoryTable.svelte'
+  import PriceStats from '$lib/components/PriceStats.svelte'
 
   let { data } = $props()
 
@@ -15,6 +19,25 @@
   const enName = $derived.by(() => { void nameGeneration; return getEnglishName(data.itemID) ?? null })
   const primaryName = $derived(data.twName ?? enName ?? `Item #${data.itemID}`)
   const secondaryName = $derived(data.twName ? enName : null)
+
+  let sales = $state<Sale[]>([])
+  let salesLoading = $state(true)
+  let salesError = $state(false)
+
+  // No cancellation guard needed: SvelteKit destroys the component on route navigation,
+  // so a stale response from a previous itemID cannot overwrite a newer one.
+  $effect(() => {
+    salesLoading = true
+    salesError = false
+    fetchItemSaleHistory(data.itemID).then(result => {
+      sales = result
+      salesLoading = false
+    }).catch(err => {
+      console.warn('[universalis] Failed to fetch sale history:', err)
+      salesError = true
+      salesLoading = false
+    })
+  })
 </script>
 
 <svelte:head>
@@ -48,12 +71,10 @@
     </div>
   </div>
 
-  <div class="card bg-base-200">
-    <div class="card-body">
-      <h2 class="card-title">Sale History</h2>
-      <div class="skeleton h-4 w-full"></div>
-      <div class="skeleton h-4 w-3/4"></div>
-      <div class="skeleton h-4 w-5/6"></div>
+  <div class="card bg-base-200 min-h-0 flex flex-col">
+    <div class="card-body flex flex-col min-h-0">
+      <h2 class="card-title shrink-0">Sale History</h2>
+      <SaleHistoryTable {sales} loading={salesLoading} error={salesError} />
     </div>
   </div>
 </div>
@@ -62,8 +83,6 @@
 <div class="card bg-base-200 mt-4 shrink-0">
   <div class="card-body">
     <h2 class="card-title">Price Statistics</h2>
-    <div class="skeleton h-4 w-full"></div>
-    <div class="skeleton h-4 w-2/3"></div>
-    <div class="skeleton h-4 w-3/4"></div>
+    <PriceStats {sales} loading={salesLoading} error={salesError} />
   </div>
 </div>

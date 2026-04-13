@@ -7,6 +7,16 @@ export type Listing = {
   hq: boolean
 }
 
+export type Sale = {
+  pricePerUnit: number
+  quantity: number
+  worldID: number
+  worldName: string
+  timestamp: number       // unix ms (converted from API seconds at ingest)
+  hq: boolean
+  buyerName: string | null
+}
+
 export type SaleRecord = {
   pricePerUnit: number
   quantity: number
