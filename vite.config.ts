@@ -1,9 +1,12 @@
 /// <reference types="vitest/config" />
 import { sveltekit } from '@sveltejs/kit/vite'
 import tailwindcss from '@tailwindcss/vite'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig, type Plugin } from 'vite'
-import path from 'node:path'
 import { version } from './package.json'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
 
 // Vite lazy-loads SSR modules in dev, so SvelteKit's init() hook
 // only fires on the first request. This plugin triggers that eagerly.
@@ -28,9 +31,9 @@ export default defineConfig({
   },
   server: {
     fs: {
-      // When running in a git worktree, SvelteKit's client bundle is resolved
-      // from the parent project's node_modules. Allow Vite to serve it.
-      allow: [path.resolve(__dirname, '../..')],
+      // Worktree symlinks node_modules to the main project. SvelteKit's client
+      // entry resolves through the real path, which is outside the worktree root.
+      allow: [resolve(__dirname, '../..')],
     },
   },
   // Resolve browser exports only during test runs (Svelte's mount() requires
