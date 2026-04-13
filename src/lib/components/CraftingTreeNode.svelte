@@ -79,11 +79,11 @@
 
   {#if isVendor}
     <span class="text-base-content/80 text-xs flex-1 min-w-0 truncate">
-      {displayName}{#if node.amount > 1}<span class="text-base-content/40"> ×{node.amount}</span>{/if}
+      {displayName}{#if node.amount > 1}<span class="ml-1">×{node.amount}</span>{/if}
     </span>
   {:else}
     <a href="/item/{node.itemId}" class="text-primary text-xs hover:underline flex-1 min-w-0 truncate">
-      {displayName}{#if node.amount > 1}<span class="text-base-content/40"> ×{node.amount}</span>{/if}
+      {displayName}{#if node.amount > 1}<span class="ml-1">×{node.amount}</span>{/if}
     </a>
   {/if}
 
