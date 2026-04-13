@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { setItem, setNameMap, setScanMeta, setCraftCosts } from '$lib/server/cache'
+import { setItem, setNameMap, setScanMeta, setCraftCosts, getAllItems } from '$lib/server/cache'
 import { solveCraftCostBatch } from '$lib/server/crafting'
 import type { ItemData } from '$lib/shared/types'
 
@@ -32,11 +32,7 @@ export function seedFixtureData(): void {
     nextScanEstimatedAt: 0,
   })
 
-  const itemCache = new Map<number, ItemData>()
-  for (const item of snapshot.items) {
-    itemCache.set(item.itemID, item)
-  }
-  const craftCosts = solveCraftCostBatch(itemCache, new Map())
+  const craftCosts = solveCraftCostBatch(getAllItems(), new Map() /* no vendor prices in fixture snapshot */)
   setCraftCosts(craftCosts)
 
   console.log(`[fixtures] Seeded cache with ${snapshot.items.length} items, ${craftCosts.size} craft costs`)
