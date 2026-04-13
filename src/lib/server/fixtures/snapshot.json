@@ -1,0 +1,51 @@
+{
+  "items": [
+    {
+      "itemID": 5057,
+      "worldUploadTimes": { "4030": 1712000000000, "4033": 1712000000000 },
+      "homeLastUploadTime": 1712000000000,
+      "listings": [
+        { "pricePerUnit": 1000, "quantity": 5, "worldID": 4030, "worldName": "利維坦", "lastReviewTime": 1712000000000, "hq": false },
+        { "pricePerUnit": 400, "quantity": 3, "worldID": 4033, "worldName": "巴哈姆特", "lastReviewTime": 1712000000000, "hq": false }
+      ],
+      "regularSaleVelocity": 10,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        { "pricePerUnit": 900, "quantity": 1, "timestamp": 1712000000000, "hq": false }
+      ]
+    },
+    {
+      "itemID": 5068,
+      "worldUploadTimes": { "4030": 1712000000000, "4032": 1712000000000, "4034": 1712000000000 },
+      "homeLastUploadTime": 1712000000000,
+      "listings": [
+        { "pricePerUnit": 2000, "quantity": 2, "worldID": 4030, "worldName": "利維坦", "lastReviewTime": 1712000000000, "hq": true },
+        { "pricePerUnit": 800, "quantity": 4, "worldID": 4032, "worldName": "奧汀", "lastReviewTime": 1712000000000, "hq": true },
+        { "pricePerUnit": 750, "quantity": 1, "worldID": 4034, "worldName": "拉姆", "lastReviewTime": 1712000000000, "hq": false }
+      ],
+      "regularSaleVelocity": 5,
+      "hqSaleVelocity": 3,
+      "recentHistory": [
+        { "pricePerUnit": 1800, "quantity": 1, "timestamp": 1712000000000, "hq": true },
+        { "pricePerUnit": 700, "quantity": 2, "timestamp": 1711990000000, "hq": false }
+      ]
+    },
+    {
+      "itemID": 19925,
+      "worldUploadTimes": { "4030": 1712000000000, "4028": 1712000000000 },
+      "homeLastUploadTime": 1712000000000,
+      "listings": [
+        { "pricePerUnit": 5000, "quantity": 1, "worldID": 4030, "worldName": "利維坦", "lastReviewTime": 1712000000000, "hq": false },
+        { "pricePerUnit": 200, "quantity": 10, "worldID": 4028, "worldName": "伊弗利特", "lastReviewTime": 1712000000000, "hq": false }
+      ],
+      "regularSaleVelocity": 1.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": []
+    }
+  ],
+  "names": {
+    "5057": "Iron Ore",
+    "5068": "Mythril Ore",
+    "19925": "Doman Iron Ore"
+  }
+}
