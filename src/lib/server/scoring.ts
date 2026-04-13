@@ -294,6 +294,7 @@ export function scoreOpportunities(
         sourceWorldID: best.worldID,
 
         availableUnits: best.availableUnits,
+        // Vendor sells are instant — no days_of_supply cap. Buy everything profitable.
         recommendedUnits: best.availableUnits,
         expectedDailyProfit: Math.round(best.profitPerUnit * velocity),
 
