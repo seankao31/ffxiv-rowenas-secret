@@ -1,4 +1,4 @@
-import type { ItemData, ScanMeta, ScanProgress } from '$lib/shared/types.ts'
+import type { ItemData, ScanMeta, ScanProgress, CraftCostEntry } from '$lib/shared/types.ts'
 
 const itemCache = new Map<number, ItemData>()
 const nameCache = new Map<number, string>()  // itemID → display name
@@ -80,6 +80,16 @@ export function setVendorPrices(prices: Map<number, number>): void {
 
 export function getVendorPrices(): Map<number, number> {
   return vendorPrices
+}
+
+let craftCostCache = new Map<number, CraftCostEntry>()
+
+export function setCraftCosts(costs: Map<number, CraftCostEntry>): void {
+  craftCostCache = costs
+}
+
+export function getCraftCosts(): Map<number, CraftCostEntry> {
+  return craftCostCache
 }
 
 // Test-only: reset name cache loading state so waitForNameCache works fresh between tests
