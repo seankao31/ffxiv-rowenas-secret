@@ -38,9 +38,9 @@
         throw new Error(body.error ?? `Request failed with status ${res.status}`)
       }
       const data = await res.json()
-      result = data
       const ids = collectItemIds(data.root)
-      fetchItemMetadata([...new Set(ids)])
+      await fetchItemMetadata([...new Set(ids)])
+      result = data
     } catch (err: unknown) {
       error = err instanceof Error ? err.message : 'Failed to load crafting data'
     } finally {

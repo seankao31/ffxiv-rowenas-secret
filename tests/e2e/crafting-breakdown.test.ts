@@ -4,13 +4,29 @@ const CRAFTABLE_ITEM_ID = 2394
 const RAW_ITEM_ID = 5111
 
 const XIVAPI_RESPONSE = {
-  rows: [{
-    row_id: CRAFTABLE_ITEM_ID,
-    fields: {
-      Name: 'Bronze Ornamental Hammer',
-      Icon: { id: 0, path: '/i/052000/052653.tex', path_hr1: '/i/052000/052653_hr1.tex' },
+  rows: [
+    {
+      row_id: CRAFTABLE_ITEM_ID,
+      fields: {
+        Name: 'Bronze Ornamental Hammer',
+        Icon: { id: 0, path: '/i/052000/052653.tex', path_hr1: '/i/052000/052653_hr1.tex' },
+      },
     },
-  }],
+    {
+      row_id: 5056,
+      fields: {
+        Name: 'Bronze Ingot',
+        Icon: { id: 0, path: '/i/020000/020801.tex', path_hr1: '/i/020000/020801_hr1.tex' },
+      },
+    },
+    {
+      row_id: 5111,
+      fields: {
+        Name: 'Fire Crystal',
+        Icon: { id: 0, path: '/i/020000/020001.tex', path_hr1: '/i/020000/020001_hr1.tex' },
+      },
+    },
+  ],
 }
 
 async function mockExternalApis(page: Page) {
@@ -211,5 +227,10 @@ test.describe('Item detail page — crafting breakdown', () => {
   test('shows overall confidence footer', async ({ page }) => {
     await expect(page.locator('text=Overall Confidence')).toBeVisible()
     await expect(page.locator('text=88%').first()).toBeVisible()
+  })
+
+  test('tree nodes show item names after metadata loads', async ({ page }) => {
+    await expect(page.getByRole('link', { name: /Bronze Ornamental Hammer/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Bronze Ingot/ })).toBeVisible()
   })
 })

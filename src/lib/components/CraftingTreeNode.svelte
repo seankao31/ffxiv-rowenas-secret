@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { CraftingNode } from '$lib/shared/types'
-  import { getIconUrl, fetchItemMetadata } from '$lib/client/xivapi.ts'
+  import { getIconUrl, getEnglishName, subscribe } from '$lib/client/xivapi.ts'
 
   let { node, depth = 0 }: { node: CraftingNode; depth?: number } = $props()
 
@@ -41,11 +41,11 @@
     return `buy${world}`
   })
 
-  $effect(() => {
-    fetchItemMetadata([node.itemId])
-  })
+  let nameGeneration = $state(0)
+  $effect(() => subscribe(() => nameGeneration++))
 
-  const iconUrl = $derived(getIconUrl(node.itemId))
+  const displayName = $derived.by(() => { void nameGeneration; return getEnglishName(node.itemId) ?? `Item #${node.itemId}` })
+  const iconUrl = $derived.by(() => { void nameGeneration; return getIconUrl(node.itemId) })
 
   function toggleExpand() {
     expanded = !expanded
@@ -75,7 +75,7 @@
         <div class="w-5 h-5 rounded-sm bg-base-300 shrink-0"></div>
       {/if}
       <a href="/item/{node.itemId}" class="text-primary text-xs hover:underline flex-1 min-w-0 truncate">
-        {node.itemId}{#if node.amount > 1}<span class="text-base-content/40"> ×{node.amount}</span>{/if}
+        {displayName}{#if node.amount > 1}<span class="text-base-content/40"> ×{node.amount}</span>{/if}
       </a>
       <span class="text-[9px] px-1.5 py-px rounded {isCraftNode ? 'bg-success/15 text-success' : 'bg-primary/15 text-primary'}">
         {actionBadgeText}
@@ -115,11 +115,11 @@
     {/if}
     {#if isVendor}
       <span class="text-base-content/80 text-xs flex-1 min-w-0 truncate">
-        {node.itemId}{#if node.amount > 1}<span class="text-base-content/40"> ×{node.amount}</span>{/if}
+        {displayName}{#if node.amount > 1}<span class="text-base-content/40"> ×{node.amount}</span>{/if}
       </span>
     {:else}
       <a href="/item/{node.itemId}" class="text-primary text-xs hover:underline flex-1 min-w-0 truncate">
-        {node.itemId}{#if node.amount > 1}<span class="text-base-content/40"> ×{node.amount}</span>{/if}
+        {displayName}{#if node.amount > 1}<span class="text-base-content/40"> ×{node.amount}</span>{/if}
       </a>
     {/if}
     <span class="text-[9px] px-1.5 py-px rounded {isVendor ? 'bg-warning/15 text-warning' : 'bg-primary/15 text-primary'}">
