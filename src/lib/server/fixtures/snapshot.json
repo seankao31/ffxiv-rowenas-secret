@@ -29016,10 +29016,994 @@
       "regularSaleVelocity": 0,
       "hqSaleVelocity": 0,
       "recentHistory": []
+    },
+    {
+      "itemID": 2394,
+      "worldUploadTimes": {
+        "4028": 1776074753463,
+        "4029": 1776074529169,
+        "4030": 1776074123064,
+        "4031": 1776073096425,
+        "4032": 1776072765201,
+        "4033": 1776075102586,
+        "4034": 1776075582124,
+        "4035": 1776072759707
+      },
+      "homeLastUploadTime": 1776074407937,
+      "listings": [
+        {
+          "lastReviewTime": 1776072607,
+          "pricePerUnit": 2500,
+          "quantity": 1,
+          "worldID": 4028,
+          "worldName": "伊弗利特",
+          "hq": false,
+          "total": 2500
+        },
+        {
+          "lastReviewTime": 1776069007,
+          "pricePerUnit": 2750,
+          "quantity": 3,
+          "worldID": 4029,
+          "worldName": "亞歷山大",
+          "hq": false,
+          "total": 8250
+        },
+        {
+          "lastReviewTime": 1776065407,
+          "pricePerUnit": 3000,
+          "quantity": 5,
+          "worldID": 4030,
+          "worldName": "利維坦",
+          "hq": false,
+          "total": 15000
+        },
+        {
+          "lastReviewTime": 1776061807,
+          "pricePerUnit": 3250,
+          "quantity": 7,
+          "worldID": 4031,
+          "worldName": "鳳凰",
+          "hq": false,
+          "total": 22750
+        },
+        {
+          "lastReviewTime": 1776058207,
+          "pricePerUnit": 3500,
+          "quantity": 9,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false,
+          "total": 31500
+        }
+      ],
+      "regularSaleVelocity": 2.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        {
+          "hq": false,
+          "pricePerUnit": 2500,
+          "quantity": 1,
+          "timestamp": 1776069007,
+          "worldID": 4028,
+          "worldName": "伊弗利特"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 2750,
+          "quantity": 3,
+          "timestamp": 1776061807,
+          "worldID": 4029,
+          "worldName": "亞歷山大"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 3000,
+          "quantity": 5,
+          "timestamp": 1776054607,
+          "worldID": 4030,
+          "worldName": "利維坦"
+        }
+      ]
+    },
+    {
+      "itemID": 2393,
+      "worldUploadTimes": {
+        "4028": 1776072797534,
+        "4029": 1776073640305,
+        "4030": 1776074530378,
+        "4031": 1776075616754,
+        "4032": 1776074229179,
+        "4033": 1776074819857,
+        "4034": 1776073149574,
+        "4035": 1776074271192
+      },
+      "homeLastUploadTime": 1776074407937,
+      "listings": [
+        {
+          "lastReviewTime": 1776072607,
+          "pricePerUnit": 800,
+          "quantity": 1,
+          "worldID": 4028,
+          "worldName": "伊弗利特",
+          "hq": false,
+          "total": 800
+        },
+        {
+          "lastReviewTime": 1776069007,
+          "pricePerUnit": 880,
+          "quantity": 3,
+          "worldID": 4029,
+          "worldName": "亞歷山大",
+          "hq": false,
+          "total": 2640
+        },
+        {
+          "lastReviewTime": 1776065407,
+          "pricePerUnit": 960,
+          "quantity": 5,
+          "worldID": 4030,
+          "worldName": "利維坦",
+          "hq": false,
+          "total": 4800
+        },
+        {
+          "lastReviewTime": 1776061807,
+          "pricePerUnit": 1040,
+          "quantity": 7,
+          "worldID": 4031,
+          "worldName": "鳳凰",
+          "hq": false,
+          "total": 7280
+        },
+        {
+          "lastReviewTime": 1776058207,
+          "pricePerUnit": 1120,
+          "quantity": 9,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false,
+          "total": 10080
+        }
+      ],
+      "regularSaleVelocity": 2.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        {
+          "hq": false,
+          "pricePerUnit": 800,
+          "quantity": 1,
+          "timestamp": 1776069007,
+          "worldID": 4028,
+          "worldName": "伊弗利特"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 880,
+          "quantity": 3,
+          "timestamp": 1776061807,
+          "worldID": 4029,
+          "worldName": "亞歷山大"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 960,
+          "quantity": 5,
+          "timestamp": 1776054607,
+          "worldID": 4030,
+          "worldName": "利維坦"
+        }
+      ]
+    },
+    {
+      "itemID": 5056,
+      "worldUploadTimes": {
+        "4028": 1776075393175,
+        "4029": 1776075049056,
+        "4030": 1776074542778,
+        "4031": 1776074089092,
+        "4032": 1776075108743,
+        "4033": 1776074195400,
+        "4034": 1776072862925,
+        "4035": 1776073045731
+      },
+      "homeLastUploadTime": 1776074407937,
+      "listings": [
+        {
+          "lastReviewTime": 1776072607,
+          "pricePerUnit": 120,
+          "quantity": 1,
+          "worldID": 4028,
+          "worldName": "伊弗利特",
+          "hq": false,
+          "total": 120
+        },
+        {
+          "lastReviewTime": 1776069007,
+          "pricePerUnit": 132,
+          "quantity": 3,
+          "worldID": 4029,
+          "worldName": "亞歷山大",
+          "hq": false,
+          "total": 396
+        },
+        {
+          "lastReviewTime": 1776065407,
+          "pricePerUnit": 144,
+          "quantity": 5,
+          "worldID": 4030,
+          "worldName": "利維坦",
+          "hq": false,
+          "total": 720
+        },
+        {
+          "lastReviewTime": 1776061807,
+          "pricePerUnit": 156,
+          "quantity": 7,
+          "worldID": 4031,
+          "worldName": "鳳凰",
+          "hq": false,
+          "total": 1092
+        },
+        {
+          "lastReviewTime": 1776058207,
+          "pricePerUnit": 168,
+          "quantity": 9,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false,
+          "total": 1512
+        }
+      ],
+      "regularSaleVelocity": 2.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        {
+          "hq": false,
+          "pricePerUnit": 120,
+          "quantity": 1,
+          "timestamp": 1776069007,
+          "worldID": 4028,
+          "worldName": "伊弗利特"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 132,
+          "quantity": 3,
+          "timestamp": 1776061807,
+          "worldID": 4029,
+          "worldName": "亞歷山大"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 144,
+          "quantity": 5,
+          "timestamp": 1776054607,
+          "worldID": 4030,
+          "worldName": "利維坦"
+        }
+      ]
+    },
+    {
+      "itemID": 5106,
+      "worldUploadTimes": {
+        "4028": 1776074834871,
+        "4029": 1776075087034,
+        "4030": 1776076013103,
+        "4031": 1776073667624,
+        "4032": 1776072932657,
+        "4033": 1776073055917,
+        "4034": 1776073375061,
+        "4035": 1776073451555
+      },
+      "homeLastUploadTime": 1776074407937,
+      "listings": [
+        {
+          "lastReviewTime": 1776072607,
+          "pricePerUnit": 20,
+          "quantity": 1,
+          "worldID": 4028,
+          "worldName": "伊弗利特",
+          "hq": false,
+          "total": 20
+        },
+        {
+          "lastReviewTime": 1776069007,
+          "pricePerUnit": 22,
+          "quantity": 3,
+          "worldID": 4029,
+          "worldName": "亞歷山大",
+          "hq": false,
+          "total": 66
+        },
+        {
+          "lastReviewTime": 1776065407,
+          "pricePerUnit": 24,
+          "quantity": 5,
+          "worldID": 4030,
+          "worldName": "利維坦",
+          "hq": false,
+          "total": 120
+        },
+        {
+          "lastReviewTime": 1776061807,
+          "pricePerUnit": 26,
+          "quantity": 7,
+          "worldID": 4031,
+          "worldName": "鳳凰",
+          "hq": false,
+          "total": 182
+        },
+        {
+          "lastReviewTime": 1776058207,
+          "pricePerUnit": 28,
+          "quantity": 9,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false,
+          "total": 252
+        }
+      ],
+      "regularSaleVelocity": 2.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        {
+          "hq": false,
+          "pricePerUnit": 20,
+          "quantity": 1,
+          "timestamp": 1776069007,
+          "worldID": 4028,
+          "worldName": "伊弗利特"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 22,
+          "quantity": 3,
+          "timestamp": 1776061807,
+          "worldID": 4029,
+          "worldName": "亞歷山大"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 24,
+          "quantity": 5,
+          "timestamp": 1776054607,
+          "worldID": 4030,
+          "worldName": "利維坦"
+        }
+      ]
+    },
+    {
+      "itemID": 5107,
+      "worldUploadTimes": {
+        "4028": 1776073250742,
+        "4029": 1776073983126,
+        "4030": 1776076050363,
+        "4031": 1776074934269,
+        "4032": 1776074326811,
+        "4033": 1776076054849,
+        "4034": 1776072921292,
+        "4035": 1776075751604
+      },
+      "homeLastUploadTime": 1776074407937,
+      "listings": [
+        {
+          "lastReviewTime": 1776072607,
+          "pricePerUnit": 25,
+          "quantity": 1,
+          "worldID": 4028,
+          "worldName": "伊弗利特",
+          "hq": false,
+          "total": 25
+        },
+        {
+          "lastReviewTime": 1776069007,
+          "pricePerUnit": 27,
+          "quantity": 3,
+          "worldID": 4029,
+          "worldName": "亞歷山大",
+          "hq": false,
+          "total": 81
+        },
+        {
+          "lastReviewTime": 1776065407,
+          "pricePerUnit": 30,
+          "quantity": 5,
+          "worldID": 4030,
+          "worldName": "利維坦",
+          "hq": false,
+          "total": 150
+        },
+        {
+          "lastReviewTime": 1776061807,
+          "pricePerUnit": 32,
+          "quantity": 7,
+          "worldID": 4031,
+          "worldName": "鳳凰",
+          "hq": false,
+          "total": 224
+        },
+        {
+          "lastReviewTime": 1776058207,
+          "pricePerUnit": 35,
+          "quantity": 9,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false,
+          "total": 315
+        }
+      ],
+      "regularSaleVelocity": 2.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        {
+          "hq": false,
+          "pricePerUnit": 25,
+          "quantity": 1,
+          "timestamp": 1776069007,
+          "worldID": 4028,
+          "worldName": "伊弗利特"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 27,
+          "quantity": 3,
+          "timestamp": 1776061807,
+          "worldID": 4029,
+          "worldName": "亞歷山大"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 30,
+          "quantity": 5,
+          "timestamp": 1776054607,
+          "worldID": 4030,
+          "worldName": "利維坦"
+        }
+      ]
+    },
+    {
+      "itemID": 2,
+      "worldUploadTimes": {
+        "4028": 1776073986431,
+        "4029": 1776076101489,
+        "4030": 1776074515763,
+        "4031": 1776073148677,
+        "4032": 1776073414520,
+        "4033": 1776074441599,
+        "4034": 1776073484954,
+        "4035": 1776074245478
+      },
+      "homeLastUploadTime": 1776074407937,
+      "listings": [
+        {
+          "lastReviewTime": 1776072607,
+          "pricePerUnit": 8,
+          "quantity": 1,
+          "worldID": 4028,
+          "worldName": "伊弗利特",
+          "hq": false,
+          "total": 8
+        },
+        {
+          "lastReviewTime": 1776069007,
+          "pricePerUnit": 8,
+          "quantity": 3,
+          "worldID": 4029,
+          "worldName": "亞歷山大",
+          "hq": false,
+          "total": 24
+        },
+        {
+          "lastReviewTime": 1776065407,
+          "pricePerUnit": 9,
+          "quantity": 5,
+          "worldID": 4030,
+          "worldName": "利維坦",
+          "hq": false,
+          "total": 45
+        },
+        {
+          "lastReviewTime": 1776061807,
+          "pricePerUnit": 10,
+          "quantity": 7,
+          "worldID": 4031,
+          "worldName": "鳳凰",
+          "hq": false,
+          "total": 70
+        },
+        {
+          "lastReviewTime": 1776058207,
+          "pricePerUnit": 11,
+          "quantity": 9,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false,
+          "total": 99
+        }
+      ],
+      "regularSaleVelocity": 2.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        {
+          "hq": false,
+          "pricePerUnit": 8,
+          "quantity": 1,
+          "timestamp": 1776069007,
+          "worldID": 4028,
+          "worldName": "伊弗利特"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 8,
+          "quantity": 3,
+          "timestamp": 1776061807,
+          "worldID": 4029,
+          "worldName": "亞歷山大"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 9,
+          "quantity": 5,
+          "timestamp": 1776054607,
+          "worldID": 4030,
+          "worldName": "利維坦"
+        }
+      ]
+    },
+    {
+      "itemID": 5091,
+      "worldUploadTimes": {
+        "4028": 1776074190653,
+        "4029": 1776074159054,
+        "4030": 1776075206772,
+        "4031": 1776076102829,
+        "4032": 1776074100356,
+        "4033": 1776073837202,
+        "4034": 1776073558096,
+        "4035": 1776075722222
+      },
+      "homeLastUploadTime": 1776074407937,
+      "listings": [
+        {
+          "lastReviewTime": 1776072607,
+          "pricePerUnit": 200,
+          "quantity": 1,
+          "worldID": 4028,
+          "worldName": "伊弗利特",
+          "hq": false,
+          "total": 200
+        },
+        {
+          "lastReviewTime": 1776069007,
+          "pricePerUnit": 220,
+          "quantity": 3,
+          "worldID": 4029,
+          "worldName": "亞歷山大",
+          "hq": false,
+          "total": 660
+        },
+        {
+          "lastReviewTime": 1776065407,
+          "pricePerUnit": 240,
+          "quantity": 5,
+          "worldID": 4030,
+          "worldName": "利維坦",
+          "hq": false,
+          "total": 1200
+        },
+        {
+          "lastReviewTime": 1776061807,
+          "pricePerUnit": 260,
+          "quantity": 7,
+          "worldID": 4031,
+          "worldName": "鳳凰",
+          "hq": false,
+          "total": 1820
+        },
+        {
+          "lastReviewTime": 1776058207,
+          "pricePerUnit": 280,
+          "quantity": 9,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false,
+          "total": 2520
+        }
+      ],
+      "regularSaleVelocity": 2.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        {
+          "hq": false,
+          "pricePerUnit": 200,
+          "quantity": 1,
+          "timestamp": 1776069007,
+          "worldID": 4028,
+          "worldName": "伊弗利特"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 220,
+          "quantity": 3,
+          "timestamp": 1776061807,
+          "worldID": 4029,
+          "worldName": "亞歷山大"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 240,
+          "quantity": 5,
+          "timestamp": 1776054607,
+          "worldID": 4030,
+          "worldName": "利維坦"
+        }
+      ]
+    },
+    {
+      "itemID": 5364,
+      "worldUploadTimes": {
+        "4028": 1776073267177,
+        "4029": 1776074368951,
+        "4030": 1776073475589,
+        "4031": 1776073801700,
+        "4032": 1776075499557,
+        "4033": 1776072631586,
+        "4034": 1776075400454,
+        "4035": 1776075778054
+      },
+      "homeLastUploadTime": 1776074407937,
+      "listings": [
+        {
+          "lastReviewTime": 1776072607,
+          "pricePerUnit": 150,
+          "quantity": 1,
+          "worldID": 4028,
+          "worldName": "伊弗利特",
+          "hq": false,
+          "total": 150
+        },
+        {
+          "lastReviewTime": 1776069007,
+          "pricePerUnit": 165,
+          "quantity": 3,
+          "worldID": 4029,
+          "worldName": "亞歷山大",
+          "hq": false,
+          "total": 495
+        },
+        {
+          "lastReviewTime": 1776065407,
+          "pricePerUnit": 180,
+          "quantity": 5,
+          "worldID": 4030,
+          "worldName": "利維坦",
+          "hq": false,
+          "total": 900
+        },
+        {
+          "lastReviewTime": 1776061807,
+          "pricePerUnit": 195,
+          "quantity": 7,
+          "worldID": 4031,
+          "worldName": "鳳凰",
+          "hq": false,
+          "total": 1365
+        },
+        {
+          "lastReviewTime": 1776058207,
+          "pricePerUnit": 210,
+          "quantity": 9,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false,
+          "total": 1890
+        }
+      ],
+      "regularSaleVelocity": 2.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        {
+          "hq": false,
+          "pricePerUnit": 150,
+          "quantity": 1,
+          "timestamp": 1776069007,
+          "worldID": 4028,
+          "worldName": "伊弗利特"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 165,
+          "quantity": 3,
+          "timestamp": 1776061807,
+          "worldID": 4029,
+          "worldName": "亞歷山大"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 180,
+          "quantity": 5,
+          "timestamp": 1776054607,
+          "worldID": 4030,
+          "worldName": "利維坦"
+        }
+      ]
+    },
+    {
+      "itemID": 5383,
+      "worldUploadTimes": {
+        "4028": 1776074841771,
+        "4029": 1776073454253,
+        "4030": 1776074106215,
+        "4031": 1776074681889,
+        "4032": 1776073578641,
+        "4033": 1776074370075,
+        "4034": 1776073299006,
+        "4035": 1776074701645
+      },
+      "homeLastUploadTime": 1776074407937,
+      "listings": [
+        {
+          "lastReviewTime": 1776072607,
+          "pricePerUnit": 30,
+          "quantity": 1,
+          "worldID": 4028,
+          "worldName": "伊弗利特",
+          "hq": false,
+          "total": 30
+        },
+        {
+          "lastReviewTime": 1776069007,
+          "pricePerUnit": 33,
+          "quantity": 3,
+          "worldID": 4029,
+          "worldName": "亞歷山大",
+          "hq": false,
+          "total": 99
+        },
+        {
+          "lastReviewTime": 1776065407,
+          "pricePerUnit": 36,
+          "quantity": 5,
+          "worldID": 4030,
+          "worldName": "利維坦",
+          "hq": false,
+          "total": 180
+        },
+        {
+          "lastReviewTime": 1776061807,
+          "pricePerUnit": 39,
+          "quantity": 7,
+          "worldID": 4031,
+          "worldName": "鳳凰",
+          "hq": false,
+          "total": 273
+        },
+        {
+          "lastReviewTime": 1776058207,
+          "pricePerUnit": 42,
+          "quantity": 9,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false,
+          "total": 378
+        }
+      ],
+      "regularSaleVelocity": 2.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        {
+          "hq": false,
+          "pricePerUnit": 30,
+          "quantity": 1,
+          "timestamp": 1776069007,
+          "worldID": 4028,
+          "worldName": "伊弗利特"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 33,
+          "quantity": 3,
+          "timestamp": 1776061807,
+          "worldID": 4029,
+          "worldName": "亞歷山大"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 36,
+          "quantity": 5,
+          "timestamp": 1776054607,
+          "worldID": 4030,
+          "worldName": "利維坦"
+        }
+      ]
+    },
+    {
+      "itemID": 4,
+      "worldUploadTimes": {
+        "4028": 1776074146740,
+        "4029": 1776075426727,
+        "4030": 1776074892909,
+        "4031": 1776073655906,
+        "4032": 1776073452792,
+        "4033": 1776073872329,
+        "4034": 1776073437986,
+        "4035": 1776073444502
+      },
+      "homeLastUploadTime": 1776074407937,
+      "listings": [
+        {
+          "lastReviewTime": 1776072607,
+          "pricePerUnit": 8,
+          "quantity": 1,
+          "worldID": 4028,
+          "worldName": "伊弗利特",
+          "hq": false,
+          "total": 8
+        },
+        {
+          "lastReviewTime": 1776069007,
+          "pricePerUnit": 8,
+          "quantity": 3,
+          "worldID": 4029,
+          "worldName": "亞歷山大",
+          "hq": false,
+          "total": 24
+        },
+        {
+          "lastReviewTime": 1776065407,
+          "pricePerUnit": 9,
+          "quantity": 5,
+          "worldID": 4030,
+          "worldName": "利維坦",
+          "hq": false,
+          "total": 45
+        },
+        {
+          "lastReviewTime": 1776061807,
+          "pricePerUnit": 10,
+          "quantity": 7,
+          "worldID": 4031,
+          "worldName": "鳳凰",
+          "hq": false,
+          "total": 70
+        },
+        {
+          "lastReviewTime": 1776058207,
+          "pricePerUnit": 11,
+          "quantity": 9,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false,
+          "total": 99
+        }
+      ],
+      "regularSaleVelocity": 2.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        {
+          "hq": false,
+          "pricePerUnit": 8,
+          "quantity": 1,
+          "timestamp": 1776069007,
+          "worldID": 4028,
+          "worldName": "伊弗利特"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 8,
+          "quantity": 3,
+          "timestamp": 1776061807,
+          "worldID": 4029,
+          "worldName": "亞歷山大"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 9,
+          "quantity": 5,
+          "timestamp": 1776054607,
+          "worldID": 4030,
+          "worldName": "利維坦"
+        }
+      ]
+    },
+    {
+      "itemID": 5,
+      "worldUploadTimes": {
+        "4028": 1776075460425,
+        "4029": 1776073527622,
+        "4030": 1776074684608,
+        "4031": 1776072765051,
+        "4032": 1776075888057,
+        "4033": 1776075589014,
+        "4034": 1776074186918,
+        "4035": 1776075526056
+      },
+      "homeLastUploadTime": 1776074407937,
+      "listings": [
+        {
+          "lastReviewTime": 1776072607,
+          "pricePerUnit": 8,
+          "quantity": 1,
+          "worldID": 4028,
+          "worldName": "伊弗利特",
+          "hq": false,
+          "total": 8
+        },
+        {
+          "lastReviewTime": 1776069007,
+          "pricePerUnit": 8,
+          "quantity": 3,
+          "worldID": 4029,
+          "worldName": "亞歷山大",
+          "hq": false,
+          "total": 24
+        },
+        {
+          "lastReviewTime": 1776065407,
+          "pricePerUnit": 9,
+          "quantity": 5,
+          "worldID": 4030,
+          "worldName": "利維坦",
+          "hq": false,
+          "total": 45
+        },
+        {
+          "lastReviewTime": 1776061807,
+          "pricePerUnit": 10,
+          "quantity": 7,
+          "worldID": 4031,
+          "worldName": "鳳凰",
+          "hq": false,
+          "total": 70
+        },
+        {
+          "lastReviewTime": 1776058207,
+          "pricePerUnit": 11,
+          "quantity": 9,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false,
+          "total": 99
+        }
+      ],
+      "regularSaleVelocity": 2.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        {
+          "hq": false,
+          "pricePerUnit": 8,
+          "quantity": 1,
+          "timestamp": 1776069007,
+          "worldID": 4028,
+          "worldName": "伊弗利特"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 8,
+          "quantity": 3,
+          "timestamp": 1776061807,
+          "worldID": 4029,
+          "worldName": "亞歷山大"
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 9,
+          "quantity": 5,
+          "timestamp": 1776054607,
+          "worldID": 4030,
+          "worldName": "利維坦"
+        }
+      ]
     }
   ],
   "names": {
+    "2": "火之碎晶",
+    "4": "風之碎晶",
+    "5": "冰之碎晶",
     "2211": "神言集",
+    "2393": "業餘木柄",
+    "2394": "青銅裝飾鐵鎚",
     "2625": "彩虹勺形魚餌",
     "2673": "青銅頭盔",
     "3096": "白鋼鏈甲",
@@ -29027,9 +30011,15 @@
     "4640": "渡渡鳥烤肉",
     "4754": "農家乳酪",
     "4858": "薰衣草油",
+    "5056": "銅錠",
     "5088": "白銀環",
+    "5091": "銅鉚釘",
+    "5106": "銅礦",
+    "5107": "錫礦",
     "5201": "土眼石",
     "5282": "野豬革",
+    "5364": "白蠟木木材",
+    "5383": "白蠟木原木",
     "5557": "水母傘帽",
     "5834": "紅銅錘幣",
     "6382": "石製海濱別墅外牆",

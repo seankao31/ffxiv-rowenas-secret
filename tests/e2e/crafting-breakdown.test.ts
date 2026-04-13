@@ -207,10 +207,13 @@ test.describe('Item detail page — crafting breakdown', () => {
 
   test('clicking buy-with-recipe node expands it', async ({ page }) => {
     const buyNode = page.locator('[data-testid="buy-recipe-node"]')
-    await buyNode.locator('text=▶').click()
+    // Count vendor leaves before expand
+    const beforeCount = await page.locator('[data-testid="vendor-leaf"]').count()
+    await buyNode.locator('button').click()
     await expect(buyNode.locator('text=▼')).toBeVisible()
-    const children = buyNode.locator('[data-testid="vendor-leaf"]')
-    await expect(children).toBeVisible()
+    // After expanding, the buy-recipe node's vendor child should appear
+    const afterCount = await page.locator('[data-testid="vendor-leaf"]').count()
+    expect(afterCount).toBeGreaterThan(beforeCount)
   })
 
   test('clicking expanded craft node collapses it', async ({ page }) => {

@@ -1,5 +1,5 @@
 export function formatGil(n: number | null): string {
-  return n != null ? n.toLocaleString() : '\u2014'
+  return n != null ? Math.round(n).toLocaleString() : '\u2014'
 }
 
 export function confidenceColor(c: number): string {
