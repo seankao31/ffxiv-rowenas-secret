@@ -10,10 +10,13 @@ env:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      PUBLIC_GA_MEASUREMENT_ID: ${{ secrets.PUBLIC_GA_MEASUREMENT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
+      - run: bun run download-data
       - run: bun run test
       - run: bun run build
 
