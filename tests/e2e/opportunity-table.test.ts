@@ -183,3 +183,43 @@ test.describe('OpportunityTable', () => {
     expect(classes).toContain('hover:bg-primary')
   })
 })
+
+test.describe('vendor-sell display', () => {
+  test.beforeEach(async ({ page }) => {
+    const vendorOpp = {
+      itemID: 201, itemName: 'Vendor Item',
+      buyPrice: 100, sellPrice: 200, listingPrice: 200,
+      profitPerUnit: 100, listingProfitPerUnit: 100,
+      sourceWorld: '利維坦', sourceWorldID: 4030,
+      sellDestination: 'vendor',
+      availableUnits: 20, recommendedUnits: 20,
+      expectedDailyProfit: 0, score: 50,
+      homeDataAgeHours: 0, homeConfidence: 1.0,
+      sourceDataAgeHours: 0.5, sourceConfidence: 0.9,
+      activeCompetitorCount: 0, fairShareVelocity: 0,
+    }
+    await page.route('**/api/opportunities**', route => route.fulfill({
+      json: { opportunities: [vendorOpp], meta },
+    }))
+    await page.route('**/v2.xivapi.com/**', route => route.fulfill({ json: { rows: [] } }))
+    await page.route('**/garlandtools.org/**/data.json', route => route.fulfill({ json: { locationIndex: {} } }))
+    await page.route('**/garlandtools.org/**/get.php**', route => route.fulfill({ json: { item: { vendors: [] }, partials: [] } }))
+    await page.goto('/arbitrage')
+    await expect(page.locator('table')).toBeVisible()
+  })
+
+  test('shows NPC badge in sell column', async ({ page }) => {
+    const sellCol = page.locator('table tbody tr').first().locator('td').nth(3)
+    await expect(sellCol.locator('.badge')).toContainText('NPC')
+  })
+
+  test('does not show age indicator in sell column', async ({ page }) => {
+    const sellCol = page.locator('table tbody tr').first().locator('td').nth(3)
+    await expect(sellCol).not.toContainText('ago')
+  })
+
+  test('shows vendor sell price', async ({ page }) => {
+    const sellCol = page.locator('table tbody tr').first().locator('td').nth(3)
+    await expect(sellCol).toContainText('200')
+  })
+})

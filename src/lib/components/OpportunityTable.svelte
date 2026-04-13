@@ -188,9 +188,13 @@
           <td class="tabular-nums">
             <div class="flex items-baseline gap-2.5">
               <span class="w-[70px] text-right flex-shrink-0">{fmt(opp.sellPrice)}</span>
-              <span class="text-xs whitespace-nowrap" style="color: {ageColor(opp.homeConfidence)}">{ageLabel(opp.homeDataAgeHours)}</span>
+              {#if opp.sellDestination === 'vendor'}
+                <span class="badge badge-sm badge-soft badge-info">NPC</span>
+              {:else}
+                <span class="text-xs whitespace-nowrap" style="color: {ageColor(opp.homeConfidence)}">{ageLabel(opp.homeDataAgeHours)}</span>
+              {/if}
             </div>
-            {#if opp.listingPrice !== opp.sellPrice}
+            {#if opp.sellDestination !== 'vendor' && opp.listingPrice !== opp.sellPrice}
               <div class="flex items-baseline gap-2.5 mt-1">
                 <span class="w-[70px] text-right flex-shrink-0 text-xs text-base-content/40">{fmt(opp.listingPrice)}</span>
               </div>

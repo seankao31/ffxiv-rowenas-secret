@@ -25,8 +25,8 @@ describe('hooks.server init() fixture mode', () => {
     vi.doMock('$lib/server/fixtures/seed', () => ({ seedFixtureData: seedMock }))
     vi.doMock('$lib/server/scanner', () => ({ startScanner: scannerMock }))
     vi.doMock('$lib/server/recipes', () => ({ initRecipes: vi.fn().mockResolvedValue(undefined) }))
-    vi.doMock('$lib/server/vendors', () => ({ fetchVendorPrices: vi.fn().mockResolvedValue(new Map()) }))
-    vi.doMock('$lib/server/cache', () => ({ setVendorPrices: vi.fn() }))
+    vi.doMock('$lib/server/vendors', () => ({ fetchVendorPrices: vi.fn().mockResolvedValue(new Map()), fetchVendorSellPrices: vi.fn().mockResolvedValue(new Map()) }))
+    vi.doMock('$lib/server/cache', () => ({ setVendorPrices: vi.fn(), setVendorSellPrices: vi.fn() }))
 
     const { init } = await import('../../src/hooks.server')
     await init()
@@ -44,8 +44,8 @@ describe('hooks.server init() fixture mode', () => {
     vi.doMock('$lib/server/fixtures/seed', () => ({ seedFixtureData: seedMock }))
     vi.doMock('$lib/server/scanner', () => ({ startScanner: scannerMock }))
     vi.doMock('$lib/server/recipes', () => ({ initRecipes: vi.fn().mockResolvedValue(undefined) }))
-    vi.doMock('$lib/server/vendors', () => ({ fetchVendorPrices: vi.fn().mockResolvedValue(new Map()) }))
-    vi.doMock('$lib/server/cache', () => ({ setVendorPrices: vi.fn() }))
+    vi.doMock('$lib/server/vendors', () => ({ fetchVendorPrices: vi.fn().mockResolvedValue(new Map()), fetchVendorSellPrices: vi.fn().mockResolvedValue(new Map()) }))
+    vi.doMock('$lib/server/cache', () => ({ setVendorPrices: vi.fn(), setVendorSellPrices: vi.fn() }))
 
     const { init } = await import('../../src/hooks.server')
     await init()

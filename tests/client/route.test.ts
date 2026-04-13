@@ -13,6 +13,7 @@ function opp(overrides: Partial<Opportunity> & Pick<Opportunity, 'itemID' | 'sou
     homeDataAgeHours: 1, homeConfidence: 0.9,
     sourceDataAgeHours: 0.5, sourceConfidence: 0.95,
     activeCompetitorCount: 2, fairShareVelocity: 3,
+    sellDestination: 'mb' as const,
     ...overrides,
   }
 }

@@ -5,7 +5,8 @@ const nameCache = new Map<number, string>()  // itemID → display name
 let nameCacheSettled = false  // true once setNameMap has been called (success or failure)
 let nameCacheResolve: (() => void) | null = null
 let nameCachePromise: Promise<void> | null = null
-let vendorPrices = new Map<number, number>()  // itemID → NPC vendor price
+let vendorPrices = new Map<number, number>()     // itemID → NPC vendor buy price (PriceMid)
+let vendorSellPrices = new Map<number, number>()  // itemID → NPC vendor sell price (PriceLow)
 
 let scanMeta: ScanMeta = {
   scanCompletedAt: 0,
@@ -90,6 +91,17 @@ export function setCraftCosts(costs: Map<number, CraftCostEntry>): void {
 
 export function getCraftCosts(): Map<number, CraftCostEntry> {
   return craftCostCache
+}
+
+export function setVendorSellPrices(prices: Map<number, number>): void {
+  vendorSellPrices.clear()
+  for (const [id, price] of prices) {
+    vendorSellPrices.set(id, price)
+  }
+}
+
+export function getVendorSellPrices(): Map<number, number> {
+  return vendorSellPrices
 }
 
 // Test-only: reset name cache loading state so waitForNameCache works fresh between tests

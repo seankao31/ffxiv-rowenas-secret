@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
-import { getAllItems, getNameMap, getVendorPrices, isCacheReady, getScanMeta, setScanMeta, getScanProgress } from '$lib/server/cache'
+import { getAllItems, getNameMap, getVendorPrices, getVendorSellPrices, isCacheReady, getScanMeta, setScanMeta, getScanProgress } from '$lib/server/cache'
 import { scoreOpportunities } from '$lib/server/scoring'
 import { parseThresholds } from '$lib/server/thresholds'
 
@@ -22,7 +22,7 @@ export const GET: RequestHandler = ({ request, url }) => {
   }
 
   try {
-    const opportunities = scoreOpportunities(getAllItems(), getNameMap(), params, getVendorPrices())
+    const opportunities = scoreOpportunities(getAllItems(), getNameMap(), params, getVendorPrices(), getVendorSellPrices())
     setScanMeta({ ...meta, itemsWithOpportunities: opportunities.length })
 
     return json(
