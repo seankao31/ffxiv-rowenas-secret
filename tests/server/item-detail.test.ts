@@ -1,25 +1,39 @@
-import { test, expect, describe, afterEach } from 'vitest'
+import { test, expect, describe, afterEach, vi, beforeEach } from 'vitest'
 import { setNameMap, waitForNameCache, _resetNameCacheState } from '$lib/server/cache'
+import * as recipeModule from '$lib/server/recipes'
 
 // Import the load function from the route module
 import { load } from '../../src/routes/item/[id]/+page.server'
 
+beforeEach(() => {
+  vi.restoreAllMocks()
+})
+
 afterEach(() => {
   setNameMap(new Map())
   _resetNameCacheState()
+  vi.restoreAllMocks()
 })
 
 describe('item detail load', () => {
-  test('returns item ID and TW name when found in cache', async () => {
+  test('returns item ID, TW name, and hasRecipe when craftable', async () => {
+    vi.spyOn(recipeModule, 'getRecipesByResult').mockReturnValue([
+      { id: 1, result: 2394, job: 8, lvl: 50, yields: 1, ingredients: [] },
+    ])
     setNameMap(new Map([[2394, '棉線']]))
     const result = await load({ params: { id: '2394' } } as any)
-    expect(result).toEqual({ itemID: 2394, twName: '棉線' })
+    expect(result.itemID).toBe(2394)
+    expect(result.twName).toBe('棉線')
+    expect(result.hasRecipe).toBe(true)
   })
 
-  test('returns null twName when item not in cache', async () => {
+  test('returns hasRecipe false when item not craftable', async () => {
+    vi.spyOn(recipeModule, 'getRecipesByResult').mockReturnValue([])
     setNameMap(new Map([[1, 'placeholder']]))
     const result = await load({ params: { id: '9999' } } as any)
-    expect(result).toEqual({ itemID: 9999, twName: null })
+    expect(result.itemID).toBe(9999)
+    expect(result.twName).toBe(null)
+    expect(result.hasRecipe).toBe(false)
   })
 
   test('throws 400 for non-integer id', async () => {
