@@ -43,7 +43,7 @@ The core seeding function. It reads a JSON snapshot and populates the cache. We 
 }
 ```
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/server/fixtures.test.ts`:
 
@@ -88,12 +88,12 @@ describe('seedFixtureData', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `bun run test -- tests/server/fixtures.test.ts`
 Expected: FAIL — `$lib/server/fixtures/seed` does not exist yet.
 
-- [ ] **Step 3: Create minimal snapshot JSON**
+- [x] **Step 3: Create minimal snapshot JSON**
 
 Create `src/lib/server/fixtures/snapshot.json` with a small set of 3 items covering different scenarios (one with HQ listings, one with multiple worlds, one with sale history). Use the schema above with real-ish world IDs from `src/lib/shared/universalis.ts` (4028–4035, home is 4030). Use timestamps relative to "recent" (e.g., `Date.now()` at generation time, but hardcoded in the file — the seeder will adjust them).
 
@@ -102,7 +102,7 @@ Use at least these 3 items:
 - Item 5068: HQ listings, three worlds (4030, 4032, 4034), velocity 5/hqVelocity 3, two history entries
 - Item 19925: Low velocity (1.5), single cheap source (4028), no history — tests edge case
 
-- [ ] **Step 4: Write the implementation**
+- [x] **Step 4: Write the implementation**
 
 Create `src/lib/server/fixtures/seed.ts`:
 
@@ -144,17 +144,17 @@ export function seedFixtureData(): void {
 }
 ```
 
-- [ ] **Step 5: Run test to verify it passes**
+- [x] **Step 5: Run test to verify it passes**
 
 Run: `bun run test -- tests/server/fixtures.test.ts`
 Expected: PASS (3 tests)
 
-- [ ] **Step 6: Run full test suite**
+- [x] **Step 6: Run full test suite**
 
 Run: `bun run test`
 Expected: All 203+ tests pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/lib/server/fixtures/seed.ts src/lib/server/fixtures/snapshot.json tests/server/fixtures.test.ts
@@ -173,7 +173,7 @@ Gate the scanner on `FIXTURE_DATA` env var. When set, call `seedFixtureData()` i
 - Modify: `src/hooks.server.ts:1-29`
 - Create: `tests/server/hooks-fixture.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/server/hooks-fixture.test.ts`. This test verifies the branching logic — that when `FIXTURE_DATA` is set, `seedFixtureData` is called and `startScanner` is not.
 
@@ -234,12 +234,12 @@ describe('hooks.server init() fixture mode', () => {
 })
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `bun run test -- tests/server/hooks-fixture.test.ts`
 Expected: FAIL — `seedFixtureData` is never called because `hooks.server.ts` doesn't check `FIXTURE_DATA` yet.
 
-- [ ] **Step 3: Modify `hooks.server.ts`**
+- [x] **Step 3: Modify `hooks.server.ts`**
 
 Update `src/hooks.server.ts` to add the fixture branch:
 
@@ -277,17 +277,17 @@ export async function init() {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `bun run test -- tests/server/hooks-fixture.test.ts`
 Expected: PASS (2 tests)
 
-- [ ] **Step 5: Run full test suite**
+- [x] **Step 5: Run full test suite**
 
 Run: `bun run test`
 Expected: All tests pass.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/hooks.server.ts tests/server/hooks-fixture.test.ts
@@ -305,7 +305,7 @@ A script that runs a real scan and captures a subset to `snapshot.json`. This is
 **Files:**
 - Create: `scripts/snapshot-cache.ts`
 
-- [ ] **Step 1: Write the script**
+- [x] **Step 1: Write the script**
 
 Create `scripts/snapshot-cache.ts`:
 
@@ -393,22 +393,22 @@ main().catch(err => {
 })
 ```
 
-- [ ] **Step 2: Run the script to generate real fixture data**
+- [x] **Step 2: Run the script to generate real fixture data**
 
 Run: `bun run scripts/snapshot-cache.ts`
 Expected: Fetches from Universalis, writes ~40 items to `src/lib/server/fixtures/snapshot.json`.
 
-- [ ] **Step 3: Verify fixture data loads correctly**
+- [x] **Step 3: Verify fixture data loads correctly**
 
 Run: `bun run test -- tests/server/fixtures.test.ts`
 Expected: PASS — the real snapshot data passes the same tests written in Task 1.
 
-- [ ] **Step 4: Run full test suite**
+- [x] **Step 4: Run full test suite**
 
 Run: `bun run test`
 Expected: All tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add scripts/snapshot-cache.ts src/lib/server/fixtures/snapshot.json
@@ -426,7 +426,7 @@ Update `CLAUDE.md` to document the fixture mode.
 **Files:**
 - Modify: `CLAUDE.md`
 
-- [ ] **Step 1: Add fixture mode to Commands section**
+- [x] **Step 1: Add fixture mode to Commands section**
 
 In `CLAUDE.md`, add a new entry to the `## Commands` section after the existing entries:
 
@@ -434,7 +434,7 @@ In `CLAUDE.md`, add a new entry to the `## Commands` section after the existing 
 - `FIXTURE_DATA=true bun run dev` — start the dev server with pre-seeded cache data (skips Universalis scanner)
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add CLAUDE.md
@@ -449,16 +449,16 @@ Ref: ENG-118"
 
 Verify the full flow works end-to-end.
 
-- [ ] **Step 1: Start dev server with fixture data**
+- [x] **Step 1: Start dev server with fixture data**
 
 Run: `FIXTURE_DATA=true bun run dev`
 Expected: Server starts, console shows `[fixtures] Seeded cache with N items`, no scanner output.
 
-- [ ] **Step 2: Verify `/api/opportunities` returns data**
+- [x] **Step 2: Verify `/api/opportunities` returns data**
 
 Run: `curl -s http://localhost:5173/api/opportunities | head -c 200`
 Expected: JSON with `"opportunities":[...]` and `"meta":{...}` — NOT `"ready":false`.
 
-- [ ] **Step 3: Stop the dev server**
+- [x] **Step 3: Stop the dev server**
 
 Kill the dev server process started in Step 1.
