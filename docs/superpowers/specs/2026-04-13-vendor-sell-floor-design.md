@@ -43,7 +43,7 @@ When `sellDestination === 'vendor'`:
 - `homeConfidence` = 1.0, `homeDataAgeHours` = 0
 - `activeCompetitorCount` = 0
 - `fairShareVelocity` = total velocity (no competition split), or 0 if no home data
-- `listingPrice` and `listingProfitPerUnit` still reflect home MB for reference
+- `listingPrice` and `listingProfitPerUnit` are set equal to the vendor sell values. This is a hack to suppress the secondary line in the UI (which only renders when `listingPrice !== sellPrice`). Vendor-sell items often have no home listings, so there is no home MB value to reference. If we later want to show "you could also list on MB for X" as a comparison, these fields need real home MB data and the UI needs a proper vendor-sell branch.
 
 ### UI Changes
 

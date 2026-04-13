@@ -289,6 +289,12 @@ export function scoreOpportunities(
 
         buyPrice: Math.round(best.effectiveBuyPrice),
         sellPrice: vendorSellPrice,
+        // HACK: listingPrice/listingProfitPerUnit semantically mean "home MB listing"
+        // but vendor-sell items often have no home listings at all. Setting them equal
+        // to the vendor sell values suppresses the secondary line in OpportunityTable
+        // (which only renders when listingPrice !== sellPrice). If we later want to
+        // show "you could also list on MB for X" alongside vendor-sell, these fields
+        // need real home MB data and the UI needs a proper vendor-sell branch.
         listingPrice: vendorSellPrice,
         profitPerUnit: Math.round(best.profitPerUnit),
         listingProfitPerUnit: Math.round(best.profitPerUnit),
