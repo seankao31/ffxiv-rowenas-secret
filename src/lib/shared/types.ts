@@ -117,3 +117,12 @@ export type CraftingResult = {
   profitVsBuy: number | null
   profitVsSell: number | null
 }
+
+export type CraftCostEntry = {
+  itemId: number       // result item ID
+  recipeId: number     // recipe that was cheapest
+  job: number          // crafter job for that recipe
+  level: number        // required job level
+  craftCost: number    // per-unit cost via optimal craft tree
+  confidence: number   // min confidence across all ingredients
+}

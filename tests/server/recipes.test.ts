@@ -157,4 +157,13 @@ describe('recipe indexes', () => {
 
     expect(recipes).toEqual([])
   })
+
+  test('getAllRecipeResultIds returns all unique result item IDs', async () => {
+    const { getAllRecipeResultIds } = await import('$lib/server/recipes')
+
+    const ids = getAllRecipeResultIds()
+    expect(ids.length).toBeGreaterThan(0)
+    // Should contain no duplicates
+    expect(new Set(ids).size).toBe(ids.length)
+  })
 })
