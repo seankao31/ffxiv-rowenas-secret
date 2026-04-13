@@ -81,11 +81,12 @@ async function mockApi(page: Page) {
       ),
     }),
   )
-  // Mock Universalis CurrentlyShown endpoint for cross-world listings (catch-all, registered first)
+  // Playwright routes match LIFO (last registered wins). The History route must be
+  // registered AFTER the catch-all so it takes priority for /history/ requests.
+  // Do not reorder these two routes.
   await page.route('**/universalis.app/api/v2/**', route =>
     route.fulfill({ json: UNIVERSALIS_RESPONSE }),
   )
-  // Mock Universalis History endpoint for sale history (more specific, registered last to win)
   await page.route('**/universalis.app/api/v2/history/**', route =>
     route.fulfill({ json: HISTORY_RESPONSE }),
   )

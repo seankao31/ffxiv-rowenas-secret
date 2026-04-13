@@ -3,7 +3,7 @@
   import { computePriceStats } from '$lib/client/price-stats'
   import { formatNumber } from '$lib/client/format'
 
-  const { sales, loading, error }: { sales: Sale[]; loading: boolean; error: boolean } = $props()
+  let { sales, loading, error }: { sales: Sale[]; loading: boolean; error: boolean } = $props()
 
   const stats = $derived(computePriceStats(sales))
 </script>

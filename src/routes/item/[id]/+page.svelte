@@ -24,6 +24,8 @@
   let salesLoading = $state(true)
   let salesError = $state(false)
 
+  // No cancellation guard needed: SvelteKit destroys the component on route navigation,
+  // so a stale response from a previous itemID cannot overwrite a newer one.
   $effect(() => {
     salesLoading = true
     salesError = false
