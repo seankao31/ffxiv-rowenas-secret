@@ -8,6 +8,7 @@ FFXIV cross-world market board arbitrage dashboard for the 陸行鳥 Data Center
 - `bun run dev` — start the dev server (auto-downloads game data)
 - `bun run build` — production build (auto-downloads game data)
 - `bun run download-data` — download FFXIV_Market msgpack files to `data/`
+- `FIXTURE_DATA=true bun run dev` — start the dev server with pre-seeded cache data (skips Universalis scanner)
 
 ## Linear
 
