@@ -1,10 +1,13 @@
 <script lang="ts">
+  import { page } from '$app/stores'
+  import { goto } from '$app/navigation'
   import { fetchItemMetadata, getIconUrl, getEnglishName, subscribe } from '$lib/client/xivapi.ts'
   import { fetchItemSaleHistory } from '$lib/client/universalis'
   import type { Sale } from '$lib/shared/types'
   import ListingsTable from '$lib/components/ListingsTable.svelte'
   import SaleHistoryTable from '$lib/components/SaleHistoryTable.svelte'
   import PriceStats from '$lib/components/PriceStats.svelte'
+  import CraftingBreakdown from '$lib/components/CraftingBreakdown.svelte'
 
   let { data } = $props()
 
@@ -38,6 +41,18 @@
       salesLoading = false
     })
   })
+
+  const activeTab = $derived($page.url.searchParams.get('tab') ?? 'market')
+
+  function selectTab(tab: string) {
+    const url = new URL($page.url)
+    if (tab === 'market') {
+      url.searchParams.delete('tab')
+    } else {
+      url.searchParams.set('tab', tab)
+    }
+    goto(url.toString(), { replaceState: true, noScroll: true })
+  }
 </script>
 
 <svelte:head>
@@ -62,27 +77,63 @@
   </div>
 </div>
 
-<!-- Listings | History -->
-<div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
-  <div class="card bg-base-200 min-h-0 flex flex-col">
-    <div class="card-body flex flex-col min-h-0">
-      <h2 class="card-title shrink-0">Cross-World Listings</h2>
-      <ListingsTable itemId={data.itemID} />
+<!-- Tab Bar -->
+<div class="flex gap-1 border-b border-base-300 mb-4 shrink-0" role="tablist">
+  <button
+    role="tab"
+    aria-selected={activeTab === 'market'}
+    class="px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer
+      {activeTab === 'market'
+        ? 'border-accent text-accent'
+        : 'border-transparent text-base-content/50 hover:text-base-content/80'}"
+    onclick={() => selectTab('market')}
+  >
+    Market
+  </button>
+  <button
+    role="tab"
+    aria-selected={activeTab === 'crafting'}
+    disabled={!data.hasRecipe}
+    class="px-4 py-2 text-sm font-medium border-b-2 transition-colors
+      {activeTab === 'crafting'
+        ? 'border-accent text-accent cursor-pointer'
+        : data.hasRecipe
+          ? 'border-transparent text-base-content/50 hover:text-base-content/80 cursor-pointer'
+          : 'border-transparent text-base-content/20 cursor-not-allowed'}"
+    onclick={() => selectTab('crafting')}
+  >
+    Crafting
+  </button>
+</div>
+
+<!-- Tab Content -->
+{#if activeTab === 'market'}
+  <!-- Listings | History -->
+  <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
+    <div class="card bg-base-200 min-h-0 flex flex-col">
+      <div class="card-body flex flex-col min-h-0">
+        <h2 class="card-title shrink-0">Cross-World Listings</h2>
+        <ListingsTable itemId={data.itemID} />
+      </div>
+    </div>
+
+    <div class="card bg-base-200 min-h-0 flex flex-col">
+      <div class="card-body flex flex-col min-h-0">
+        <h2 class="card-title shrink-0">Sale History</h2>
+        <SaleHistoryTable {sales} loading={salesLoading} error={salesError} />
+      </div>
     </div>
   </div>
 
-  <div class="card bg-base-200 min-h-0 flex flex-col">
-    <div class="card-body flex flex-col min-h-0">
-      <h2 class="card-title shrink-0">Sale History</h2>
-      <SaleHistoryTable {sales} loading={salesLoading} error={salesError} />
+  <!-- Price Statistics -->
+  <div class="card bg-base-200 mt-4 shrink-0">
+    <div class="card-body">
+      <h2 class="card-title">Price Statistics</h2>
+      <PriceStats {sales} loading={salesLoading} error={salesError} />
     </div>
   </div>
-</div>
-
-<!-- Price Statistics -->
-<div class="card bg-base-200 mt-4 shrink-0">
-  <div class="card-body">
-    <h2 class="card-title">Price Statistics</h2>
-    <PriceStats {sales} loading={salesLoading} error={salesError} />
+{:else if activeTab === 'crafting'}
+  <div class="flex-1 min-h-0 overflow-auto">
+    <CraftingBreakdown itemId={data.itemID} />
   </div>
-</div>
+{/if}

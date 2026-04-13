@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit'
 import { getNameMap, waitForNameCache } from '$lib/server/cache'
+import { getRecipesByResult } from '$lib/server/recipes'
 
 export async function load({ params }: { params: { id: string } }) {
   const parsed = Number(params.id)
@@ -9,5 +10,6 @@ export async function load({ params }: { params: { id: string } }) {
 
   await waitForNameCache()
   const twName = getNameMap().get(parsed) ?? null
-  return { itemID: parsed, twName }
+  const hasRecipe = getRecipesByResult(parsed).length > 0
+  return { itemID: parsed, twName, hasRecipe }
 }
