@@ -30,7 +30,7 @@
 **Files:**
 - Modify: `src/lib/shared/types.ts:119-120` (after `CraftingResult`)
 
-- [ ] **Step 1: Add the type**
+- [x] **Step 1: Add the type**
 
 Add after the `CraftingResult` type at the end of `src/lib/shared/types.ts`:
 
@@ -45,12 +45,12 @@ export type CraftCostEntry = {
 }
 ```
 
-- [ ] **Step 2: Verify types compile**
+- [x] **Step 2: Verify types compile**
 
 Run: `bunx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/shared/types.ts
@@ -69,7 +69,7 @@ The `byResult` map in `recipes.ts` is module-private. The batch solver needs to 
 - Modify: `src/lib/server/recipes.ts:50-56`
 - Test: `tests/server/recipes.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add a new test to `tests/server/recipes.test.ts`:
 
@@ -84,12 +84,12 @@ test('getAllRecipeResultIds returns all unique result item IDs', async () => {
 
 Import `getAllRecipeResultIds` from `$lib/server/recipes` at the top of the file.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `bun run test -- tests/server/recipes.test.ts`
 Expected: FAIL — `getAllRecipeResultIds` is not exported
 
-- [ ] **Step 3: Implement the accessor**
+- [x] **Step 3: Implement the accessor**
 
 Add to `src/lib/server/recipes.ts` after the `getRecipesByIngredient` function:
 
@@ -99,12 +99,12 @@ export function getAllRecipeResultIds(): number[] {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `bun run test -- tests/server/recipes.test.ts`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/server/recipes.ts tests/server/recipes.test.ts
@@ -121,7 +121,7 @@ Ref: ENG-69"
 - Modify: `src/lib/server/cache.ts:82-91` (after vendor price accessors)
 - Test: Tested implicitly via Task 5 batch tests; no standalone cache test needed
 
-- [ ] **Step 1: Add cache state and accessors**
+- [x] **Step 1: Add cache state and accessors**
 
 Add to `src/lib/server/cache.ts` after the vendor price section (before `_resetNameCacheState`). Also add the import of `CraftCostEntry` to the type import at line 1.
 
@@ -143,12 +143,12 @@ export function getCraftCosts(): Map<number, CraftCostEntry> {
 }
 ```
 
-- [ ] **Step 2: Verify types compile**
+- [x] **Step 2: Verify types compile**
 
 Run: `bunx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/server/cache.ts
@@ -164,7 +164,7 @@ Ref: ENG-69"
 **Files:**
 - Modify: `src/lib/server/crafting.ts`
 
-- [ ] **Step 1: Add imports**
+- [x] **Step 1: Add imports**
 
 Add to the imports at the top of `crafting.ts`:
 
@@ -177,7 +177,7 @@ Update the type import to include `CraftCostEntry`:
 import type { ItemData, CraftingNode, CraftingResult, CraftAction, CraftCostEntry } from '$lib/shared/types'
 ```
 
-- [ ] **Step 2: Add `solveCraftCostBatch` function**
+- [x] **Step 2: Add `solveCraftCostBatch` function**
 
 Add after the `solveCraftingCost` function (after line 67, before `solveNode`):
 
@@ -214,12 +214,12 @@ export function solveCraftCostBatch(
 
 Note: We pass `Infinity` as `maxDepth` since recipes form a DAG. The `solveNode` function's `depth < maxDepth` guard will always be true, so every node gets fully evaluated and memoized.
 
-- [ ] **Step 3: Verify types compile**
+- [x] **Step 3: Verify types compile**
 
 Run: `bunx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/lib/server/crafting.ts
@@ -235,7 +235,7 @@ Ref: ENG-69"
 **Files:**
 - Modify: `tests/server/crafting.test.ts`
 
-- [ ] **Step 1: Add import**
+- [x] **Step 1: Add import**
 
 Update the dynamic import in `beforeAll` to also import `solveCraftCostBatch`:
 
@@ -248,7 +248,7 @@ And in the `beforeAll`:
 solveCraftCostBatch = mod.solveCraftCostBatch
 ```
 
-- [ ] **Step 2: Write batch tests**
+- [x] **Step 2: Write batch tests**
 
 Add a new `describe('solveCraftCostBatch', ...)` block after the existing `describe('solveCraftingCost', ...)`:
 
@@ -355,12 +355,12 @@ describe('solveCraftCostBatch', () => {
 })
 ```
 
-- [ ] **Step 3: Run tests to verify they pass**
+- [x] **Step 3: Run tests to verify they pass**
 
 Run: `bun run test -- tests/server/crafting.test.ts`
 Expected: All tests PASS
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add tests/server/crafting.test.ts
@@ -376,7 +376,7 @@ Ref: ENG-69"
 **Files:**
 - Modify: `src/lib/server/scanner.ts`
 
-- [ ] **Step 1: Add imports**
+- [x] **Step 1: Add imports**
 
 Add to the imports at the top of `scanner.ts`:
 
@@ -394,7 +394,7 @@ Update it to:
 import { setItem, setNameMap, setScanMeta, getScanMeta, setScanProgress, getAllItems, getVendorPrices, setCraftCosts } from './cache.ts'
 ```
 
-- [ ] **Step 2: Add batch call to `runScanCycle`**
+- [x] **Step 2: Add batch call to `runScanCycle`**
 
 Add after the `console.log(\`[scanner] Scan complete: ...\`)` line at the end of `runScanCycle()` (line 108):
 
@@ -406,7 +406,7 @@ Add after the `console.log(\`[scanner] Scan complete: ...\`)` line at the end of
   console.log(`[scanner] Craft cost batch: ${craftCosts.size} items in ${batchElapsed}s`)
 ```
 
-- [ ] **Step 3: Add batch call to `runScanCyclePerWorld`**
+- [x] **Step 3: Add batch call to `runScanCyclePerWorld`**
 
 Add after the `console.log(\`[scanner] Scan complete: ...\`)` line at the end of `runScanCyclePerWorld()` (line 204):
 
@@ -418,17 +418,17 @@ Add after the `console.log(\`[scanner] Scan complete: ...\`)` line at the end of
   console.log(`[scanner] Craft cost batch: ${craftCosts.size} items in ${batchElapsed}s`)
 ```
 
-- [ ] **Step 4: Verify types compile**
+- [x] **Step 4: Verify types compile**
 
 Run: `bunx tsc --noEmit`
 Expected: No errors
 
-- [ ] **Step 5: Run full test suite**
+- [x] **Step 5: Run full test suite**
 
 Run: `bun run test`
 Expected: All tests PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/server/scanner.ts
@@ -445,7 +445,7 @@ Ref: ENG-69"
 - Modify: `src/lib/server/fixtures/seed.ts`
 - Modify: `tests/server/fixtures.test.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add a new test to `tests/server/fixtures.test.ts`:
 
@@ -469,12 +469,12 @@ Add `getCraftCosts` to the import from `$lib/server/cache`:
 import { getAllItems, getNameMap, isCacheReady, getScanMeta, getCraftCosts } from '$lib/server/cache'
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `bun run test -- tests/server/fixtures.test.ts`
 Expected: FAIL — `getCraftCosts()` returns empty map after seeding
 
-- [ ] **Step 3: Update `seedFixtureData` to run batch solver**
+- [x] **Step 3: Update `seedFixtureData` to run batch solver**
 
 Modify `src/lib/server/fixtures/seed.ts`. Add imports:
 
@@ -504,17 +504,17 @@ Update the final log line to include craft costs:
   console.log(`[fixtures] Seeded cache with ${snapshot.items.length} items, ${craftCosts.size} craft costs`)
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `bun run test -- tests/server/fixtures.test.ts`
 Expected: PASS
 
-- [ ] **Step 5: Run full test suite**
+- [x] **Step 5: Run full test suite**
 
 Run: `bun run test`
 Expected: All 208+ tests PASS
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lib/server/fixtures/seed.ts tests/server/fixtures.test.ts
@@ -527,19 +527,19 @@ Ref: ENG-69"
 
 ### Task 8: Final verification
 
-- [ ] **Step 1: Run full test suite**
+- [x] **Step 1: Run full test suite**
 
 Run: `bun run test`
 Expected: All tests PASS, including new batch tests
 
-- [ ] **Step 2: Verify fixture dev mode works**
+- [x] **Step 2: Verify fixture dev mode works**
 
 Run: `FIXTURE_DATA=true bun run dev`
 Expected: Server starts, logs show craft cost batch seeded (e.g., "[fixtures] Seeded cache with N items, M craft costs")
 
 Kill the dev server after verifying.
 
-- [ ] **Step 3: Verify types compile cleanly**
+- [x] **Step 3: Verify types compile cleanly**
 
 Run: `bunx tsc --noEmit`
 Expected: No errors
