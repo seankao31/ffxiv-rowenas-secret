@@ -72,8 +72,8 @@
     return result.cheapestListing.price - result.totalCost
   })
 
-  function formatGil(n: number): string {
-    return n.toLocaleString()
+  function formatGil(n: number | null): string {
+    return n != null ? n.toLocaleString() : '—'
   }
 </script>
 
