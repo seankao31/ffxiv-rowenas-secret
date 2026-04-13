@@ -17,6 +17,10 @@
   const secondaryName = $derived(data.twName ? enName : null)
 </script>
 
+<svelte:head>
+  <title>{primaryName} — 羅薇娜的商業機密</title>
+</svelte:head>
+
 <!-- Item Header -->
 <div class="flex items-center gap-3 py-4 shrink-0">
   {#if iconUrl}

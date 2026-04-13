@@ -37,6 +37,8 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64
+          build-args: |
+            PUBLIC_GA_MEASUREMENT_ID=${{ secrets.PUBLIC_GA_MEASUREMENT_ID }}
           tags: |
             ${{ env.IMAGE }}:latest
             ${{ env.IMAGE }}:${{ github.ref_name }}

@@ -4,6 +4,8 @@ WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY . .
+ARG PUBLIC_GA_MEASUREMENT_ID=""
+ENV PUBLIC_GA_MEASUREMENT_ID=$PUBLIC_GA_MEASUREMENT_ID
 RUN bun run build
 
 FROM oven/bun:1

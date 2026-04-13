@@ -1,12 +1,37 @@
 <script lang="ts">
   import '../app.css'
+  import { onMount } from 'svelte'
   import { Heart } from 'lucide-svelte'
+  import { afterNavigate } from '$app/navigation'
+  import { PUBLIC_GA_MEASUREMENT_ID } from '$env/static/public'
   import TopBar from '$lib/components/TopBar.svelte'
   import Sidebar from '$lib/components/Sidebar.svelte'
   import NavDrawer from '$lib/components/NavDrawer.svelte'
   import { loadSidebarExpanded, saveSidebarExpanded } from '$lib/client/sidebar.ts'
 
   let { children } = $props()
+
+  onMount(() => {
+    if (!PUBLIC_GA_MEASUREMENT_ID) return
+    const script = document.createElement('script')
+    script.async = true
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${PUBLIC_GA_MEASUREMENT_ID}`
+    document.head.appendChild(script)
+    window.dataLayer = window.dataLayer || []
+    function gtag(...args: unknown[]) { window.dataLayer.push(args) }
+    window.gtag = gtag
+    gtag('js', new Date())
+    gtag('config', PUBLIC_GA_MEASUREMENT_ID, { send_page_view: false })
+  })
+
+  afterNavigate(() => {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'page_view', {
+        page_title: document.title,
+        page_location: location.href,
+      })
+    }
+  })
 
   let expanded = $state(loadSidebarExpanded())
   let drawerOpen = $state(false)
