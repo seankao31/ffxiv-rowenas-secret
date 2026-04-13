@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { CraftingNode } from '$lib/shared/types'
+  import { formatGil, confidenceColor } from '$lib/shared/format'
   import { getIconUrl, getEnglishName, subscribe } from '$lib/client/xivapi.ts'
 
   let { node, depth = 0 }: { node: CraftingNode; depth?: number } = $props()
@@ -12,12 +13,7 @@
   const isVendor = $derived(node.action === 'vendor')
 
   const showConfidenceDot = $derived(!isVendor)
-  const confidenceColor = $derived.by(() => {
-    if (node.confidence >= 0.85) return '#5b5'
-    if (node.confidence >= 0.60) return '#cb3'
-    if (node.confidence >= 0.25) return '#e83'
-    return '#d44'
-  })
+  const nodeConfidenceColor = $derived(confidenceColor(node.confidence))
 
   const alternativeText = $derived.by(() => {
     if (node.action === 'craft' && node.marketPrice != null) {
@@ -51,9 +47,7 @@
     expanded = !expanded
   }
 
-  function formatGil(n: number | null): string {
-    return n != null ? n.toLocaleString() : '—'
-  }
+
 </script>
 
 {#if isCraftNode || isBuyWithRecipe}
@@ -86,7 +80,7 @@
       {#if showConfidenceDot}
         <span
           class="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-          style="background:{confidenceColor}"
+          style="background:{nodeConfidenceColor}"
           data-testid="confidence-dot"
         ></span>
       {/if}
@@ -128,7 +122,7 @@
     {#if showConfidenceDot}
       <span
         class="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-        style="background:{confidenceColor}"
+        style="background:{nodeConfidenceColor}"
         data-testid="confidence-dot"
       ></span>
     {/if}

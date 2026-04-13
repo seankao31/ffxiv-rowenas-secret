@@ -1,11 +1,12 @@
 <script lang="ts">
   import type { CraftingResult, CraftingNode as CraftingNodeType } from '$lib/shared/types'
+  import { formatGil, confidenceColor, confidenceLabel } from '$lib/shared/format'
   import { fetchItemMetadata, subscribe } from '$lib/client/xivapi.ts'
   import CraftingTreeNode from './CraftingTreeNode.svelte'
 
   let { itemId }: { itemId: number } = $props()
 
-  let result = $state<(CraftingResult & { recommendation: 'craft' | 'buy' }) | null>(null)
+  let result = $state<CraftingResult | null>(null)
   let loading = $state(true)
   let error = $state<string | null>(null)
   let cacheNotReady = $state(false)
@@ -51,30 +52,14 @@
   $effect(() => { fetchCraftData() })
 
   const confidencePercent = $derived(result ? Math.round(result.confidence * 100) : 0)
-  const confidenceLabel = $derived.by(() => {
-    if (!result) return ''
-    if (result.confidence >= 0.85) return 'High'
-    if (result.confidence >= 0.60) return 'Medium'
-    if (result.confidence >= 0.25) return 'Low'
-    return 'Stale'
-  })
-  const confidenceColor = $derived.by(() => {
-    if (!result) return '#5b5'
-    if (result.confidence >= 0.85) return '#5b5'
-    if (result.confidence >= 0.60) return '#cb3'
-    if (result.confidence >= 0.25) return '#e83'
-    return '#d44'
-  })
+  const confLabel = $derived(result ? confidenceLabel(result.confidence) : '')
+  const confColor = $derived(result ? confidenceColor(result.confidence) : '#5b5')
 
-  const isCraftRecommended = $derived(result?.recommendation === 'craft')
+  const isCraftRecommended = $derived(result?.root.action === 'craft')
   const savings = $derived.by(() => {
     if (!result?.cheapestListing) return null
     return result.cheapestListing.price - result.totalCost
   })
-
-  function formatGil(n: number | null): string {
-    return n != null ? n.toLocaleString() : '—'
-  }
 </script>
 
 <div class="flex justify-center">
@@ -121,7 +106,7 @@
               ⚒ Recommendation: {isCraftRecommended ? 'Craft' : 'Buy'}
             </span>
             <span class="text-xs px-2.5 py-0.5 rounded-full"
-              style="background:{confidenceColor}20;color:{confidenceColor}">
+              style="background:{confColor}20;color:{confColor}">
               {confidencePercent}% confidence
             </span>
           </div>
@@ -164,10 +149,10 @@
         <div class="card-body p-3">
           <div class="flex justify-between items-center text-xs mb-1.5">
             <span class="text-base-content/50">Overall Confidence</span>
-            <span class="font-bold" style="color:{confidenceColor}">{confidencePercent}% — {confidenceLabel}</span>
+            <span class="font-bold" style="color:{confColor}">{confidencePercent}% — {confLabel}</span>
           </div>
           <div class="bg-base-300 rounded-sm h-1">
-            <div class="rounded-sm h-1 transition-all" style="background:{confidenceColor};width:{confidencePercent}%"></div>
+            <div class="rounded-sm h-1 transition-all" style="background:{confColor};width:{confidencePercent}%"></div>
           </div>
           <div class="flex gap-3 mt-1.5 text-[9px] text-base-content/30">
             <span><span class="inline-block w-1.5 h-1.5 rounded-full align-middle mr-1" style="background:#5b5"></span>High</span>

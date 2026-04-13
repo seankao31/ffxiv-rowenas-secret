@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Opportunity } from '$lib/client/api.ts'
+  import { confidenceColor } from '$lib/shared/format'
   import CopyButton from '$lib/components/CopyButton.svelte'
   import { Info, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-svelte'
   import { toggleSort, sortOpportunities, type SortState, type SortColumn } from '$lib/client/sort.ts'
@@ -49,12 +50,7 @@
 
   const isNPC = (world: string) => world === 'NPC'
 
-  function ageColor(confidence: number): string {
-    if (confidence >= 0.85) return '#5b5'
-    if (confidence >= 0.60) return '#cb3'
-    if (confidence >= 0.25) return '#e83'
-    return '#d44'
-  }
+  const ageColor = confidenceColor
 
   const totalVelocity = (opp: Opportunity) =>
     Math.round(opp.fairShareVelocity * (opp.activeCompetitorCount + 1) * 100) / 100
