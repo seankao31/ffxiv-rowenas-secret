@@ -282,3 +282,131 @@ describe('NPC vendor pricing', () => {
     expect(results[0]!.altSourceWorld).toBeUndefined()
   })
 })
+
+describe('vendor-sell scoring', () => {
+  test('vendor-sell surfaces item with no home listings', () => {
+    const data = item({
+      listings: [
+        { pricePerUnit: 200, quantity: 5, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
+      ],
+      regularSaleVelocity: 0,
+    })
+    const vendorSellPrices = new Map([[1, 500]])
+    const results = scoreOpportunities(new Map([[1, data]]), names, DEFAULT, undefined, vendorSellPrices)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.sellDestination).toBe('vendor')
+    expect(results[0]!.sellPrice).toBe(500)
+    expect(results[0]!.buyPrice).toBe(210)    // 200 × 1.05
+    expect(results[0]!.profitPerUnit).toBe(290) // 500 - 210
+    expect(results[0]!.homeConfidence).toBe(1.0)
+    expect(results[0]!.homeDataAgeHours).toBe(0)
+    expect(results[0]!.activeCompetitorCount).toBe(0)
+  })
+
+  test('vendor-sell can use home world as buy source', () => {
+    const data = item({
+      listings: [
+        { pricePerUnit: 200, quantity: 10, worldID: HOME, worldName: '利維坦', lastReviewTime: FRESH, hq: false },
+      ],
+      regularSaleVelocity: 0,
+    })
+    const vendorSellPrices = new Map([[1, 500]])
+    const results = scoreOpportunities(new Map([[1, data]]), names, DEFAULT, undefined, vendorSellPrices)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.sellDestination).toBe('vendor')
+    expect(results[0]!.sourceWorldID).toBe(HOME)
+    expect(results[0]!.sourceWorld).toBe('利維坦')
+  })
+
+  test('vendor-sell replaces MB-sell when it scores higher', () => {
+    const data = item({
+      listings: [
+        { pricePerUnit: 200, quantity: 5, worldID: HOME, worldName: '利維坦', lastReviewTime: FRESH, hq: false },
+        { pricePerUnit: 100, quantity: 3, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
+      ],
+      regularSaleVelocity: 0.1,
+    })
+    const vendorSellPrices = new Map([[1, 300]])
+    // MB-sell score is tiny (velocity 0.1, turnover penalty)
+    // Vendor-sell: profit = 300 - 105 = 195, score ≈ 195
+    const results = scoreOpportunities(new Map([[1, data]]), names, DEFAULT, undefined, vendorSellPrices)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.sellDestination).toBe('vendor')
+    expect(results[0]!.sellPrice).toBe(300)
+  })
+
+  test('MB-sell wins when it scores higher than vendor-sell', () => {
+    const data = item({
+      listings: [
+        { pricePerUnit: 1000, quantity: 5, worldID: HOME, worldName: '利維坦', lastReviewTime: FRESH, hq: false },
+        { pricePerUnit: 400, quantity: 3, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
+      ],
+      regularSaleVelocity: 10,
+    })
+    // Vendor sell barely profitable
+    const vendorSellPrices = new Map([[1, 430]])
+    // MB-sell: profit 530, high velocity → high score
+    // Vendor-sell: profit = 430 - 420 = 10, score ≈ 10
+    const results = scoreOpportunities(new Map([[1, data]]), names, DEFAULT, undefined, vendorSellPrices)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.sellDestination).toBe('mb')
+  })
+
+  test('vendor-sell has no sell-side tax', () => {
+    const data = item({
+      listings: [
+        { pricePerUnit: 200, quantity: 5, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
+      ],
+      regularSaleVelocity: 0,
+    })
+    const vendorSellPrices = new Map([[1, 500]])
+    const results = scoreOpportunities(new Map([[1, data]]), names, DEFAULT, undefined, vendorSellPrices)
+    // profit = 500 (no tax) - 200 * 1.05 = 290
+    expect(results[0]!.profitPerUnit).toBe(290)
+  })
+
+  test('vendor-sell excluded when no profitable source listing', () => {
+    const data = item({
+      listings: [
+        { pricePerUnit: 600, quantity: 5, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
+      ],
+      regularSaleVelocity: 0,
+    })
+    // buy = 630 > sell = 500 → no profit
+    const vendorSellPrices = new Map([[1, 500]])
+    const results = scoreOpportunities(new Map([[1, data]]), names, DEFAULT, undefined, vendorSellPrices)
+    expect(results).toHaveLength(0)
+  })
+
+  test('item without vendor sell price uses MB-sell only', () => {
+    const results = scoreOpportunities(new Map([[1, item()]]), names, DEFAULT, undefined, new Map())
+    expect(results).toHaveLength(1)
+    expect(results[0]!.sellDestination).toBe('mb')
+  })
+
+  test('vendor-sell score is profitPerUnit × sourceConfidence', () => {
+    const data: ItemData = {
+      itemID: 1,
+      worldUploadTimes: { [SRC_B]: STALE20H },
+      homeLastUploadTime: 0,
+      listings: [
+        { pricePerUnit: 200, quantity: 5, worldID: SRC_B, worldName: '奧汀', lastReviewTime: STALE20H, hq: false },
+      ],
+      regularSaleVelocity: 0,
+      hqSaleVelocity: 0,
+      recentHistory: [],
+    }
+    const vendorSellPrices = new Map([[1, 500]])
+    const results = scoreOpportunities(new Map([[1, data]]), names, DEFAULT, undefined, vendorSellPrices)
+    expect(results).toHaveLength(1)
+    // profit = 290, sourceConf = exp(-20/12) ≈ 0.189
+    const expectedScore = 290 * Math.exp(-20 / 12)
+    expect(results[0]!.score).toBeCloseTo(expectedScore, 0)
+  })
+
+  test('regular opportunity has sellDestination mb', () => {
+    const results = scoreOpportunities(new Map([[1, item()]]), names, DEFAULT)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.sellDestination).toBe('mb')
+  })
+})

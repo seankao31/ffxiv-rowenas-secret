@@ -23,10 +23,23 @@ export function scoreOpportunities(
   nameMap: Map<number, string>,
   params: ThresholdParams,
   vendorPrices?: Map<number, number>,
+  vendorSellPrices?: Map<number, number>,
 ): Opportunity[] {
   const now = Date.now()
   const stalenessCutoff = now - params.listing_staleness_hours * MS_PER_HOUR
   const opportunities: Opportunity[] = []
+
+  type WorldResult = {
+    worldID: number
+    worldName: string
+    cheapestSource: number
+    effectiveBuyPrice: number
+    profitPerUnit: number
+    sourceAgeHours: number
+    sourceConf: number
+    worldScore: number
+    availableUnits: number
+  }
 
   for (const item of cache.values()) {
     const allListings = params.hq ? item.listings.filter(l => l.hq) : item.listings
@@ -83,18 +96,6 @@ export function scoreOpportunities(
     const homeConf = confidence(homeAgeHours, HOME_TIME_CONSTANT_H)
 
     // --- Per-source-world scoring ---
-    type WorldResult = {
-      worldID: number
-      worldName: string
-      cheapestSource: number
-      effectiveBuyPrice: number
-      profitPerUnit: number
-      sourceAgeHours: number
-      sourceConf: number
-      worldScore: number
-      availableUnits: number
-    }
-
     const sourceListings = allListings.filter(l => l.worldID !== HOME_WORLD_ID)
     const worldIds = [...new Set(sourceListings.map(l => l.worldID))]
     const worldResults: WorldResult[] = []
@@ -213,6 +214,119 @@ export function scoreOpportunities(
     }
 
     opportunities.push(opp)
+  }
+
+  // --- Vendor-sell pass ---
+  // Evaluate selling to NPC vendor (PriceLow) as alternative to home-world MB.
+  // All worlds (including home) are valid buy sources for vendor-sell.
+  if (vendorSellPrices && vendorSellPrices.size > 0) {
+    const mbByItem = new Map<number, number>()
+    for (let i = 0; i < opportunities.length; i++) {
+      mbByItem.set(opportunities[i]!.itemID, i)
+    }
+
+    for (const item of cache.values()) {
+      const vendorSellPrice = vendorSellPrices.get(item.itemID)
+      if (vendorSellPrice === undefined || vendorSellPrice <= 0) continue
+
+      const allListings = params.hq ? item.listings.filter(l => l.hq) : item.listings
+      const worldIds = [...new Set(allListings.map(l => l.worldID))]
+      const worldResults: WorldResult[] = []
+
+      for (const worldID of worldIds) {
+        const wListings = allListings.filter(l => l.worldID === worldID)
+        const minPrice = Math.min(...wListings.map(l => l.pricePerUnit))
+        const activeSrc = wListings.filter(l =>
+          l.pricePerUnit <= minPrice * params.price_threshold &&
+          l.lastReviewTime >= stalenessCutoff
+        )
+        if (activeSrc.length === 0) continue
+
+        const cheapestSource = Math.min(...activeSrc.map(l => l.pricePerUnit))
+        const effectiveBuyPrice = cheapestSource * (1 + MARKET_TAX)
+        const profitPerUnit = vendorSellPrice - effectiveBuyPrice
+        if (profitPerUnit <= 0) continue
+
+        const uploadTime = item.worldUploadTimes[worldID] ?? 0
+        const sourceAgeHours = uploadTime > 0 ? (now - uploadTime) / MS_PER_HOUR : Infinity
+        const sourceConf = confidence(sourceAgeHours, SOURCE_TIME_CONSTANT_H)
+        const worldScore = profitPerUnit * sourceConf
+
+        const availableUnits = activeSrc
+          .filter(l => l.pricePerUnit === cheapestSource)
+          .reduce((sum, l) => sum + l.quantity, 0)
+
+        worldResults.push({
+          worldID,
+          worldName: wListings[0]!.worldName,
+          cheapestSource,
+          effectiveBuyPrice,
+          profitPerUnit,
+          sourceAgeHours,
+          sourceConf,
+          worldScore,
+          availableUnits,
+        })
+      }
+
+      if (worldResults.length === 0) continue
+
+      const best = worldResults.reduce((a, b) => b.worldScore > a.worldScore ? b : a)
+      const altCandidates = worldResults.filter(w => w.worldID !== best.worldID)
+      const alt = altCandidates.length > 0
+        ? altCandidates.reduce((a, b) => b.profitPerUnit > a.profitPerUnit ? b : a)
+        : null
+
+      const velocity = params.hq ? item.hqSaleVelocity : item.regularSaleVelocity
+
+      const opp: Opportunity = {
+        itemID: item.itemID,
+        itemName: nameMap.get(item.itemID) ?? `Item #${item.itemID}`,
+        sellDestination: 'vendor',
+
+        buyPrice: Math.round(best.effectiveBuyPrice),
+        sellPrice: vendorSellPrice,
+        listingPrice: vendorSellPrice,
+        profitPerUnit: Math.round(best.profitPerUnit),
+        listingProfitPerUnit: Math.round(best.profitPerUnit),
+
+        sourceWorld: best.worldName,
+        sourceWorldID: best.worldID,
+
+        availableUnits: best.availableUnits,
+        recommendedUnits: best.availableUnits,
+        expectedDailyProfit: Math.round(best.profitPerUnit * velocity),
+
+        score: best.worldScore,
+
+        homeDataAgeHours: 0,
+        homeConfidence: 1.0,
+
+        sourceDataAgeHours: Math.round(best.sourceAgeHours * 10) / 10,
+        sourceConfidence: Math.round(best.sourceConf * 1000) / 1000,
+
+        activeCompetitorCount: 0,
+        fairShareVelocity: Math.round(velocity * 100) / 100,
+      }
+
+      if (alt) {
+        opp.altSourceWorld = alt.worldName
+        opp.altSourceWorldID = alt.worldID
+        opp.altBuyPrice = Math.round(alt.effectiveBuyPrice)
+        opp.altExpectedDailyProfit = Math.round(alt.profitPerUnit * velocity)
+        opp.altSourceConfidence = Math.round(alt.sourceConf * 1000) / 1000
+        opp.altSourceDataAgeHours = Math.round(alt.sourceAgeHours * 10) / 10
+      }
+
+      const existingIdx = mbByItem.get(item.itemID)
+      if (existingIdx !== undefined) {
+        if (opp.score > opportunities[existingIdx]!.score) {
+          opportunities[existingIdx] = opp
+        }
+      } else {
+        opportunities.push(opp)
+      }
+    }
   }
 
   opportunities.sort((a, b) => b.score - a.score)
