@@ -461,6 +461,39 @@ describe('solveCraftingCost', () => {
     expect(solveCraftingCost(600, cache, new Map())).toBeNull()
   })
 
+  test('populates itemName from nameMap on all nodes', () => {
+    const cache = new Map([
+      [100, itemData(100, [listing(600)])],
+      [10, itemData(10, [listing(100)])],
+      [11, itemData(11, [listing(100)])],
+      [12, itemData(12, [listing(200)])],
+    ])
+    const nameMap = new Map([
+      [100, '青銅裝飾鐵鎚'],
+      [10, '銅礦'],
+      [11, '錫礦'],
+    ])
+    const result = solveCraftingCost(100, cache, new Map(), { nameMap })!
+    // Root node gets its name
+    expect(result.root.itemName).toBe('青銅裝飾鐵鎚')
+    // Ingredient nodes get their names
+    const ing10 = result.root.recipe!.ingredients.find(n => n.itemId === 10)!
+    expect(ing10.itemName).toBe('銅礦')
+    const ing11 = result.root.recipe!.ingredients.find(n => n.itemId === 11)!
+    expect(ing11.itemName).toBe('錫礦')
+  })
+
+  test('itemName falls back to undefined when nameMap omitted', () => {
+    const cache = new Map([
+      [100, itemData(100, [listing(600)])],
+      [10, itemData(10, [listing(100)])],
+      [11, itemData(11, [listing(100)])],
+      [12, itemData(12, [listing(200)])],
+    ])
+    const result = solveCraftingCost(100, cache, new Map())!
+    expect(result.root.itemName).toBeUndefined()
+  })
+
   test('null cheapestListing when item has no market data', () => {
     // Item 100 has recipes but no market listing
     const cache = new Map([

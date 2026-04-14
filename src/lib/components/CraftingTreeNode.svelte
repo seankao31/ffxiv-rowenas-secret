@@ -41,7 +41,7 @@
   let nameGeneration = $state(0)
   $effect(() => subscribe(() => nameGeneration++))
 
-  const displayName = $derived.by(() => { void nameGeneration; return getEnglishName(node.itemId) ?? `Item #${node.itemId}` })
+  const displayName = $derived.by(() => { void nameGeneration; return node.itemName ?? getEnglishName(node.itemId) ?? `Item #${node.itemId}` })
   const iconUrl = $derived.by(() => { void nameGeneration; return getIconUrl(node.itemId) })
 
   function toggleExpand() {
