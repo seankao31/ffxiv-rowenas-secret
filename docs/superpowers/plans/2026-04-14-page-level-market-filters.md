@@ -20,7 +20,7 @@
 - Create: `src/lib/client/market-filters.ts`
 - Create: `tests/client/market-filters.test.ts`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `tests/client/market-filters.test.ts`:
 
@@ -79,12 +79,12 @@ describe('applyMarketFilters', () => {
 })
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `bun run test tests/client/market-filters.test.ts`
 Expected: FAIL — module `$lib/client/market-filters` not found
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 In `src/lib/client/market-filters.ts`:
 
@@ -107,12 +107,12 @@ export function applyMarketFilters<T extends Filterable>(
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `bun run test tests/client/market-filters.test.ts`
 Expected: 6 tests PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/client/market-filters.ts tests/client/market-filters.test.ts
@@ -128,7 +128,7 @@ Ref: ENG-132"
 **Files:**
 - Modify: `src/lib/components/ListingsTable.svelte`
 
-- [ ] **Step 1: Update the component**
+- [x] **Step 1: Update the component**
 
 In `src/lib/components/ListingsTable.svelte`:
 
@@ -183,12 +183,12 @@ const filteredListings = $derived(applyMarketFilters(listings, selectedWorld, hq
 
 4. Remove the filter controls from the template. Delete lines 45-57 (the `<div class="flex items-center gap-2 mb-3 shrink-0">` block containing the select and toggle).
 
-- [ ] **Step 2: Run existing unit tests to check nothing breaks**
+- [x] **Step 2: Run existing unit tests to check nothing breaks**
 
 Run: `bun run test`
 Expected: All tests pass (the e2e filter tests will be updated in Task 5)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/components/ListingsTable.svelte
@@ -204,7 +204,7 @@ Ref: ENG-132"
 **Files:**
 - Modify: `src/lib/components/SaleHistoryTable.svelte`
 
-- [ ] **Step 1: Update the component**
+- [x] **Step 1: Update the component**
 
 In `src/lib/components/SaleHistoryTable.svelte`:
 
@@ -251,12 +251,12 @@ With:
   </p>
 ```
 
-- [ ] **Step 2: Run tests**
+- [x] **Step 2: Run tests**
 
 Run: `bun run test`
 Expected: All unit tests pass
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/lib/components/SaleHistoryTable.svelte
@@ -272,7 +272,7 @@ Ref: ENG-132"
 **Files:**
 - Modify: `src/routes/item/[id]/+page.svelte`
 
-- [ ] **Step 1: Update the page component**
+- [x] **Step 1: Update the page component**
 
 In `src/routes/item/[id]/+page.svelte`:
 
@@ -368,12 +368,12 @@ With:
 <PriceStats sales={filteredSales} loading={salesLoading} error={salesError} />
 ```
 
-- [ ] **Step 2: Run unit tests**
+- [x] **Step 2: Run unit tests**
 
 Run: `bun run test`
 Expected: All unit tests pass
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add src/routes/item/[id]/+page.svelte
@@ -391,7 +391,7 @@ Ref: ENG-132"
 
 The filter controls have moved from inside the ListingsTable card to the page level (above all three sections). Existing filter tests that scope their selectors to the listings card need updating.
 
-- [ ] **Step 1: Update existing filter tests**
+- [x] **Step 1: Update existing filter tests**
 
 In `tests/e2e/item-detail.test.ts`:
 
@@ -472,7 +472,7 @@ test('shows empty message when filters match nothing', async ({ page }) => {
 })
 ```
 
-- [ ] **Step 2: Add new e2e tests for cross-section filtering**
+- [x] **Step 2: Add new e2e tests for cross-section filtering**
 
 Add these tests inside the existing `test.describe('Item detail page', ...)` block, after the existing filter tests:
 
@@ -516,12 +516,12 @@ test('world filter affects price statistics', async ({ page }) => {
 })
 ```
 
-- [ ] **Step 3: Run e2e tests**
+- [x] **Step 3: Run e2e tests**
 
 Run: `bun run test:e2e tests/e2e/item-detail.test.ts`
 Expected: All tests pass
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add tests/e2e/item-detail.test.ts
@@ -534,11 +534,11 @@ Ref: ENG-132"
 
 ### Task 6: Visual verification
 
-- [ ] **Step 1: Start dev server with fixture data**
+- [x] **Step 1: Start dev server with fixture data**
 
 Run: `FIXTURE_DATA=true bun run dev`
 
-- [ ] **Step 2: Navigate to item detail page and verify**
+- [x] **Step 2: Navigate to item detail page and verify**
 
 Use Playwright to navigate to an item detail page (e.g., `/item/2394`). Verify:
 
@@ -550,6 +550,6 @@ Use Playwright to navigate to an item detail page (e.g., `/item/2394`). Verify:
 6. Switching back to Market tab shows filter controls with state preserved
 7. Check mobile viewport (375px wide) — filter controls wrap appropriately
 
-- [ ] **Step 3: Kill dev server**
+- [x] **Step 3: Kill dev server**
 
 Stop the dev server process started in Step 1.
