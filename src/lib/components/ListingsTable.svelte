@@ -1,27 +1,20 @@
 <script lang="ts">
   import type { Listing } from '$lib/shared/types'
-  import { DC_WORLDS } from '$lib/shared/universalis'
   import { fetchItemListings } from '$lib/client/universalis'
+  import { applyMarketFilters } from '$lib/client/market-filters'
   import { formatNumber, formatRelativeTime } from '$lib/client/format'
 
-  let { itemId }: { itemId: number } = $props()
+  let { itemId, selectedWorld, hqOnly }: {
+    itemId: number
+    selectedWorld: string
+    hqOnly: boolean
+  } = $props()
 
   let listings = $state<Listing[]>([])
   let loading = $state(true)
   let error = $state(false)
-  let selectedWorld = $state('all')
-  let hqOnly = $state(false)
 
-  const filteredListings = $derived.by(() => {
-    let result = listings
-    if (selectedWorld !== 'all') {
-      result = result.filter(l => l.worldName === selectedWorld)
-    }
-    if (hqOnly) {
-      result = result.filter(l => l.hq)
-    }
-    return result
-  })
+  const filteredListings = $derived(applyMarketFilters(listings, selectedWorld, hqOnly))
 
   // Note: this $effect has no cancellation guard for rapid itemId changes.
   // Currently safe because SvelteKit destroys the component on route navigation.
@@ -41,20 +34,6 @@
   })
 
 </script>
-
-<div class="flex items-center gap-2 mb-3 shrink-0">
-  <select class="select select-sm" bind:value={selectedWorld}>
-    <option value="all">All Worlds</option>
-    {#each DC_WORLDS as world (world.id)}
-      <option value={world.name}>{world.name}</option>
-    {/each}
-  </select>
-
-  <label class="label cursor-pointer gap-1">
-    <input type="checkbox" class="toggle toggle-sm" bind:checked={hqOnly} />
-    <span class="text-sm">HQ only</span>
-  </label>
-</div>
 
 {#if loading}
   <div class="flex flex-col gap-2">
