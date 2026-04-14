@@ -100,7 +100,9 @@
   <StatusBar {meta} {flash} />
 {/if}
 
-<ThresholdControls {thresholds} onchange={onThresholdChange} />
+{#if !coldStart && !loading}
+  <ThresholdControls {thresholds} onchange={onThresholdChange} />
+{/if}
 
 <main class="flex-1 flex flex-col min-h-0 min-w-0">
   {#if coldStart}
