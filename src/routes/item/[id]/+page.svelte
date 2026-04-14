@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores'
   import { goto } from '$app/navigation'
-  import { fetchItemMetadata, getIconUrl, getEnglishName, subscribe } from '$lib/client/xivapi.ts'
+  import { fetchItemMetadata, getIconUrl, getEnglishName, resolveDisplayName, subscribe } from '$lib/client/xivapi.ts'
   import { fetchItemSaleHistory } from '$lib/client/universalis'
   import type { Sale } from '$lib/shared/types'
   import ListingsTable from '$lib/components/ListingsTable.svelte'
@@ -19,8 +19,8 @@
   })
 
   const iconUrl = $derived.by(() => { void nameGeneration; return getIconUrl(data.itemID) })
+  const primaryName = $derived.by(() => { void nameGeneration; return resolveDisplayName(data.itemID, data.twName) })
   const enName = $derived.by(() => { void nameGeneration; return getEnglishName(data.itemID) ?? null })
-  const primaryName = $derived(data.twName ?? enName ?? `Item #${data.itemID}`)
   const secondaryName = $derived(data.twName ? enName : null)
 
   let sales = $state<Sale[]>([])
