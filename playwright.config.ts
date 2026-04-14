@@ -16,6 +16,6 @@ export default defineConfig({
   webServer: {
     command: 'bun run dev -- --port 5173',
     url: 'http://localhost:5173',
-    reuseExistingServer: true,
+    reuseExistingServer: false,
   },
 })

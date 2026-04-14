@@ -1,8 +1,17 @@
 <script lang="ts">
   import type { Sale } from '$lib/shared/types'
   import { formatNumber, formatRelativeTime } from '$lib/client/format'
+  import { applyMarketFilters } from '$lib/client/market-filters'
 
-  let { sales, loading, error }: { sales: Sale[]; loading: boolean; error: boolean } = $props()
+  let { sales, loading, error, selectedWorld, hqOnly }: {
+    sales: Sale[]
+    loading: boolean
+    error: boolean
+    selectedWorld: string
+    hqOnly: boolean
+  } = $props()
+
+  const filteredSales = $derived(applyMarketFilters(sales, selectedWorld, hqOnly))
 </script>
 
 {#if loading}
@@ -13,8 +22,10 @@
   </div>
 {:else if error}
   <p class="text-sm text-error">Unable to load sale history</p>
-{:else if sales.length === 0}
-  <p class="text-sm text-base-content/50">No sale history found</p>
+{:else if filteredSales.length === 0}
+  <p class="text-sm text-base-content/50">
+    {sales.length === 0 ? 'No sale history found' : 'No sales match the current filters'}
+  </p>
 {:else}
   <div data-testid="history-scroll-container" class="flex-1 overflow-auto min-h-0">
     <table class="table table-sm">
@@ -30,7 +41,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each sales as sale, i (i)}
+        {#each filteredSales as sale, i (i)}
           <tr>
             <td>{sale.worldName}</td>
             <td class="text-right">{formatNumber(sale.pricePerUnit)}</td>

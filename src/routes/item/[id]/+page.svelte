@@ -3,6 +3,8 @@
   import { goto } from '$app/navigation'
   import { fetchItemMetadata, getIconUrl, getEnglishName, resolveDisplayName, subscribe } from '$lib/client/xivapi.ts'
   import { fetchItemSaleHistory } from '$lib/client/universalis'
+  import { DC_WORLDS } from '$lib/shared/universalis'
+  import { applyMarketFilters } from '$lib/client/market-filters'
   import type { Sale } from '$lib/shared/types'
   import ListingsTable from '$lib/components/ListingsTable.svelte'
   import SaleHistoryTable from '$lib/components/SaleHistoryTable.svelte'
@@ -28,6 +30,11 @@
   let sales = $state<Sale[]>([])
   let salesLoading = $state(true)
   let salesError = $state(false)
+
+  let selectedWorld = $state('all')
+  let hqOnly = $state(false)
+
+  const filteredSales = $derived(applyMarketFilters(sales, selectedWorld, hqOnly))
 
   // No cancellation guard needed: SvelteKit destroys the component on route navigation,
   // so a stale response from a previous itemID cannot overwrite a newer one.
@@ -118,19 +125,33 @@
 
 <!-- Tab Content -->
 {#if activeTab === 'market'}
+  <div class="flex items-center gap-2 mb-4 shrink-0">
+    <select class="select select-sm" bind:value={selectedWorld}>
+      <option value="all">All Worlds</option>
+      {#each DC_WORLDS as world (world.id)}
+        <option value={world.name}>{world.name}</option>
+      {/each}
+    </select>
+
+    <label class="label cursor-pointer gap-1">
+      <input type="checkbox" class="toggle toggle-sm" bind:checked={hqOnly} />
+      <span class="text-sm">HQ only</span>
+    </label>
+  </div>
+
   <!-- Listings | History -->
   <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
     <div class="card bg-base-200 min-h-0 flex flex-col">
       <div class="card-body flex flex-col min-h-0">
         <h2 class="card-title shrink-0">Cross-World Listings</h2>
-        <ListingsTable itemId={data.itemID} />
+        <ListingsTable itemId={data.itemID} {selectedWorld} {hqOnly} />
       </div>
     </div>
 
     <div class="card bg-base-200 min-h-0 flex flex-col">
       <div class="card-body flex flex-col min-h-0">
         <h2 class="card-title shrink-0">Sale History</h2>
-        <SaleHistoryTable {sales} loading={salesLoading} error={salesError} />
+        <SaleHistoryTable {sales} loading={salesLoading} error={salesError} {selectedWorld} {hqOnly} />
       </div>
     </div>
   </div>
@@ -139,7 +160,7 @@
   <div class="card bg-base-200 mt-4 shrink-0">
     <div class="card-body">
       <h2 class="card-title">Price Statistics</h2>
-      <PriceStats {sales} loading={salesLoading} error={salesError} />
+      <PriceStats sales={filteredSales} loading={salesLoading} error={salesError} />
     </div>
   </div>
 {:else if activeTab === 'crafting'}

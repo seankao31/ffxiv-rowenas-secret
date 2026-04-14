@@ -179,20 +179,20 @@ test.describe('Item detail page', () => {
     await expect(lastRowPrice).toContainText('800')
   })
 
-  test('world filter narrows results', async ({ page }) => {
-    const listingsCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Cross-World Listings' }) })
-    const select = listingsCard.locator('select')
+  test('world filter narrows listings', async ({ page }) => {
+    const select = page.locator('select')
     await expect(select).toBeVisible()
     await select.selectOption('利維坦')
+    const listingsCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Cross-World Listings' }) })
     const rows = listingsCard.locator('table tbody tr')
     await expect(rows).toHaveCount(1)
     await expect(rows.first().locator('td').first()).toContainText('利維坦')
   })
 
   test('HQ toggle filters to HQ only', async ({ page }) => {
-    const listingsCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Cross-World Listings' }) })
-    const toggle = listingsCard.locator('input[type="checkbox"]')
+    const toggle = page.locator('input[type="checkbox"]')
     await toggle.check()
+    const listingsCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Cross-World Listings' }) })
     const rows = listingsCard.locator('table tbody tr')
     // Only 1 HQ listing in mock data
     await expect(rows).toHaveCount(1)
@@ -200,12 +200,53 @@ test.describe('Item detail page', () => {
   })
 
   test('shows empty message when filters match nothing', async ({ page }) => {
-    // Select a world with no HQ listings, then enable HQ filter
+    // Wait for sale history to load before filtering
+    const historyCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Sale History' }) })
+    await expect(historyCard.locator('table')).toBeVisible()
+    // Select a world absent from both listing and sale mocks
     const select = page.locator('select')
-    await select.selectOption('鳳凰')
+    await select.selectOption('奧汀')
+    await expect(page.locator('text=No listings match the current filters')).toBeVisible()
+    await expect(page.locator('text=No sales match the current filters')).toBeVisible()
+  })
+
+  test('world filter also narrows sale history', async ({ page }) => {
+    const historyCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Sale History' }) })
+    // Wait for sale history to load before filtering
+    await expect(historyCard.locator('table')).toBeVisible()
+    const select = page.locator('select')
+    await select.selectOption('利維坦')
+    const rows = historyCard.locator('table tbody tr')
+    // In HISTORY_RESPONSE, entries cycle through 3 worlds: indices 1,4,7 are 利維坦 (i % 3 === 1)
+    await expect(rows).toHaveCount(3)
+    for (const row of await rows.all()) {
+      await expect(row.locator('td').first()).toContainText('利維坦')
+    }
+  })
+
+  test('HQ filter also narrows sale history', async ({ page }) => {
+    const historyCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Sale History' }) })
+    // Wait for sale history to load before filtering
+    await expect(historyCard.locator('table')).toBeVisible()
     const toggle = page.locator('input[type="checkbox"]')
     await toggle.check()
-    await expect(page.locator('text=No listings match the current filters')).toBeVisible()
+    const rows = historyCard.locator('table tbody tr')
+    // In HISTORY_RESPONSE, HQ is true for even indices: 0,2,4,6,8 → 5 HQ sales
+    await expect(rows).toHaveCount(5)
+    for (const row of await rows.all()) {
+      await expect(row.locator('td').nth(4)).toContainText('★')
+    }
+  })
+
+  test('world filter affects price statistics', async ({ page }) => {
+    const statsCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Price Statistics' }) })
+    // Wait for stats to load before filtering
+    await expect(statsCard.locator('text=Min Price')).toBeVisible()
+
+    // Filter to 鳳凰: indices 2,5,8 → prices 210,300,390. Min = 210.
+    const select = page.locator('select')
+    await select.selectOption('鳳凰')
+    await expect(statsCard.locator('text=210')).toBeVisible()
   })
 
   test('listings section scrolls independently without overlapping footer', async ({ page }) => {
