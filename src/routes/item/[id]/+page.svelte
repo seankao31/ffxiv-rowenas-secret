@@ -60,7 +60,7 @@
 </svelte:head>
 
 <!-- Item Header -->
-<div class="flex items-center gap-3 py-4 shrink-0 flex-wrap">
+<div class="flex items-center gap-3 py-4 shrink-0">
   {#if iconUrl}
     <img src={iconUrl} alt="" width="40" height="40" class="flex-shrink-0"
       onerror={(e: Event) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
@@ -74,14 +74,6 @@
       <span class="text-sm text-base-content/50">{secondaryName}</span>
     {/if}
     <span class="badge badge-soft">{data.itemID}</span>
-  </div>
-
-  <div class="ml-auto flex items-center gap-1 text-xs text-base-content/40" data-testid="external-links">
-    <a href="https://universalis.app/market/{data.itemID}" target="_blank" rel="noopener" class="hover:text-base-content/70 transition-colors">Universalis</a>
-    <span>·</span>
-    <a href="https://www.garlandtools.org/db/#item/{data.itemID}" target="_blank" rel="noopener" class="hover:text-base-content/70 transition-colors">Garland Tools</a>
-    <span>·</span>
-    <a href="https://ffxivteamcraft.com/db/en/item/{data.itemID}/" target="_blank" rel="noopener" class="hover:text-base-content/70 transition-colors">Teamcraft</a>
   </div>
 </div>
 

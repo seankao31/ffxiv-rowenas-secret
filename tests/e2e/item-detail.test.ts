@@ -111,23 +111,6 @@ test.describe('Item detail page', () => {
     await expect(badge).toContainText(String(ITEM_ID))
   })
 
-  test('shows external reference links', async ({ page }) => {
-    const links = page.locator('[data-testid="external-links"]')
-    await expect(links).toBeVisible()
-
-    const universalis = links.locator('a', { hasText: 'Universalis' })
-    await expect(universalis).toHaveAttribute('href', `https://universalis.app/market/${ITEM_ID}`)
-    await expect(universalis).toHaveAttribute('target', '_blank')
-
-    const garland = links.locator('a', { hasText: 'Garland Tools' })
-    await expect(garland).toHaveAttribute('href', `https://www.garlandtools.org/db/#item/${ITEM_ID}`)
-    await expect(garland).toHaveAttribute('target', '_blank')
-
-    const teamcraft = links.locator('a', { hasText: 'Teamcraft' })
-    await expect(teamcraft).toHaveAttribute('href', `https://ffxivteamcraft.com/db/en/item/${ITEM_ID}/`)
-    await expect(teamcraft).toHaveAttribute('target', '_blank')
-  })
-
   test('shows English name as secondary text from XIVAPI', async ({ page }) => {
     // The English name appears as a secondary span alongside the h1
     const secondary = page.locator('span.text-sm', { hasText: EN_NAME })
