@@ -132,7 +132,7 @@
 
 <svelte:window onkeydown={onkeydown} />
 
-<div data-testid="buy-route-modal" class="fixed inset-0 z-50">
+<div data-testid="buy-route-modal" class="fixed inset-0 z-50 flex items-start justify-center px-4 py-4 lg:px-8 lg:py-8">
   <!-- Backdrop -->
   <button
     data-testid="buy-route-backdrop"
@@ -143,7 +143,7 @@
   ></button>
 
   <!-- Modal panel -->
-  <div class="absolute inset-4 lg:inset-8 bg-base-100 rounded-lg flex flex-col overflow-hidden">
+  <div data-testid="buy-route-panel" class="relative w-full max-w-3xl h-full bg-base-100 rounded-lg flex flex-col overflow-hidden">
     <!-- Header -->
     <div class="px-5 py-4 border-b border-base-300 flex items-start justify-between shrink-0">
       <div>
