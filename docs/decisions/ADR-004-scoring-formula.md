@@ -3,6 +3,7 @@
 **Status:** Accepted
 **Date:** 2026-03-23
 **Updated:** 2026-03-24 — realistic sell price, competitor recount, turnover discount
+**Updated:** 2026-04-15 — removed listing_staleness_hours, simplified competitor counting (ENG-146)
 
 ## Context
 
@@ -26,7 +27,7 @@ Scoring is computed **per source world**, and the best-scoring world is selected
 
 ```
 for each source_world in DC (excluding home):
-  profit_per_unit = realistic_sell_price × (1 - TAX) - cheapest_source_price[world]
+  profit_per_unit = realistic_sell_price × (1 - TAX) - cheapest_listing_price[world]
   if profit_per_unit <= 0: skip world
 
   source_confidence = exp(-world_data_age_hours[world] / 12)
@@ -49,7 +50,7 @@ See [Realistic Sell Price](#realistic-sell-price) section below.
 **`profit_per_unit`** (per source world)
 ```
 = realistic_sell_price × (1 - MARKET_TAX)
-- cheapest_active_price_on_source_world
+- cheapest_listing_price_on_source_world
 ```
 `MARKET_TAX = 0.05` (5% of sale price, standard TC server rate)
 
@@ -135,16 +136,9 @@ Score every source world independently. The recommended world is the one with th
 
 ### Per-World Data Age Derivation
 
-The Universalis DC-level response does not provide per-world upload timestamps directly — only a single `lastUploadTime` reflecting the most recent upload across the entire DC.
+The Universalis DC-level response provides a `worldUploadTimes` field mapping each world to the timestamp of the last market data upload for that item. In per-world scan mode (the current default), this is synthesized from each world endpoint's `lastUploadTime`.
 
-Per-world staleness is therefore **derived** from listing-level data:
-```
-world_upload_time[worldID] = max(lastReviewTime of all listings on that world for this item)
-```
-
-`lastReviewTime` is a per-listing field representing when that specific retainer listing was last seen during a Universalis upload. The most recent `lastReviewTime` across all listings on a given world is a strong proxy for when that world's market data was last refreshed.
-
-This derivation is an approximation, but a well-grounded one: Universalis uploaders scan the full market board when they upload, so the newest listing timestamp reliably reflects the last full board scan on that world.
+Note: prior to Dawntrail (7.0), `lastReviewTime` was a per-listing field representing when each retainer listing was individually reviewed. Post-7.0, Square Enix removed the underlying packet field. Both Dalamud and Teamcraft now send placeholder values, and Universalis falls back to `DateTime.UtcNow`. As a result, `lastReviewTime` equals the per-world upload time for all listings on that world — it is no longer a per-listing signal.
 
 ### UI: Surfacing Alternatives
 
@@ -158,43 +152,33 @@ This lets the user decide: "the stale world has a technically better deal — is
 
 ## Staleness Asymmetry
 
-A key design insight: staleness risk is **asymmetric by direction**.
+Staleness risk is **asymmetric by direction**.
 
 | Stale data | Consequence | Reversible? |
 |---|---|---|
 | Source world price (buy side) | Travel there, see real price in-person, choose not to buy | Yes — wasted trip only |
 | Home world price (sell side) | Already bought items on another server; arrive home to a crashed market | No — money already committed |
 
-Therefore home-side staleness carries a steeper penalty (3-hour half-life) versus source-side staleness (12-hour half-life).
+Therefore home-side staleness carries a steeper penalty (3-hour τ) versus source-side staleness (12-hour τ).
 
-Stale data is **never excluded entirely** — it retains heuristic value. Instead it is discounted by the confidence multiplier and visually flagged on the dashboard.
+Stale data is never excluded entirely — it retains heuristic value. Confidence decay (`exp(-age/τ)`) smoothly discounts stale opportunities rather than hard-cutting them. This avoids penalizing items on worlds with low uploader coverage, where prices may be valid but simply haven't been re-uploaded recently.
 
-## Active Competitor Count
+## Competitor Count
 
-### Baseline Filter
-
-Raw listing count overstates competition. A listing is only counted as "active" if:
-1. `pricePerUnit <= cheapest_price × price_threshold_multiplier` (not a price-gouging outlier)
-2. `lastReviewTime >= now - listing_staleness_cutoff` (seller has been recently active)
-
-Players who set prices and never update them ("dead retainers") are excluded.
-
-Note: `lastReviewTime` is a **per-listing** field in the Universalis API, distinct from the per-item `lastUploadTime`.
-
-### Recount Relative to Realistic Sell Price
-
-After computing `realistic_sell_price`, competitors are recounted using the realistic price as the anchor:
+Competitors are all home-world listings priced near the expected sell point:
 
 ```
-competitor_listings = active_listings where price <= realistic_sell_price × price_threshold
+competitor_listings = home_listings where price <= realistic_sell_price × price_threshold
 active_competitor_count = count(competitor_listings)
 ```
+
+Listings far above the expected sell price are excluded — a 200K listing is not competing with a 50K seller. The `price_threshold` multiplier (default 2.0×) controls how wide this radius is.
 
 **Why:** If the cheapest listing is 200K but we plan to sell at 50K (based on sale history), the 200K seller is not real competition — buyers at the 50K price point won't comparison-shop at 200K. Only listings near *our* expected price compete for the same buyers.
 
 **Effect:** When `realistic_sell_price` drops below listing prices, high-priced listings fall out of the competitor count, increasing `fair_share_velocity`. This matches economic intuition: if you're the cheapest seller by a wide margin, you capture most of the demand.
 
-**Edge case:** If all active listings are above `realistic_sell_price × price_threshold`, competitor count = 0 and `fair_share_velocity = velocity / 1 = velocity` (full market demand). This is correct — there are no real competitors at your price point.
+**Edge case:** If all home listings are above `realistic_sell_price × price_threshold`, competitor count = 0 and `fair_share_velocity = velocity / 1 = velocity` (full market demand). This is correct — there are no real competitors at your price point.
 
 ## Turnover Discount
 
@@ -268,8 +252,7 @@ All threshold parameters are user-configurable via the dashboard UI and passed a
 
 | Parameter | Default | Effect |
 |---|---|---|
-| `price_threshold_multiplier` | 2.0× | Listings above 2× cheapest are excluded as dead |
-| `listing_staleness_hours` | 48h | Listings older than this are excluded as inactive |
+| `price_threshold_multiplier` | 2.0× | Competitor radius: listings above this × realistic sell price are not counted as competition |
 | `days_of_supply_cap` | 3 days | Max units to buy per item per trip |
 
 Because thresholds affect which listings count as active competition, the backend must store **full raw scan data** in memory (not just a pre-scored Top-N). Scoring is computed dynamically per API request with the given threshold parameters.
@@ -281,7 +264,7 @@ Multi-world scoring requires per-world upload times, not a single top-level `las
 ```typescript
 type ItemData = {
   itemID: number
-  worldUploadTimes: Record<number, number>  // worldID → unix ms (derived from max lastReviewTime per world)
+  worldUploadTimes: Record<number, number>  // worldID → unix ms
   homeLastUploadTime: number                // authoritative from Phase 2 item-level lastUploadTime;
                                             // falls back to worldUploadTimes[4030] if Phase 2 has no value
                                             // (important for sold-out home boards)
