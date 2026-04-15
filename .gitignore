@@ -1,5 +1,5 @@
-# Local environment overrides
-.env
+# Local environment overrides (secrets, real API keys)
+.env.local
 
 # Dependencies
 node_modules/
