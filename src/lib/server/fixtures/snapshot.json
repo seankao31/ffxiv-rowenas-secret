@@ -29995,6 +29995,83 @@
           "worldName": "利維坦"
         }
       ]
+    },
+    {
+      "itemID": 99901,
+      "worldUploadTimes": {
+        "4032": 1774526755285,
+        "4033": 1774526755285
+      },
+      "homeLastUploadTime": 0,
+      "listings": [
+        {
+          "lastReviewTime": 1774526755285,
+          "pricePerUnit": 500,
+          "quantity": 3,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false
+        },
+        {
+          "lastReviewTime": 1774526755285,
+          "pricePerUnit": 600,
+          "quantity": 2,
+          "worldID": 4033,
+          "worldName": "巴哈姆特",
+          "hq": false
+        }
+      ],
+      "regularSaleVelocity": 1.5,
+      "hqSaleVelocity": 0,
+      "recentHistory": []
+    },
+    {
+      "itemID": 99902,
+      "worldUploadTimes": {
+        "4032": 1774526755285,
+        "4033": 1774526755285
+      },
+      "homeLastUploadTime": 0,
+      "listings": [
+        {
+          "lastReviewTime": 1774526755285,
+          "pricePerUnit": 400,
+          "quantity": 5,
+          "worldID": 4032,
+          "worldName": "酷賈塔",
+          "hq": false
+        },
+        {
+          "lastReviewTime": 1774526755285,
+          "pricePerUnit": 450,
+          "quantity": 3,
+          "worldID": 4033,
+          "worldName": "巴哈姆特",
+          "hq": false
+        }
+      ],
+      "regularSaleVelocity": 2,
+      "hqSaleVelocity": 0,
+      "recentHistory": [
+        {
+          "hq": false,
+          "pricePerUnit": 1000,
+          "quantity": 1,
+          "timestamp": 1774526755
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 900,
+          "quantity": 2,
+          "timestamp": 1774526755
+        },
+        {
+          "hq": false,
+          "pricePerUnit": 1100,
+          "quantity": 1,
+          "timestamp": 1774526755
+        }
+      ]
     }
   ],
   "names": {
@@ -30048,6 +30125,8 @@
     "37295": "黃色比爾格紫羅蘭項環",
     "39591": "陳舊的地圖G15",
     "43216": "五加木紡車",
-    "44303": "管弦樂琴樂譜：The Skyruin"
+    "44303": "管弦樂琴樂譜：The Skyruin",
+    "99901": "(測試) 無本服上架品",
+    "99902": "(測試) 無本服有歷史"
   }
 }
