@@ -17,7 +17,8 @@ data/
 # Superpowers tooling
 .superpowers/
 
-# Playwright MCP screenshots
+# Playwright CLI / MCP artifacts
+.playwright-cli/
 .playwright-mcp/
 
 # Private deployment docs
