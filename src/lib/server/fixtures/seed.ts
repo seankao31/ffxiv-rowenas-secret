@@ -10,7 +10,11 @@ type Snapshot = {
   names: Record<string, string>
 }
 
-/** Shift all timestamps forward so the newest one aligns with Date.now(). */
+/**
+ * Shift all timestamps forward so the newest one aligns with Date.now().
+ * Rebase to the max timestamp (not a fixed "now") so relative freshness
+ * differences between items are preserved — confidence scoring relies on this.
+ */
 function rebaseTimestamps(items: ItemData[]): void {
   // Find the maximum timestamp (in ms) across all items
   let maxMs = 0
