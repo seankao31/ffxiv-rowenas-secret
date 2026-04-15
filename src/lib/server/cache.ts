@@ -6,7 +6,14 @@ let nameCacheSettled = false  // true once setNameMap has been called (success o
 let nameCacheResolve: (() => void) | null = null
 let nameCachePromise: Promise<void> | null = null
 let vendorPrices = new Map<number, number>()     // itemID → NPC vendor buy price (PriceMid)
+let vendorPricesSettled = false
+let vendorPricesResolve: (() => void) | null = null
+let vendorPricesPromise: Promise<void> | null = null
+
 let vendorSellPrices = new Map<number, number>()  // itemID → NPC vendor sell price (PriceLow)
+let vendorSellPricesSettled = false
+let vendorSellPricesResolve: (() => void) | null = null
+let vendorSellPricesPromise: Promise<void> | null = null
 
 let scanMeta: ScanMeta = {
   scanCompletedAt: 0,
@@ -77,10 +84,32 @@ export function setVendorPrices(prices: Map<number, number>): void {
   for (const [id, price] of prices) {
     vendorPrices.set(id, price)
   }
+  settleVendorPrices()
 }
 
 export function getVendorPrices(): Map<number, number> {
   return vendorPrices
+}
+
+export function waitForVendorPrices(): Promise<void> {
+  if (vendorPricesSettled) return Promise.resolve()
+  if (!vendorPricesPromise) {
+    vendorPricesPromise = new Promise<void>(resolve => { vendorPricesResolve = resolve })
+  }
+  return vendorPricesPromise
+}
+
+// Unblock waiters without writing data — for error and empty-result paths in hooks.server.ts
+// (setVendorPrices settles implicitly on success).
+export function settleVendorPrices(): void {
+  if (!vendorPricesSettled) {
+    vendorPricesSettled = true
+    if (vendorPricesResolve) {
+      vendorPricesResolve()
+      vendorPricesResolve = null
+      vendorPricesPromise = null
+    }
+  }
 }
 
 let craftCostCache = new Map<number, CraftCostEntry>()
@@ -98,10 +127,30 @@ export function setVendorSellPrices(prices: Map<number, number>): void {
   for (const [id, price] of prices) {
     vendorSellPrices.set(id, price)
   }
+  settleVendorSellPrices()
 }
 
 export function getVendorSellPrices(): Map<number, number> {
   return vendorSellPrices
+}
+
+export function waitForVendorSellPrices(): Promise<void> {
+  if (vendorSellPricesSettled) return Promise.resolve()
+  if (!vendorSellPricesPromise) {
+    vendorSellPricesPromise = new Promise<void>(resolve => { vendorSellPricesResolve = resolve })
+  }
+  return vendorSellPricesPromise
+}
+
+export function settleVendorSellPrices(): void {
+  if (!vendorSellPricesSettled) {
+    vendorSellPricesSettled = true
+    if (vendorSellPricesResolve) {
+      vendorSellPricesResolve()
+      vendorSellPricesResolve = null
+      vendorSellPricesPromise = null
+    }
+  }
 }
 
 // Test-only: reset name cache loading state so waitForNameCache works fresh between tests
@@ -109,4 +158,14 @@ export function _resetNameCacheState(): void {
   nameCacheSettled = false
   nameCacheResolve = null
   nameCachePromise = null
+}
+
+// Test-only: reset vendor price loading state so wait functions work fresh between tests
+export function _resetVendorPriceState(): void {
+  vendorPricesSettled = false
+  vendorPricesResolve = null
+  vendorPricesPromise = null
+  vendorSellPricesSettled = false
+  vendorSellPricesResolve = null
+  vendorSellPricesPromise = null
 }

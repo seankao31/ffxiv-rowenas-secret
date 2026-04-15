@@ -1,5 +1,5 @@
 import { fetchMarketableItems, fetchDCListings, fetchHomeListings, fetchWorldListings, fetchHomeWorldCombined, fetchItemNames, DC_WORLDS, HOME_WORLD_ID } from './universalis.ts'
-import { setItem, setNameMap, setScanMeta, getScanMeta, setScanProgress, getAllItems, getVendorPrices, setCraftCosts } from './cache.ts'
+import { setItem, setNameMap, setScanMeta, getScanMeta, setScanProgress, getAllItems, getVendorPrices, setCraftCosts, waitForVendorPrices } from './cache.ts'
 import type { ItemData, Listing, SaleRecord } from '$lib/shared/types.ts'
 import { solveCraftCostBatch } from './crafting.ts'
 const SCAN_COOLDOWN_MS = 60_000
@@ -237,6 +237,11 @@ export async function startScanner(): Promise<void> {
   setScanProgress({ phase: 'Loading item names…', completedBatches: 0, totalBatches: 0 })
   const names = await fetchItemNames()
   setNameMap(names)
+
+  // Wait for vendor prices before the first scan cycle so craft cost calculations
+  // include NPC prices. If XIVAPI is down, the promise resolves with empty prices
+  // and the scanner proceeds without vendor data (same as current behavior).
+  await waitForVendorPrices()
 
   while (true) {
     try {
