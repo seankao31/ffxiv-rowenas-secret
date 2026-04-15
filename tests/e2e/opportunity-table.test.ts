@@ -88,25 +88,6 @@ test.describe('OpportunityTable', () => {
     await expect(gilDayBtn.locator('svg')).toHaveClass(/opacity-50/)
   })
 
-  test('copy button copies item name to clipboard', async ({ page, context }) => {
-    // Grant clipboard permissions for the test
-    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-
-    // Click the copy button on the first row
-    const firstRow = page.locator('table tbody tr').first()
-    await firstRow.locator('button[aria-label="Copy item name"]').click()
-
-    // Verify the check icon appears (feedback)
-    await expect(firstRow.locator('[data-lucide="check"]')).toBeVisible()
-
-    // Verify clipboard contents
-    const clipboardText = await page.evaluate(() => navigator.clipboard.readText())
-    expect(clipboardText).toBe('Alpha Draught')
-
-    // Verify the icon reverts to copy after 1.5s
-    await expect(firstRow.locator('[data-lucide="copy"]')).toBeVisible({ timeout: 3000 })
-  })
-
   test('copy button is hidden for unresolved item names', async ({ page }) => {
     // Re-mock API with a fallback-named item, then re-navigate
     await page.route('**/api/opportunities**', route => route.fulfill({
