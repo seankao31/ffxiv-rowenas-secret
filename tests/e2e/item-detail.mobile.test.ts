@@ -116,4 +116,38 @@ test.describe('Item detail page (mobile layout)', () => {
     await expect(rows).toHaveCount(20)
     await expect(showMore).toContainText('30 remaining')
   })
+
+  test('history table caps at 10 rows with show-more button', async ({ page }) => {
+    await mockApi(page)
+    await page.goto(`/item/${ITEM_ID}`)
+
+    const historyCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Sale History' }) })
+    const table = historyCard.locator('table')
+    await expect(table).toBeVisible()
+    const rows = table.locator('tbody tr')
+    await expect(rows).toHaveCount(10)
+
+    const showMore = historyCard.locator('button', { hasText: 'Show more' })
+    await expect(showMore).toBeVisible()
+    await expect(showMore).toContainText('20 remaining')
+  })
+
+  test('clicking show-more on history reveals more rows', async ({ page }) => {
+    await mockApi(page)
+    await page.goto(`/item/${ITEM_ID}`)
+
+    const historyCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Sale History' }) })
+    const showMore = historyCard.locator('button', { hasText: 'Show more' })
+    await expect(showMore).toBeVisible()
+
+    await showMore.click()
+    const rows = historyCard.locator('table tbody tr')
+    await expect(rows).toHaveCount(20)
+    await expect(showMore).toContainText('10 remaining')
+
+    // Click again to reveal all — button should disappear
+    await showMore.click()
+    await expect(historyCard.locator('table tbody tr')).toHaveCount(30)
+    await expect(showMore).not.toBeVisible()
+  })
 })
