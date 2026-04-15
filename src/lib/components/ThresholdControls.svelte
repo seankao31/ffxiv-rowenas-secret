@@ -46,20 +46,6 @@
       </label>
 
       <label class="flex flex-col gap-1 text-base-content/60 text-sm lg:min-w-40">
-        Listing staleness: {thresholds.listing_staleness_hours}h
-        <div class="flex items-center gap-2">
-          <input type="range" class="range range-sm flex-1" min="1" max="168" step="1"
-            value={thresholds.listing_staleness_hours}
-            oninput={(e) => emit({ listing_staleness_hours: Number((e.target as HTMLInputElement).value) })}
-          />
-          <input type="number" class="input input-sm w-16" min="1" max="168" step="1"
-            value={thresholds.listing_staleness_hours}
-            onchange={(e) => clampEmit('listing_staleness_hours', Number((e.target as HTMLInputElement).value), 1, 168)}
-          />
-        </div>
-      </label>
-
-      <label class="flex flex-col gap-1 text-base-content/60 text-sm lg:min-w-40">
         Days of supply: {thresholds.days_of_supply}
         <div class="flex items-center gap-2">
           <input type="range" class="range range-sm flex-1" min="1" max="14" step="1"

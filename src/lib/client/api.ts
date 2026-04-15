@@ -16,7 +16,6 @@ export type ColdStartResponse = {
 export async function fetchOpportunities(params: ThresholdState): Promise<OpportunitiesResponse | ColdStartResponse> {
   const query = new URLSearchParams({
     price_threshold: String(params.price_threshold),
-    listing_staleness_hours: String(params.listing_staleness_hours),
     days_of_supply: String(params.days_of_supply),
     limit: String(params.limit),
     hq: String(params.hq),
