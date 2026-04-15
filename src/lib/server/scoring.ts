@@ -68,6 +68,8 @@ export function scoreOpportunities(
       const medianPrice = prices[Math.floor(prices.length / 2)]!
       realisticSellPrice = Math.min(cheapestHomePrice, medianPrice)
     }
+    // No sell price signal: no home listings and no sale history to derive a price from
+    if (!isFinite(realisticSellPrice)) continue
 
     // --- Competitors relative to realistic sell price ---
     // Only count listings near our expected price as real competition.

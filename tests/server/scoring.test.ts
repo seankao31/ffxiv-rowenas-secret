@@ -83,6 +83,17 @@ describe('scoreOpportunities', () => {
     expect(results[0]!.sellPrice).toBe(1000)
   })
 
+  test('item with no home listings and no sale history but positive velocity is excluded', () => {
+    const noHome = item({
+      listings: [
+        { pricePerUnit: 400, quantity: 3, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
+      ],
+      // positive velocity but no home listings and no sale history → no sell price signal
+    })
+    const results = scoreOpportunities(new Map([[1, noHome]]), names, DEFAULT)
+    expect(results).toHaveLength(0)
+  })
+
   test('item with no home listings and no sale history is excluded by velocity', () => {
     const noHome = item({
       listings: [
