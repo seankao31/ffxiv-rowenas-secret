@@ -54,7 +54,6 @@ export type ScanProgress = {
 
 export type ThresholdParams = {
   price_threshold: number           // multiplier, default 2.0
-  listing_staleness_hours: number   // default 48
   days_of_supply: number            // default 3
   limit: number                     // default 50, max 200
   hq: boolean                       // default false
