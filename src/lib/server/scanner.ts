@@ -18,7 +18,9 @@ export function buildItemData(
     lastUploadTime: number
   }
 ): ItemData {
-  // homeLastUploadTime: authoritative from Phase 2; fallback to DC worldUploadTimes for home world
+  // homeLastUploadTime: authoritative from Phase 2; fallback to DC worldUploadTimes for home world.
+  // In per-world mode (default), both branches read the same field, so the fallback is a no-op.
+  // The fallback only matters in DC scan mode where Phase 2 may return 0 for a sold-out board.
   const homeLastUploadTime = homeResult.lastUploadTime > 0
     ? homeResult.lastUploadTime
     : (worldUploadTimes[HOME_WORLD_ID] ?? 0)

@@ -57,7 +57,7 @@
           <th class="text-right">Qty</th>
           <th class="text-right">Total</th>
           <th>HQ</th>
-          <th>Last Review</th>
+          <th>Updated</th>
         </tr>
       </thead>
       <tbody>

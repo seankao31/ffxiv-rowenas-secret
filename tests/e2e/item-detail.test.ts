@@ -164,7 +164,7 @@ test.describe('Item detail page', () => {
     await expect(headers.nth(2)).toContainText('Qty')
     await expect(headers.nth(3)).toContainText('Total')
     await expect(headers.nth(4)).toContainText('HQ')
-    await expect(headers.nth(5)).toContainText('Last Review')
+    await expect(headers.nth(5)).toContainText('Updated')
   })
 
   test('listings are sorted by price ascending', async ({ page }) => {

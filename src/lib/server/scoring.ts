@@ -26,6 +26,8 @@ export function scoreOpportunities(
   vendorSellPrices?: Map<number, number>,
 ): Opportunity[] {
   const now = Date.now()
+  // Post-7.0: lastReviewTime is the per-world upload time, not per-listing freshness.
+  // This filter effectively excludes worlds whose data is older than the cutoff.
   const stalenessCutoff = now - params.listing_staleness_hours * MS_PER_HOUR
   const opportunities: Opportunity[] = []
 
