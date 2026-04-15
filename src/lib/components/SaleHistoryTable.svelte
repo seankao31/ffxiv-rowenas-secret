@@ -2,6 +2,7 @@
   import type { Sale } from '$lib/shared/types'
   import { formatNumber, formatRelativeTime } from '$lib/client/format'
   import { applyMarketFilters } from '$lib/client/market-filters'
+  import { createMobilePagination } from '$lib/client/mobile-pagination.svelte'
 
   let { sales, loading, error, selectedWorld, hqOnly }: {
     sales: Sale[]
@@ -12,6 +13,18 @@
   } = $props()
 
   const filteredSales = $derived(applyMarketFilters(sales, selectedWorld, hqOnly))
+
+  const pagination = createMobilePagination()
+
+  // Reset pagination when data or filters change
+  $effect(() => {
+    void sales
+    void selectedWorld
+    void hqOnly
+    pagination.reset()
+  })
+
+  const displayedSales = $derived(pagination.slice(filteredSales))
 </script>
 
 {#if loading}
@@ -41,7 +54,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each filteredSales as sale, i (i)}
+        {#each displayedSales as sale, i (i)}
           <tr>
             <td>{sale.worldName}</td>
             <td class="text-right">{formatNumber(sale.pricePerUnit)}</td>
@@ -55,4 +68,9 @@
       </tbody>
     </table>
   </div>
+  {#if pagination.hasMore(filteredSales.length)}
+    <button class="btn btn-ghost btn-sm w-full mt-2" onclick={pagination.showMore}>
+      Show more ({pagination.remaining(filteredSales.length)} remaining)
+    </button>
+  {/if}
 {/if}
