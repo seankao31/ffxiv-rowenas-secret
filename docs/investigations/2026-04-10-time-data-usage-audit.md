@@ -207,11 +207,11 @@ const relevantHistory = params.hq ? item.recentHistory.filter(s => s.hq) : item.
 | # | Severity | Site | Status |
 |---|---|---|---|
 | 1 | Code change (this audit) | `universalis.ts` `entries=20` for home calls | ✅ **Done** |
-| 2 | Stale documentation | `types.ts:19` `worldUploadTimes` comment | Tracked as ENG-95 |
-| 3 | User-visible label drift | `ListingsTable.svelte` "Last Review" column | Open — rename to "Updated" |
-| 4 | Comment debt | `scoring.ts:41, 107` `listing_staleness_hours` semantics | Open — add comment or rename param |
-| 5 | Latent trap | `universalis.ts` + `types.ts:13` `SaleRecord.timestamp` unit | Open — normalize to ms or annotate |
-| 6 | Comment debt | `scanner.ts:21-23` `homeLastUploadTime` fallback rationale | Open — clarify which mode uses each branch |
+| 2 | Stale documentation | `types.ts:19` `worldUploadTimes` comment | ✅ **Done** (ENG-95) |
+| 3 | User-visible label drift | `ListingsTable.svelte` "Last Review" column | ✅ **Done** (ENG-142) |
+| 4 | Comment debt | `scoring.ts:41, 107` `listing_staleness_hours` semantics | ✅ **Done** (ENG-142) |
+| 5 | Latent trap | `universalis.ts` + `types.ts:13` `SaleRecord.timestamp` unit | ✅ **Done** (ENG-142) |
+| 6 | Comment debt | `scanner.ts:21-23` `homeLastUploadTime` fallback rationale | ✅ **Done** (ENG-142) |
 | 7 | Possibly-incorrect assumption | `scoring.ts:48` velocity source semantics | **Tracked separately as a new Linear issue** |
 
-Items 3–6 are small follow-up edits that could be bundled into a single ENG-94 closeout commit. Item 7 is the substantive open question and warrants its own investigation.
+Items 3–6 were bundled into ENG-142. Item 7 is the substantive open question and warrants its own investigation.
