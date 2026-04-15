@@ -25,6 +25,8 @@ FFXIV cross-world market board arbitrage dashboard for the 陸行鳥 Data Center
 | Retainer Venture Optimizer | Most profitable retainer venture dispatches by job, level, and loot prices |
 | Monetization & Analytics | Google Ads, Google Analytics, traffic tracking, and revenue |
 
+**Estimates** use Fibonacci points (1, 2, 3, 5, 8, 13). Every new issue must include an estimate.
+
 ## Testing: visual and e2e
 
 New pages, routes, and visual changes must include:
@@ -34,9 +36,17 @@ New pages, routes, and visual changes must include:
 
 Unit tests alone are not sufficient for UI work.
 
+### Running e2e tests
+
+Run `npx playwright test` — Playwright manages its own dev server with dynamic port allocation (see `playwright.config.ts`). **NEVER start a dev server yourself for e2e tests, and NEVER kill processes on ports.** The user may have their own dev server running.
+
 ## UI changes and responsive design
 
 When modifying UI elements, always consider responsive/mobile behavior (RWD), even for minor fixes.
+
+## Google Analytics
+
+GA4 is integrated via `gtag.js`. When adding new pages or changing routes, ensure page views are tracked correctly — SPA navigation requires manual `page_view` events. See `ENG-130` for prior work on this.
 
 ## Git workflow
 
