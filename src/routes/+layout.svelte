@@ -51,7 +51,7 @@
   }
 </script>
 
-<div class="flex flex-col h-screen overflow-hidden">
+<div class="flex flex-col min-h-screen lg:h-screen lg:overflow-hidden">
   <TopBar onmenuclick={() => drawerOpen = true} />
 
   <div class="flex flex-1 min-h-0">
