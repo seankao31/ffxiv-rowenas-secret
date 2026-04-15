@@ -168,9 +168,11 @@ export function scoreOpportunities(
 
       buyPrice: Math.round(best.effectiveBuyPrice),
       sellPrice: realisticSellPrice,
-      listingPrice: cheapestHomePrice,
+      listingPrice: isFinite(cheapestHomePrice) ? cheapestHomePrice : null,
       profitPerUnit: Math.round(best.profitPerUnit),
-      listingProfitPerUnit: Math.round(cheapestHomePrice * (1 - MARKET_TAX) - best.effectiveBuyPrice),
+      listingProfitPerUnit: isFinite(cheapestHomePrice)
+        ? Math.round(cheapestHomePrice * (1 - MARKET_TAX) - best.effectiveBuyPrice)
+        : null,
 
       sourceWorld: best.worldName,
       sourceWorldID: best.worldID,

@@ -65,9 +65,9 @@ export type Opportunity = {
 
   buyPrice: number
   sellPrice: number        // realistic sell price: min(cheapest listing, median recent sale)
-  listingPrice: number     // cheapest active listing on home world (before history adjustment)
+  listingPrice: number | null     // cheapest active listing on home world; null when no home listings
   profitPerUnit: number
-  listingProfitPerUnit: number  // profit if sold at current lowest listing price (before history cap)
+  listingProfitPerUnit: number | null  // profit at listing price; null when no home listings
 
   sourceWorld: string
   sourceWorldID: number

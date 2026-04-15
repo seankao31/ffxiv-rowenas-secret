@@ -190,7 +190,7 @@
                 <span class="text-xs whitespace-nowrap" style="color: {ageColor(opp.homeConfidence)}">{ageLabel(opp.homeDataAgeHours)}</span>
               {/if}
             </div>
-            {#if opp.sellDestination !== 'vendor' && opp.listingPrice !== opp.sellPrice}
+            {#if opp.sellDestination !== 'vendor' && opp.listingPrice != null && opp.listingPrice !== opp.sellPrice}
               <div class="flex items-baseline gap-2.5 mt-1">
                 <span class="w-[70px] text-right flex-shrink-0 text-xs text-base-content/40">{fmt(opp.listingPrice)}</span>
               </div>
@@ -200,7 +200,7 @@
           <!-- Profit/unit -->
           <td class="tabular-nums">
             <div>{fmt(opp.profitPerUnit)}</div>
-            {#if opp.listingProfitPerUnit !== opp.profitPerUnit}
+            {#if opp.listingProfitPerUnit != null && opp.listingProfitPerUnit !== opp.profitPerUnit}
               <div class="text-xs text-base-content/40 mt-1">{fmt(opp.listingProfitPerUnit)}</div>
             {/if}
           </td>

@@ -81,6 +81,9 @@ describe('scoreOpportunities', () => {
     expect(results[0]!.activeCompetitorCount).toBe(0)
     // realisticSellPrice = min(Infinity, median=1000) = 1000
     expect(results[0]!.sellPrice).toBe(1000)
+    // No home listings → listingPrice is null (genuinely no listing to reference)
+    expect(results[0]!.listingPrice).toBeNull()
+    expect(results[0]!.listingProfitPerUnit).toBeNull()
   })
 
   test('item with no home listings and no sale history but positive velocity is excluded', () => {
