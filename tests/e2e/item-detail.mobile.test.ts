@@ -89,4 +89,31 @@ test.describe('Item detail page (mobile layout)', () => {
     const overflow = await root.evaluate(el => getComputedStyle(el).overflow)
     expect(overflow).not.toBe('hidden')
   })
+
+  test('listings table caps at 10 rows with show-more button', async ({ page }) => {
+    await mockApi(page)
+    await page.goto(`/item/${ITEM_ID}`)
+
+    const listingsCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Cross-World Listings' }) })
+    const rows = listingsCard.locator('table tbody tr')
+    await expect(rows).toHaveCount(10)
+
+    const showMore = listingsCard.locator('button', { hasText: 'Show more' })
+    await expect(showMore).toBeVisible()
+    await expect(showMore).toContainText('40 remaining')
+  })
+
+  test('clicking show-more on listings reveals more rows', async ({ page }) => {
+    await mockApi(page)
+    await page.goto(`/item/${ITEM_ID}`)
+
+    const listingsCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Cross-World Listings' }) })
+    const showMore = listingsCard.locator('button', { hasText: 'Show more' })
+    await expect(showMore).toBeVisible()
+
+    await showMore.click()
+    const rows = listingsCard.locator('table tbody tr')
+    await expect(rows).toHaveCount(20)
+    await expect(showMore).toContainText('30 remaining')
+  })
 })

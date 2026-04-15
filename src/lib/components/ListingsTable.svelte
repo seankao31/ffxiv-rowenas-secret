@@ -3,6 +3,7 @@
   import { fetchItemListings } from '$lib/client/universalis'
   import { applyMarketFilters } from '$lib/client/market-filters'
   import { formatNumber, formatRelativeTime } from '$lib/client/format'
+  import { createMobilePagination } from '$lib/client/mobile-pagination.svelte'
 
   let { itemId, selectedWorld, hqOnly }: {
     itemId: number
@@ -15,6 +16,18 @@
   let error = $state(false)
 
   const filteredListings = $derived(applyMarketFilters(listings, selectedWorld, hqOnly))
+
+  const pagination = createMobilePagination()
+
+  // Reset pagination when data or filters change
+  $effect(() => {
+    void itemId
+    void selectedWorld
+    void hqOnly
+    pagination.reset()
+  })
+
+  const displayedListings = $derived(pagination.slice(filteredListings))
 
   // Note: this $effect has no cancellation guard for rapid itemId changes.
   // Currently safe because SvelteKit destroys the component on route navigation.
@@ -61,7 +74,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each filteredListings as listing}
+        {#each displayedListings as listing}
           <tr>
             <td>{listing.worldName}</td>
             <td class="text-right">{formatNumber(listing.pricePerUnit)}</td>
@@ -74,4 +87,9 @@
       </tbody>
     </table>
   </div>
+  {#if pagination.hasMore(filteredListings.length)}
+    <button class="btn btn-ghost btn-sm w-full mt-2" onclick={pagination.showMore}>
+      Show more ({pagination.remaining(filteredListings.length)} remaining)
+    </button>
+  {/if}
 {/if}
