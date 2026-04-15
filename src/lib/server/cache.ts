@@ -99,6 +99,8 @@ export function waitForVendorPrices(): Promise<void> {
   return vendorPricesPromise
 }
 
+// Unblock waiters without writing data — for error and empty-result paths in hooks.server.ts
+// (setVendorPrices settles implicitly on success).
 export function settleVendorPrices(): void {
   if (!vendorPricesSettled) {
     vendorPricesSettled = true

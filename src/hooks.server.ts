@@ -16,7 +16,7 @@ export async function init() {
   fetchVendorPrices()
     .then(prices => {
       if (prices.size > 0) setVendorPrices(prices)
-      else settleVendorPrices()
+      else settleVendorPrices()  // setVendorPrices is skipped, but waiters must not block forever
     })
     .catch(err => {
       console.error('[server] Vendor price fetch failed after retries:', err)
@@ -26,7 +26,7 @@ export async function init() {
   fetchVendorSellPrices()
     .then(prices => {
       if (prices.size > 0) setVendorSellPrices(prices)
-      else settleVendorSellPrices()
+      else settleVendorSellPrices()  // same rationale as settleVendorPrices above
     })
     .catch(err => {
       console.error('[server] Vendor sell price fetch failed:', err)
