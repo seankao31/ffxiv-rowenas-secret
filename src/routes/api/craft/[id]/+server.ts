@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
-import { getAllItems, getVendorPrices, isCacheReady, getScanProgress } from '$lib/server/cache'
+import { getAllItems, getVendorPrices, getNameMap, isCacheReady, getScanProgress } from '$lib/server/cache'
 import { solveCraftingCost } from '$lib/server/crafting'
 
 export const GET: RequestHandler = ({ params }) => {
@@ -13,7 +13,7 @@ export const GET: RequestHandler = ({ params }) => {
     return json({ ready: false, progress: getScanProgress() }, { status: 202 })
   }
 
-  const result = solveCraftingCost(id, getAllItems(), getVendorPrices())
+  const result = solveCraftingCost(id, getAllItems(), getVendorPrices(), { nameMap: getNameMap() })
   if (result === null) {
     return json({ error: 'no recipe found for item' }, { status: 404 })
   }

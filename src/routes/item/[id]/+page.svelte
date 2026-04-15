@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores'
   import { goto } from '$app/navigation'
-  import { fetchItemMetadata, getIconUrl, getEnglishName, subscribe } from '$lib/client/xivapi.ts'
+  import { fetchItemMetadata, getIconUrl, getEnglishName, resolveDisplayName, subscribe } from '$lib/client/xivapi.ts'
   import { fetchItemSaleHistory } from '$lib/client/universalis'
   import type { Sale } from '$lib/shared/types'
   import ListingsTable from '$lib/components/ListingsTable.svelte'
@@ -19,8 +19,10 @@
   })
 
   const iconUrl = $derived.by(() => { void nameGeneration; return getIconUrl(data.itemID) })
+  const primaryName = $derived.by(() => { void nameGeneration; return resolveDisplayName(data.itemID, data.twName) })
+  // getEnglishName is intentional here: enName is the English subtitle shown below
+  // the TW primary name, not a fallback. Don't replace with resolveDisplayName.
   const enName = $derived.by(() => { void nameGeneration; return getEnglishName(data.itemID) ?? null })
-  const primaryName = $derived(data.twName ?? enName ?? `Item #${data.itemID}`)
   const secondaryName = $derived(data.twName ? enName : null)
 
   let sales = $state<Sale[]>([])
@@ -60,7 +62,7 @@
 </svelte:head>
 
 <!-- Item Header -->
-<div class="flex items-center gap-3 py-4 shrink-0">
+<div class="flex items-center gap-3 py-4 shrink-0 flex-wrap">
   {#if iconUrl}
     <img src={iconUrl} alt="" width="40" height="40" class="flex-shrink-0"
       onerror={(e: Event) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
@@ -74,6 +76,14 @@
       <span class="text-sm text-base-content/50">{secondaryName}</span>
     {/if}
     <span class="badge badge-soft">{data.itemID}</span>
+  </div>
+
+  <div class="ml-auto flex items-center gap-1 text-xs text-base-content/40" data-testid="external-links">
+    <a href="https://universalis.app/market/{data.itemID}" target="_blank" rel="noopener" class="hover:text-base-content/70 transition-colors">Universalis</a>
+    <span>·</span>
+    <a href="https://www.garlandtools.org/db/#item/{data.itemID}" target="_blank" rel="noopener" class="hover:text-base-content/70 transition-colors">Garland Tools</a>
+    <span>·</span>
+    <a href="https://ffxivteamcraft.com/db/en/item/{data.itemID}/" target="_blank" rel="noopener" class="hover:text-base-content/70 transition-colors">Teamcraft</a>
   </div>
 </div>
 

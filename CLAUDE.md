@@ -30,7 +30,7 @@ FFXIV cross-world market board arbitrage dashboard for the 陸行鳥 Data Center
 New pages, routes, and visual changes must include:
 
 - **Playwright e2e tests** following the existing pattern in `tests/e2e/`. Mock external APIs to keep tests offline.
-- **Visual verification via Playwright MCP** (navigate + screenshot) before declaring work complete. Use `--isolated` when launching the browser — multiple Claude sessions may run Playwright concurrently.
+- **Visual verification via Playwright** (navigate + screenshot) before declaring work complete.
 
 Unit tests alone are not sufficient for UI work.
 

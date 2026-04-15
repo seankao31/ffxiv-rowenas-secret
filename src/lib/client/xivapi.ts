@@ -13,9 +13,9 @@ export function isFallbackName(name: string): boolean {
   return FALLBACK_RE.test(name)
 }
 
-export function resolveItemName(itemID: number, serverName: string): string {
-  if (!isFallbackName(serverName)) return serverName
-  return cache.get(itemID)?.name ?? serverName
+export function resolveDisplayName(itemID: number, serverName: string | null | undefined): string {
+  if (serverName != null && !isFallbackName(serverName)) return serverName
+  return cache.get(itemID)?.name ?? `Item #${itemID}`
 }
 
 export function getIconUrl(itemID: number): string | undefined {

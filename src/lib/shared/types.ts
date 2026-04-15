@@ -102,6 +102,7 @@ export type CraftAction = 'craft' | 'buy' | 'vendor'
 
 export type CraftingNode = {
   itemId: number
+  itemName?: string
   amount: number
   action: CraftAction
   unitCost: number

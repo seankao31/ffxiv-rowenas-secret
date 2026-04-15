@@ -4,7 +4,7 @@
   import CopyButton from '$lib/components/CopyButton.svelte'
   import { Info, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-svelte'
   import { toggleSort, sortOpportunities, type SortState, type SortColumn } from '$lib/client/sort.ts'
-  import { resolveItemName, isFallbackName, subscribe, getIconUrl, fetchItemMetadata } from '$lib/client/xivapi.ts'
+  import { resolveDisplayName, isFallbackName, subscribe, getIconUrl, fetchItemMetadata } from '$lib/client/xivapi.ts'
   import { tooltip } from '$lib/client/tooltip.ts'
   import { fetchVendorInfo, getVendorInfo, setOnChange as setVendorOnChange } from '$lib/client/vendors.ts'
 
@@ -39,7 +39,7 @@
   })
 
   const fmt = (n: number) => n.toLocaleString()
-  const name = (opp: Opportunity) => { void nameGeneration; return resolveItemName(opp.itemID, opp.itemName) }
+  const name = (opp: Opportunity) => { void nameGeneration; return resolveDisplayName(opp.itemID, opp.itemName) }
   const iconUrl = (opp: Opportunity) => { void nameGeneration; return getIconUrl(opp.itemID) }
 
   function ageLabel(ageHours: number): string {

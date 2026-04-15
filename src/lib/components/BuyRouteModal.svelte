@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { resolveItemName, getIconUrl, subscribe, fetchItemMetadata } from '$lib/client/xivapi.ts'
+  import { resolveDisplayName, getIconUrl, subscribe, fetchItemMetadata } from '$lib/client/xivapi.ts'
   import CopyButton from './CopyButton.svelte'
   import type { RouteWorldGroup, RouteItem, RouteItemState } from '$lib/client/route'
 
@@ -25,7 +25,7 @@
 
   const displayNameOf = (item: RouteItem) => {
     void nameGeneration
-    return resolveItemName(item.itemID, item.itemName)
+    return resolveDisplayName(item.itemID, item.itemName)
   }
   const iconOf = (item: RouteItem) => {
     void nameGeneration

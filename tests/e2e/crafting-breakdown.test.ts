@@ -95,6 +95,7 @@ test.describe('Item detail page — tabs', () => {
 const CRAFT_API_RESPONSE = {
   root: {
     itemId: CRAFTABLE_ITEM_ID,
+    itemName: '青銅裝飾鐵鎚',
     amount: 1,
     action: 'craft',
     unitCost: 320,
@@ -108,6 +109,7 @@ const CRAFT_API_RESPONSE = {
       ingredients: [
         {
           itemId: 5056,
+          itemName: '青銅鑄塊',
           amount: 3,
           action: 'buy',
           unitCost: 50,
@@ -125,6 +127,7 @@ const CRAFT_API_RESPONSE = {
             ingredients: [
               {
                 itemId: 5111,
+                itemName: '火之水晶',
                 amount: 2,
                 action: 'vendor',
                 unitCost: 5,
@@ -140,6 +143,7 @@ const CRAFT_API_RESPONSE = {
         },
         {
           itemId: 5111,
+          itemName: '火之水晶',
           amount: 4,
           action: 'vendor',
           unitCost: 5,
@@ -232,8 +236,8 @@ test.describe('Item detail page — crafting breakdown', () => {
     await expect(page.locator('text=88%').first()).toBeVisible()
   })
 
-  test('tree nodes show item names after metadata loads', async ({ page }) => {
-    await expect(page.getByRole('link', { name: /Bronze Ornamental Hammer/ })).toBeVisible()
-    await expect(page.getByRole('link', { name: /Bronze Ingot/ })).toBeVisible()
+  test('tree nodes show Chinese item names from server', async ({ page }) => {
+    await expect(page.getByRole('link', { name: /青銅裝飾鐵鎚/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /青銅鑄塊/ })).toBeVisible()
   })
 })

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { CraftingNode } from '$lib/shared/types'
   import { formatGil, confidenceColor } from '$lib/shared/format'
-  import { getIconUrl, getEnglishName, subscribe } from '$lib/client/xivapi.ts'
+  import { getIconUrl, resolveDisplayName, subscribe } from '$lib/client/xivapi.ts'
 
   let { node, depth = 0 }: { node: CraftingNode; depth?: number } = $props()
 
@@ -41,7 +41,7 @@
   let nameGeneration = $state(0)
   $effect(() => subscribe(() => nameGeneration++))
 
-  const displayName = $derived.by(() => { void nameGeneration; return getEnglishName(node.itemId) ?? `Item #${node.itemId}` })
+  const displayName = $derived.by(() => { void nameGeneration; return resolveDisplayName(node.itemId, node.itemName) })
   const iconUrl = $derived.by(() => { void nameGeneration; return getIconUrl(node.itemId) })
 
   function toggleExpand() {

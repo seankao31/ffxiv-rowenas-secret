@@ -1,5 +1,5 @@
 import { test, expect, describe, beforeEach, afterEach, vi } from 'vitest'
-import { buildIconUrl, resolveItemName, isFallbackName, getIconUrl, _seedCache, _clearCache, _clearListeners, fetchItemMetadata, subscribe } from '$lib/client/xivapi'
+import { buildIconUrl, resolveDisplayName, isFallbackName, getIconUrl, _seedCache, _clearCache, _clearListeners, fetchItemMetadata, subscribe } from '$lib/client/xivapi'
 
 const originalFetch = globalThis.fetch
 const originalWarn = console.warn
@@ -34,18 +34,27 @@ describe('isFallbackName', () => {
   })
 })
 
-describe('resolveItemName', () => {
-  test('returns server name when it is a real name', () => {
-    expect(resolveItemName(5057, '鐵塊')).toBe('鐵塊')
+describe('resolveDisplayName', () => {
+  test('returns twName when it is a real TW name', () => {
+    expect(resolveDisplayName(5057, '鐵塊')).toBe('鐵塊')
   })
 
-  test('returns server name for fallback pattern when no cached name exists', () => {
-    expect(resolveItemName(99999, 'Item #99999')).toBe('Item #99999')
+  test('returns Item #N fallback when twName is null and no cache', () => {
+    expect(resolveDisplayName(99999, null)).toBe('Item #99999')
   })
 
-  test('returns cached English name for fallback-pattern items', () => {
+  test('returns cached English name when twName is null', () => {
+    _seedCache(5057, { name: 'Iron Ingot' })
+    expect(resolveDisplayName(5057, null)).toBe('Iron Ingot')
+  })
+
+  test('returns Item #N fallback when twName is a fallback pattern and no cache', () => {
+    expect(resolveDisplayName(99999, 'Item #99999')).toBe('Item #99999')
+  })
+
+  test('returns cached English name when twName is a fallback pattern', () => {
     _seedCache(12345, { name: 'Mythril Ingot' })
-    expect(resolveItemName(12345, 'Item #12345')).toBe('Mythril Ingot')
+    expect(resolveDisplayName(12345, 'Item #12345')).toBe('Mythril Ingot')
   })
 })
 
@@ -90,7 +99,7 @@ describe('fetchItemMetadata', () => {
     expect(url).toContain('rows=5057')
     expect(url).toContain('fields=Icon,Name')
     expect(getIconUrl(5057)).toBe(buildIconUrl('ui/icon/020000/020801.tex'))
-    expect(resolveItemName(5057, 'Item #5057')).toBe('Iron Ingot')
+    expect(resolveDisplayName(5057, 'Item #5057')).toBe('Iron Ingot')
   })
 
   test('skips already-cached items', async () => {
@@ -228,6 +237,6 @@ describe('fetchItemMetadata', () => {
     expect(getIconUrl(2)).toBeUndefined()
     // Row 3: cached with icon but no name
     expect(getIconUrl(3)).toBe(buildIconUrl('c.tex'))
-    expect(resolveItemName(3, 'Item #3')).toBe('Item #3')
+    expect(resolveDisplayName(3, 'Item #3')).toBe('Item #3')
   })
 })

@@ -17,6 +17,7 @@ export function solveCraftingCost(
   options?: {
     jobLevels?: Record<number, number>
     maxDepth?: number
+    nameMap?: Map<number, string>
   },
 ): CraftingResult | null {
   if (getRecipesByResult(itemId).every(r => r.companyCraft ?? false)) return null
@@ -25,8 +26,9 @@ export function solveCraftingCost(
   const memo = new Map<number, CraftingNode>()
   const maxDepth = options?.maxDepth ?? DEFAULT_MAX_DEPTH
   const jobLevels = options?.jobLevels
+  const nameMap = options?.nameMap
 
-  const root = solveNode(itemId, 1, cache, vendorPrices, jobLevels, memo, now, 0, maxDepth)
+  const root = solveNode(itemId, 1, cache, vendorPrices, jobLevels, memo, now, 0, maxDepth, nameMap)
 
   const itemDataForRoot = cache.get(itemId)
   let cheapestListing: CraftingResult['cheapestListing'] = null
@@ -107,6 +109,7 @@ function solveNode(
   now: number,
   depth: number,
   maxDepth: number,
+  nameMap?: Map<number, string>,
 ): CraftingNode {
   // Memoization: return cached result adjusted for requested amount
   const cached = memo.get(itemId)
@@ -149,7 +152,7 @@ function solveNode(
       let batchCost = 0
       const ingredientNodes: CraftingNode[] = []
       for (const ing of recipe.ingredients) {
-        const child = solveNode(ing.id, ing.amount, cache, vendorPrices, jobLevels, memo, now, depth + 1, maxDepth)
+        const child = solveNode(ing.id, ing.amount, cache, vendorPrices, jobLevels, memo, now, depth + 1, maxDepth, nameMap)
         batchCost += child.totalCost
         ingredientNodes.push(child)
       }
@@ -176,8 +179,11 @@ function solveNode(
     ? options.reduce((a, b) => b.unitCost < a.unitCost ? b : a)
     : { action: 'buy' as CraftAction, unitCost: Infinity, conf: 0 }
 
+  const itemName = nameMap?.get(itemId)
+
   const node: CraftingNode = {
     itemId,
+    ...(itemName !== undefined && { itemName }),
     amount,
     action: best.action,
     unitCost: best.unitCost,
