@@ -20,7 +20,7 @@ export type Sale = {
 export type SaleRecord = {
   pricePerUnit: number
   quantity: number
-  timestamp: number
+  timestamp: number  // unix seconds (raw from API — not converted to ms unlike Sale.timestamp)
   hq: boolean
 }
 
