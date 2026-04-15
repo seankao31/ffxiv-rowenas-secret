@@ -168,9 +168,12 @@ export function scoreOpportunities(
 
       buyPrice: Math.round(best.effectiveBuyPrice),
       sellPrice: realisticSellPrice,
-      listingPrice: cheapestHomePrice,
+      // When no home listings exist, use realisticSellPrice (from history) to avoid Infinity in JSON
+      listingPrice: isFinite(cheapestHomePrice) ? cheapestHomePrice : realisticSellPrice,
       profitPerUnit: Math.round(best.profitPerUnit),
-      listingProfitPerUnit: Math.round(cheapestHomePrice * (1 - MARKET_TAX) - best.effectiveBuyPrice),
+      listingProfitPerUnit: isFinite(cheapestHomePrice)
+        ? Math.round(cheapestHomePrice * (1 - MARKET_TAX) - best.effectiveBuyPrice)
+        : Math.round(best.profitPerUnit),
 
       sourceWorld: best.worldName,
       sourceWorldID: best.worldID,
