@@ -1,6 +1,6 @@
 # Playwright Mobile Project Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking. Each task includes cross-model verification via codex-review-gate after code quality review, with a final cross-task codex review before branch completion.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking. Each task includes cross-model verification via codex-review-gate after code quality review, with a final cross-task codex review before branch completion.
 
 **Goal:** Add a Playwright `mobile` project so all e2e tests run at both desktop and mobile viewports automatically, replacing per-test viewport overrides.
 
@@ -19,7 +19,7 @@ Three test files (`mobile-layout.test.ts`, `opportunity-table.test.ts`, `buy-rou
 - Modify: `tests/e2e/opportunity-table.test.ts:8-19`
 - Modify: `tests/e2e/buy-route.test.ts:4-13`
 
-- [ ] **Step 1: Create the shared helper**
+- [x] **Step 1: Create the shared helper**
 
 ```ts
 // tests/e2e/fixtures/mock-arbitrage-api.ts
@@ -36,7 +36,7 @@ export async function mockArbitrageApi(page: Page) {
 }
 ```
 
-- [ ] **Step 2: Update `opportunity-table.test.ts` to use shared helper**
+- [x] **Step 2: Update `opportunity-table.test.ts` to use shared helper**
 
 Replace the inline `mockApi` function and its import of fixtures. The file should import `mockArbitrageApi` from `./fixtures/mock-arbitrage-api` instead. The `opportunities` import is still needed for `DEFAULT_ORDER` and the inline re-mock in the "copy button is hidden" and "vendor-sell display" tests, so keep it.
 
@@ -55,7 +55,7 @@ In `beforeEach`, replace `await mockApi(page)` with `await mockArbitrageApi(page
 
 Delete the inline `mockApi` function (old lines 8-19).
 
-- [ ] **Step 3: Update `buy-route.test.ts` to use shared helper**
+- [x] **Step 3: Update `buy-route.test.ts` to use shared helper**
 
 Replace the inline `mockApi` function. Import `mockArbitrageApi` from `./fixtures/mock-arbitrage-api`. Replace `mockApi(page)` calls with `mockArbitrageApi(page)`.
 
@@ -68,12 +68,12 @@ import { mockArbitrageApi } from './fixtures/mock-arbitrage-api'
 
 Delete the inline `mockApi` function (old lines 4-13). Replace all `mockApi(page)` calls with `mockArbitrageApi(page)`.
 
-- [ ] **Step 4: Run e2e tests to verify nothing broke**
+- [x] **Step 4: Run e2e tests to verify nothing broke**
 
 Run: `bunx playwright test --reporter=list 2>&1`
 Expected: All existing tests pass. No behavior change.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/e2e/fixtures/mock-arbitrage-api.ts tests/e2e/opportunity-table.test.ts tests/e2e/buy-route.test.ts
@@ -89,11 +89,11 @@ Ref: ENG-89"
 **Files:**
 - Modify: `playwright.config.ts`
 
-- [ ] **Step 1: Write the failing test — verify config has two projects**
+- [x] **Step 1: Write the failing test — verify config has two projects**
 
 No unit test needed here — this is pure config. We'll verify by running Playwright with `--list` to confirm both projects are recognized.
 
-- [ ] **Step 2: Update `playwright.config.ts`**
+- [x] **Step 2: Update `playwright.config.ts`**
 
 Replace the single `chromium` project with `desktop` and `mobile`:
 
@@ -127,18 +127,18 @@ export default defineConfig({
 })
 ```
 
-- [ ] **Step 3: Verify both projects are recognized**
+- [x] **Step 3: Verify both projects are recognized**
 
 Run: `bunx playwright test --list 2>&1 | head -20`
 Expected: Test names prefixed with `[desktop]` and `[mobile]`. Each non-excluded test appears twice.
 
-- [ ] **Step 4: Run e2e tests to see which tests pass/fail at mobile viewport**
+- [x] **Step 4: Run e2e tests to see which tests pass/fail at mobile viewport**
 
 Run: `bunx playwright test --reporter=list 2>&1`
 
 Some tests may fail at mobile viewport — that's expected and will be addressed. Note any failures for investigation. The mobile-layout tests will still pass because they have inline `test.use({ viewport })` overrides that take precedence over the project device config.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add playwright.config.ts
@@ -156,7 +156,7 @@ Extract the nav/drawer tests from `mobile-layout.test.ts` into a mobile-only tes
 **Files:**
 - Create: `tests/e2e/nav-drawer.mobile.test.ts`
 
-- [ ] **Step 1: Create the mobile-only nav drawer test file**
+- [x] **Step 1: Create the mobile-only nav drawer test file**
 
 These tests come from `mobile-layout.test.ts` lines 22-49. Remove `test.use({ viewport })` — the mobile project provides 390×844 via `devices['iPhone 14']`.
 
@@ -202,12 +202,12 @@ test.describe('nav drawer', () => {
 })
 ```
 
-- [ ] **Step 2: Run the new test file to verify it passes**
+- [x] **Step 2: Run the new test file to verify it passes**
 
 Run: `bunx playwright test nav-drawer.mobile --project=mobile --reporter=list 2>&1`
 Expected: 5 tests pass. The file only runs in the mobile project (desktop ignores `*.mobile.test.ts`).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/e2e/nav-drawer.mobile.test.ts
@@ -225,7 +225,7 @@ Extract the arbitrage table mobile-specific tests (sticky column, horizontal scr
 **Files:**
 - Create: `tests/e2e/opportunity-table.mobile.test.ts`
 
-- [ ] **Step 1: Create the mobile-only opportunity table test file**
+- [x] **Step 1: Create the mobile-only opportunity table test file**
 
 These tests come from `mobile-layout.test.ts` lines 51-88. Remove `test.use({ viewport })`.
 
@@ -274,12 +274,12 @@ test.describe('opportunity table mobile layout', () => {
 })
 ```
 
-- [ ] **Step 2: Run the new test file to verify it passes**
+- [x] **Step 2: Run the new test file to verify it passes**
 
 Run: `bunx playwright test opportunity-table.mobile --project=mobile --reporter=list 2>&1`
 Expected: 3 tests pass.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tests/e2e/opportunity-table.mobile.test.ts
@@ -297,13 +297,13 @@ All tests have been redistributed. Delete the original file.
 **Files:**
 - Delete: `tests/e2e/mobile-layout.test.ts`
 
-- [ ] **Step 1: Delete the file**
+- [x] **Step 1: Delete the file**
 
 ```bash
 git rm tests/e2e/mobile-layout.test.ts
 ```
 
-- [ ] **Step 2: Run the full e2e suite to verify nothing is missing**
+- [x] **Step 2: Run the full e2e suite to verify nothing is missing**
 
 Run: `bunx playwright test --reporter=list 2>&1`
 
@@ -315,7 +315,7 @@ Compare test counts:
 
 Wait — the count should be: 5 nav-drawer + 3 opportunity-table = 8 mobile-only tests, vs. the original 7 mobile + 2 desktop = 9. We dropped the 2 desktop-inverse tests and kept the 7 mobile tests minus... let me recount. The original had exactly: sidebar hidden, hamburger visible, drawer open, drawer close backdrop, drawer close escape (5 nav) + sticky column, horizontal scroll, controls stacking (3 table) = 8 mobile tests + 2 desktop tests = 10 total. We're keeping 8, dropping 2. Good.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git commit -m "refactor(e2e): delete mobile-layout.test.ts, tests redistributed by feature
@@ -334,13 +334,13 @@ After Tasks 1-5, the full suite runs all non-mobile-only tests at both viewports
 - Possibly modify: `tests/e2e/item-detail.test.ts`
 - Possibly modify: any other failing test file
 
-- [ ] **Step 1: Run the full suite and capture failures**
+- [x] **Step 1: Run the full suite and capture failures**
 
 Run: `bunx playwright test --reporter=list 2>&1`
 
 Note which tests fail and in which project (desktop vs mobile).
 
-- [ ] **Step 2: Investigate each failure**
+- [x] **Step 2: Investigate each failure**
 
 For each failing test, determine whether the failure is:
 - **A real mobile layout bug** in the app code → fix the app code
@@ -349,12 +349,12 @@ For each failing test, determine whether the failure is:
 
 This step is intentionally open-ended — the specific failures can't be predicted until the suite runs at mobile viewport for the first time.
 
-- [ ] **Step 3: Run the full suite again to verify all fixes**
+- [x] **Step 3: Run the full suite again to verify all fixes**
 
 Run: `bunx playwright test --reporter=list 2>&1`
 Expected: All tests pass in both projects.
 
-- [ ] **Step 4: Commit fixes**
+- [x] **Step 4: Commit fixes**
 
 ```bash
 git add -u
@@ -367,17 +367,17 @@ Ref: ENG-89"
 
 ### Task 7: Final verification and cleanup
 
-- [ ] **Step 1: Run the full e2e suite one last time**
+- [x] **Step 1: Run the full e2e suite one last time**
 
 Run: `bunx playwright test --reporter=list 2>&1`
 Expected: All tests pass in both `desktop` and `mobile` projects.
 
-- [ ] **Step 2: Run vitest to confirm no unit test regressions**
+- [x] **Step 2: Run vitest to confirm no unit test regressions**
 
 Run: `bun run test 2>&1`
 Expected: All 264 unit tests pass.
 
-- [ ] **Step 3: Verify test distribution looks correct**
+- [x] **Step 3: Verify test distribution looks correct**
 
 Run: `bunx playwright test --list 2>&1`
 
@@ -386,6 +386,6 @@ Verify:
 - `craft-api.test.ts` only appears under `[desktop]`
 - All other test files appear under both `[desktop]` and `[mobile]`
 
-- [ ] **Step 4: Commit any final cleanup**
+- [x] **Step 4: Commit any final cleanup**
 
 Only if needed. If everything is clean, skip this step.
