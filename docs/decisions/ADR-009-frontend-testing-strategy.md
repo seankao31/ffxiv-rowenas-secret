@@ -38,5 +38,5 @@ Use vitest for fast component-level tests (CI on every commit), Playwright for s
 - vitest + jsdom + @testing-library/svelte added as devDependencies
 - Component tests go in `tests/client/` alongside existing `tests/server/`
 - Unit tests run under vitest via `bun run test`
-- E2E tests run under Playwright via `bun run test:e2e` (Chromium only, dev server on port 5173)
+- E2E tests run under Playwright via `bun run test:e2e` (Chromium only, dev server on dynamic port)
 - E2E tests live in `tests/e2e/`, excluded from vitest via narrow includes
