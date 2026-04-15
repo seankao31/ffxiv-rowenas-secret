@@ -1,7 +1,7 @@
 import { startScanner } from '$lib/server/scanner'
 import { fetchVendorPrices, fetchVendorSellPrices } from '$lib/server/vendors'
 import { initRecipes } from '$lib/server/recipes'
-import { setVendorPrices, setVendorSellPrices } from '$lib/server/cache'
+import { setVendorPrices, setVendorSellPrices, settleVendorPrices, settleVendorSellPrices } from '$lib/server/cache'
 import { seedFixtureData } from '$lib/server/fixtures/seed'
 
 export async function init() {
@@ -16,17 +16,21 @@ export async function init() {
   fetchVendorPrices()
     .then(prices => {
       if (prices.size > 0) setVendorPrices(prices)
+      else settleVendorPrices()
     })
     .catch(err => {
       console.error('[server] Vendor price fetch failed after retries:', err)
+      settleVendorPrices()
     })
 
   fetchVendorSellPrices()
     .then(prices => {
       if (prices.size > 0) setVendorSellPrices(prices)
+      else settleVendorSellPrices()
     })
     .catch(err => {
       console.error('[server] Vendor sell price fetch failed:', err)
+      settleVendorSellPrices()
     })
 
   await recipePromise
