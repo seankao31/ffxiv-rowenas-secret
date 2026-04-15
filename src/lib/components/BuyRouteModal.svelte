@@ -209,6 +209,9 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <span class="text-sm line-through text-base-content/50">{displayName}</span>
+                  {#if item.isAlt && item.primaryWorld && item.primaryBuyPrice}
+                    <p class="text-xs mt-0.5 invisible" aria-hidden="true">&nbsp;</p>
+                  {/if}
                 </div>
                 <span class="text-sm text-base-content/30 tabular-nums">×{item.recommendedUnits}</span>
                 <span class="text-sm text-base-content/30 tabular-nums">{fmt(item.buyPrice)}</span>
@@ -253,6 +256,9 @@
                     <span class="text-sm line-through text-base-content/50">{displayName}</span>
                     <span class="badge badge-xs badge-error">missing</span>
                   </div>
+                  {#if item.isAlt && item.primaryWorld && item.primaryBuyPrice}
+                    <p class="text-xs mt-0.5 invisible" aria-hidden="true">&nbsp;</p>
+                  {/if}
                 </div>
                 <span class="text-sm text-base-content/30 tabular-nums">{fmt(item.buyPrice)}</span>
                 <button
