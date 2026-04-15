@@ -26,9 +26,6 @@ export function scoreOpportunities(
   vendorSellPrices?: Map<number, number>,
 ): Opportunity[] {
   const now = Date.now()
-  // Post-7.0: lastReviewTime is the per-world upload time, not per-listing freshness.
-  // This filter effectively excludes worlds whose data is older than the cutoff.
-  const stalenessCutoff = now - params.listing_staleness_hours * MS_PER_HOUR
   const opportunities: Opportunity[] = []
 
   type WorldResult = {
@@ -46,18 +43,12 @@ export function scoreOpportunities(
   for (const item of cache.values()) {
     const allListings = params.hq ? item.listings.filter(l => l.hq) : item.listings
 
-    // --- Active home listings ---
+    // --- Home listings ---
     const homeListings = allListings.filter(l => l.worldID === HOME_WORLD_ID)
-    if (homeListings.length === 0) continue
 
-    const minHomePrice = Math.min(...homeListings.map(l => l.pricePerUnit))
-    const activeHomeListings = homeListings.filter(l =>
-      l.pricePerUnit <= minHomePrice * params.price_threshold &&
-      l.lastReviewTime >= stalenessCutoff
-    )
-    if (activeHomeListings.length === 0) continue
-
-    const cheapestHomePrice = Math.min(...activeHomeListings.map(l => l.pricePerUnit))
+    const cheapestHomePrice = homeListings.length > 0
+      ? Math.min(...homeListings.map(l => l.pricePerUnit))
+      : Infinity
 
     // --- Total velocity (needed before history window + competitor count) ---
     const velocity = params.hq ? item.hqSaleVelocity : item.regularSaleVelocity
@@ -81,7 +72,7 @@ export function scoreOpportunities(
     // --- Competitors relative to realistic sell price ---
     // Only count listings near our expected price as real competition.
     // A 200K listing is not competing with us if we plan to sell at 50K.
-    const competitorListings = activeHomeListings.filter(l =>
+    const competitorListings = homeListings.filter(l =>
       l.pricePerUnit <= realisticSellPrice * params.price_threshold
     )
     const activeCompetitorCount = competitorListings.length
@@ -104,14 +95,7 @@ export function scoreOpportunities(
 
     for (const worldID of worldIds) {
       const wListings = sourceListings.filter(l => l.worldID === worldID)
-      const minSrcPrice = Math.min(...wListings.map(l => l.pricePerUnit))
-      const activeSrc = wListings.filter(l =>
-        l.pricePerUnit <= minSrcPrice * params.price_threshold &&
-        l.lastReviewTime >= stalenessCutoff
-      )
-      if (activeSrc.length === 0) continue
-
-      const cheapestSource = Math.min(...activeSrc.map(l => l.pricePerUnit))
+      const cheapestSource = Math.min(...wListings.map(l => l.pricePerUnit))
       const effectiveBuyPrice = cheapestSource * (1 + MARKET_TAX)
       const profitPerUnit = realisticSellPrice * (1 - MARKET_TAX) - effectiveBuyPrice
       if (profitPerUnit <= 0) continue
@@ -121,8 +105,7 @@ export function scoreOpportunities(
       const sourceConf = confidence(sourceAgeHours, SOURCE_TIME_CONSTANT_H)
       const worldScore = profitPerUnit * fairShareVelocity * homeConf * sourceConf * turnoverDiscount
 
-      // Count only units at the exact cheapest price (multiple retainers at same price all count)
-      const availableUnits = activeSrc
+      const availableUnits = wListings
         .filter(l => l.pricePerUnit === cheapestSource)
         .reduce((sum, l) => sum + l.quantity, 0)
 
@@ -237,14 +220,7 @@ export function scoreOpportunities(
 
       for (const worldID of worldIds) {
         const wListings = allListings.filter(l => l.worldID === worldID)
-        const minPrice = Math.min(...wListings.map(l => l.pricePerUnit))
-        const activeSrc = wListings.filter(l =>
-          l.pricePerUnit <= minPrice * params.price_threshold &&
-          l.lastReviewTime >= stalenessCutoff
-        )
-        if (activeSrc.length === 0) continue
-
-        const cheapestSource = Math.min(...activeSrc.map(l => l.pricePerUnit))
+        const cheapestSource = Math.min(...wListings.map(l => l.pricePerUnit))
         const effectiveBuyPrice = cheapestSource * (1 + MARKET_TAX)
         const profitPerUnit = vendorSellPrice - effectiveBuyPrice
         if (profitPerUnit <= 0) continue
@@ -257,7 +233,7 @@ export function scoreOpportunities(
         const sourceConf = confidence(sourceAgeHours, SOURCE_TIME_CONSTANT_H)
         const worldScore = profitPerUnit * sourceConf
 
-        const availableUnits = activeSrc
+        const availableUnits = wListings
           .filter(l => l.pricePerUnit === cheapestSource)
           .reduce((sum, l) => sum + l.quantity, 0)
 
