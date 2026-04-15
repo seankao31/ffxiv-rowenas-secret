@@ -32,5 +32,5 @@ A `FIXTURE_DATA=true` environment variable bypasses the scanner and seeds the in
 ## Consequences
 
 - The snapshot must be regenerated when the cache data shape changes (new fields on `ItemData`, changes to `Opportunity` structure).
-- Fixture data is a frozen point-in-time sample — it won't reflect new items, recipe changes, or market dynamics.
+- Fixture data is a frozen point-in-time sample — it won't reflect new items, recipe changes, or market dynamics. Timestamps are rebased relative to `Date.now()` on each seed so listings don't decay past the staleness threshold.
 - The `FIXTURE_DATA` check is a simple boolean gate with no intermediate modes. If partial scanning or selective fixture loading is needed later, this pattern would need extension.
