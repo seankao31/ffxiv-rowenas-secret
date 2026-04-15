@@ -7,7 +7,11 @@ export function createMobilePagination() {
   $effect(() => {
     const mql = window.matchMedia('(min-width: 1024px)')
     isDesktop = mql.matches
-    const handler = (e: MediaQueryListEvent) => { isDesktop = e.matches }
+    const handler = (e: MediaQueryListEvent) => {
+      const wasDesktop = isDesktop
+      isDesktop = e.matches
+      if (wasDesktop && !isDesktop) visibleCount = PAGE_SIZE
+    }
     mql.addEventListener('change', handler)
     return () => mql.removeEventListener('change', handler)
   })
