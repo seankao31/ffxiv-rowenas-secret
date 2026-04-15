@@ -8,8 +8,14 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'desktop',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: /\.mobile\.test\.ts$/,
+    },
+    {
+      name: 'mobile',
+      use: { ...devices['iPhone 14'] },
+      testIgnore: [/\.desktop\.test\.ts$/, /craft-api\.test\.ts$/],
     },
   ],
   webServer: {
