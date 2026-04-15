@@ -20,6 +20,8 @@
 
   const iconUrl = $derived.by(() => { void nameGeneration; return getIconUrl(data.itemID) })
   const primaryName = $derived.by(() => { void nameGeneration; return resolveDisplayName(data.itemID, data.twName) })
+  // getEnglishName is intentional here: enName is the English subtitle shown below
+  // the TW primary name, not a fallback. Don't replace with resolveDisplayName.
   const enName = $derived.by(() => { void nameGeneration; return getEnglishName(data.itemID) ?? null })
   const secondaryName = $derived(data.twName ? enName : null)
 
