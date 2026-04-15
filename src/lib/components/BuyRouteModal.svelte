@@ -154,7 +154,7 @@
       </div>
       <button
         type="button"
-        class="btn btn-ghost btn-sm"
+        class="btn btn-ghost btn-square size-12"
         onclick={onclose}
         aria-label="Close route"
       >✕</button>
@@ -195,29 +195,30 @@
 
             {#if state === 'bought'}
               <!-- Bought state -->
-              <div
-                class="flex items-center px-5 py-2.5 pl-11 gap-3 border-l-3 border-transparent opacity-45 cursor-pointer"
+              <button
+                type="button"
+                class="flex items-center w-full text-left px-5 py-2.5 lg:pl-11 gap-3 border-l-3 border-transparent opacity-45 cursor-pointer"
                 data-testid="route-item"
                 data-state="bought"
-                role="button"
-                tabindex="0"
                 onclick={() => toggleState(item, 'bought')}
-                onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleState(item, 'bought') } }}
               >
                 <div class="w-5 h-5 rounded border-2 border-primary bg-primary/30 flex items-center justify-center shrink-0">
                   <span class="text-primary text-xs">✓</span>
                 </div>
                 <div class="flex-1 min-w-0">
                   <span class="text-sm line-through text-base-content/50">{displayName}</span>
+                  {#if item.isAlt && item.primaryWorld && item.primaryBuyPrice}
+                    <p class="text-xs mt-0.5 invisible" aria-hidden="true">&nbsp;</p>
+                  {/if}
                 </div>
                 <span class="text-sm text-base-content/30 tabular-nums">×{item.recommendedUnits}</span>
                 <span class="text-sm text-base-content/30 tabular-nums">{fmt(item.buyPrice)}</span>
-              </div>
+              </button>
 
             {:else if dismissed}
               <!-- Dismissed (linked partner bought elsewhere) -->
               <div
-                class="flex items-center px-5 py-2.5 pl-11 gap-3 border-l-3 border-transparent opacity-30 cursor-not-allowed"
+                class="flex items-center px-5 py-2.5 lg:pl-11 gap-3 border-l-3 border-transparent opacity-30 cursor-not-allowed"
                 data-testid="route-item"
                 data-state="dismissed"
               >
@@ -241,7 +242,7 @@
             {:else if state === 'missing'}
               <!-- Missing state -->
               <div
-                class="flex items-center px-5 py-2.5 pl-11 gap-3 border-l-3 border-transparent opacity-45"
+                class="flex items-center px-5 py-2.5 lg:pl-11 gap-3 border-l-3 border-transparent opacity-45"
                 data-testid="route-item"
                 data-state="missing"
               >
@@ -253,6 +254,9 @@
                     <span class="text-sm line-through text-base-content/50">{displayName}</span>
                     <span class="badge badge-xs badge-error">missing</span>
                   </div>
+                  {#if item.isAlt && item.primaryWorld && item.primaryBuyPrice}
+                    <p class="text-xs mt-0.5 invisible" aria-hidden="true">&nbsp;</p>
+                  {/if}
                 </div>
                 <span class="text-sm text-base-content/30 tabular-nums">{fmt(item.buyPrice)}</span>
                 <button
@@ -266,44 +270,48 @@
             {:else}
               <!-- Unchecked (default) state -->
               <div
-                class="flex items-center px-5 py-2.5 pl-11 gap-3 border-l-3 cursor-pointer hover:bg-base-200/50 {promoted ? 'border-warning' : 'border-transparent'} {item.isAlt && !promoted ? 'opacity-75' : ''}"
+                class="flex items-center px-5 py-2.5 lg:pl-11 gap-3 border-l-3 {promoted ? 'border-warning' : 'border-transparent'} {item.isAlt && !promoted ? 'opacity-75' : ''}"
                 data-testid="route-item"
                 data-state="unchecked"
-                role="button"
-                tabindex="0"
-                onclick={() => toggleState(item, 'bought')}
-                onkeydown={(e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleState(item, 'bought') } }}
               >
-                <div class="w-5 h-5 rounded border-2 border-base-content/20 shrink-0"></div>
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2">
-                    {#if icon}
-                      <img src={icon} alt="" width="20" height="20" class="shrink-0"
-                        onerror={(e: Event) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
-                    {/if}
-                    <span class="text-sm">{displayName}</span>
-                    {#if item.isAlt}
-                      <span class="badge badge-xs badge-warning">alt</span>
-                    {/if}
-                    <CopyButton text={displayName} />
-                  </div>
-                  {#if item.isAlt && item.primaryWorld && item.primaryBuyPrice}
-                    <p class="text-xs mt-0.5 pl-7 {promoted ? 'text-warning' : 'text-base-content/35'}">
-                      {#if promoted}
-                        ⚠ Missing on {item.primaryWorld} — available here at {fmt(item.buyPrice)} ({priceDiffPercent(item.buyPrice, item.primaryBuyPrice)})
-                      {:else}
-                        Primary: {item.primaryWorld} at {fmt(item.primaryBuyPrice)} · here: {fmt(item.buyPrice)} ({priceDiffPercent(item.buyPrice, item.primaryBuyPrice)})
+                <button
+                  type="button"
+                  class="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:bg-base-200/50 -my-2.5 py-2.5 -ml-5 pl-5 lg:-ml-11 lg:pl-11 flex-wrap lg:flex-nowrap"
+                  onclick={() => toggleState(item, 'bought')}
+                >
+                  <div class="w-5 h-5 rounded border-2 border-base-content/20 shrink-0"></div>
+                  <div class="flex-1 min-w-0 basis-[calc(100%-2rem)] lg:basis-0">
+                    <div class="flex items-center gap-2">
+                      {#if icon}
+                        <img src={icon} alt="" width="20" height="20" class="shrink-0"
+                          onerror={(e: Event) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
                       {/if}
-                    </p>
-                  {/if}
-                </div>
-                <span class="text-sm text-base-content/50 tabular-nums">×{item.recommendedUnits}</span>
-                <span class="text-sm tabular-nums {item.isAlt ? 'text-base-content/50' : 'text-success'}">{fmt(item.buyPrice)}</span>
-                <span class="badge badge-xs {conf.color}">{conf.text}</span>
+                      <span class="text-sm">{displayName}</span>
+                      {#if item.isAlt}
+                        <span class="badge badge-xs badge-warning">alt</span>
+                      {/if}
+                      <span class="hidden lg:inline-flex"><CopyButton text={displayName} /></span>
+                    </div>
+                    {#if item.isAlt && item.primaryWorld && item.primaryBuyPrice}
+                      <p class="text-xs mt-0.5 pl-7 text-left {promoted ? 'text-warning' : 'text-base-content/35'}">
+                        {#if promoted}
+                          ⚠ Missing on {item.primaryWorld} — available here at {fmt(item.buyPrice)} ({priceDiffPercent(item.buyPrice, item.primaryBuyPrice)})
+                        {:else}
+                          Primary: {item.primaryWorld} at {fmt(item.primaryBuyPrice)} · here: {fmt(item.buyPrice)} ({priceDiffPercent(item.buyPrice, item.primaryBuyPrice)})
+                        {/if}
+                      </p>
+                    {/if}
+                  </div>
+                  <span class="flex items-center gap-3 lg:ml-0">
+                    <span class="text-sm text-base-content/50 tabular-nums">×{item.recommendedUnits}</span>
+                    <span class="text-sm tabular-nums {item.isAlt ? 'text-base-content/50' : 'text-success'}">{fmt(item.buyPrice)}</span>
+                    <span class="badge badge-xs {conf.color}">{conf.text}</span>
+                  </span>
+                </button>
                 <button
                   type="button"
                   class="btn btn-ghost btn-xs text-error/40 hover:text-error/80"
-                  onclick={(e: MouseEvent) => { e.stopPropagation(); toggleState(item, 'missing') }}
+                  onclick={() => toggleState(item, 'missing')}
                   aria-label="Mark as missing"
                 >✕</button>
               </div>

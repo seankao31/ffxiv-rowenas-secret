@@ -33,6 +33,43 @@ test.describe('Buy Route (desktop layout)', () => {
     expect(box!.width).toBeLessThanOrEqual(768)
   })
 
+  test('alt item row height stays constant when marked as bought', async ({ page }) => {
+    // Items 101 and 102 both have alt sources, so the modal will contain alt rows.
+    // Alt rows in unchecked state show a secondary info line (primary world/price);
+    // that line must not vanish on state change — layout shift is jarring.
+    const rows = page.locator('table tbody tr')
+    await rows.nth(0).locator('td:nth-child(3)').click()
+    await rows.nth(1).locator('td:nth-child(3)').click()
+    await page.locator('[data-testid="floating-action-bar"] button', { hasText: 'Plan Route' }).click()
+
+    // Find the positional index of the first alt item. We use a positional (.nth) locator
+    // so the reference stays stable after the state changes and Svelte swaps the DOM element.
+    const allItems = page.locator('[data-testid="route-item"]')
+    let altIndex = -1
+    const count = await allItems.count()
+    for (let i = 0; i < count; i++) {
+      if (await allItems.nth(i).locator('.badge-warning', { hasText: 'alt' }).count() > 0) {
+        altIndex = i
+        break
+      }
+    }
+    expect(altIndex).toBeGreaterThanOrEqual(0)
+
+    const altItem = allItems.nth(altIndex)
+    await expect(altItem).toHaveAttribute('data-state', 'unchecked')
+
+    const boxBefore = await altItem.boundingBox()
+    expect(boxBefore).toBeTruthy()
+
+    await altItem.click()
+    await expect(altItem).toHaveAttribute('data-state', 'bought')
+
+    const boxAfter = await altItem.boundingBox()
+    expect(boxAfter).toBeTruthy()
+
+    expect(Math.abs(boxAfter!.height - boxBefore!.height)).toBeLessThanOrEqual(1)
+  })
+
   test('floating action bar does not overlap footer', async ({ page }) => {
     await page.locator('table tbody tr').first().locator('td:nth-child(3)').click()
     const fab = page.locator('[data-testid="floating-action-bar"]')
