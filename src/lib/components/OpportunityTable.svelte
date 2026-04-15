@@ -87,7 +87,7 @@
 {/snippet}
 
 {#snippet sortIcon(column: SortColumn)}
-  <button type="button" class="inline-flex items-center gap-0.5 cursor-pointer" aria-label="Sort by {column}" onclick={() => onSort(column)}>
+  <span class="inline-flex items-center">
     {#if sort.column === column}
       {#if sort.direction === 'asc'}
         <ArrowUp class="inline w-3.5 h-3.5 opacity-90" strokeWidth={3.5} />
@@ -97,7 +97,7 @@
     {:else}
       <ArrowUpDown class="inline w-3.5 h-3.5 opacity-50" strokeWidth={3.5} />
     {/if}
-  </button>
+  </span>
 {/snippet}
 
 <div data-testid="table-container" class="flex-1 overflow-auto min-h-0">
@@ -108,11 +108,11 @@
         <th>Buy from</th>
         <th>Buy</th>
         <th>Sell <span {@attach tooltip("Estimated sell price: the lower of the cheapest listing and the median recent sale. Second line (if shown) is the current cheapest listing on the market board.")}>{@render infoIcon()}</span></th>
-        <th>Profit/unit {@render sortIcon('profitPerUnit')} <span {@attach tooltip("Sell price after 5% tax, minus buy price. Second line (if shown) uses the market board listing instead.")}>{@render infoIcon()}</span></th>
+        <th class="cursor-pointer" aria-label="Sort by profitPerUnit" onclick={() => onSort('profitPerUnit')}>Profit/unit {@render sortIcon('profitPerUnit')} <span {@attach tooltip("Sell price after 5% tax, minus buy price. Second line (if shown) uses the market board listing instead.")}>{@render infoIcon()}</span></th>
         <th>Units <span {@attach tooltip("Recommended / available at source. Recommended is capped by fair-share velocity × days of supply.")}>{@render infoIcon()}</span></th>
-        <th>Comp {@render sortIcon('activeCompetitorCount')} <span {@attach tooltip("Active competing listings on the home world near the expected sell price.")}>{@render infoIcon()}</span></th>
-        <th>Vel {@render sortIcon('fairShareVelocity')} <span {@attach tooltip("Your fair share of daily sales: total velocity ÷ (competitors + 1). Second line shows total market velocity.")}>{@render infoIcon()}</span></th>
-        <th>Gil/day {@render sortIcon('expectedDailyProfit')} <span {@attach tooltip("Expected daily profit: profit per unit × fair-share velocity. Second line (if shown) is an alternative source world, for comparison only — all other columns use the primary source.")}>{@render infoIcon()}</span></th>
+        <th class="cursor-pointer" aria-label="Sort by activeCompetitorCount" onclick={() => onSort('activeCompetitorCount')}>Comp {@render sortIcon('activeCompetitorCount')} <span {@attach tooltip("Active competing listings on the home world near the expected sell price.")}>{@render infoIcon()}</span></th>
+        <th class="cursor-pointer" aria-label="Sort by fairShareVelocity" onclick={() => onSort('fairShareVelocity')}>Vel {@render sortIcon('fairShareVelocity')} <span {@attach tooltip("Your fair share of daily sales: total velocity ÷ (competitors + 1). Second line shows total market velocity.")}>{@render infoIcon()}</span></th>
+        <th class="cursor-pointer" aria-label="Sort by expectedDailyProfit" onclick={() => onSort('expectedDailyProfit')}>Gil/day {@render sortIcon('expectedDailyProfit')} <span {@attach tooltip("Expected daily profit: profit per unit × fair-share velocity. Second line (if shown) is an alternative source world, for comparison only — all other columns use the primary source.")}>{@render infoIcon()}</span></th>
       </tr>
     </thead>
     <tbody>
