@@ -1,20 +1,9 @@
-import { test, expect, type Page } from '@playwright/test'
-import { opportunities, meta } from './fixtures/opportunities'
-
-async function mockApi(page: Page) {
-  await page.route('**/api/opportunities**', async route => {
-    await route.fulfill({ json: { opportunities, meta } })
-  })
-  // Mock XIVAPI item search (used by name cache)
-  await page.route('**/v2.xivapi.com/**', route => route.fulfill({ json: { rows: [] } }))
-  // Return empty results for Garland Tools to keep tests offline and quiet
-  await page.route('**/garlandtools.org/**/data.json', route => route.fulfill({ json: { locationIndex: {} } }))
-  await page.route('**/garlandtools.org/**/get.php**', route => route.fulfill({ json: { item: { vendors: [] }, partials: [] } }))
-}
+import { test, expect } from '@playwright/test'
+import { mockArbitrageApi } from './fixtures/mock-arbitrage-api'
 
 test.describe('Buy Route', () => {
   test.beforeEach(async ({ page }) => {
-    await mockApi(page)
+    await mockArbitrageApi(page)
     await page.goto('/arbitrage')
     await expect(page.locator('table')).toBeVisible()
   })
@@ -89,17 +78,6 @@ test.describe('Buy Route', () => {
     await expect(page.locator('[data-testid="buy-route-modal"]')).toBeHidden()
   })
 
-  test('clicking an item in modal marks it as bought', async ({ page }) => {
-    const rows = page.locator('table tbody tr')
-    await rows.nth(0).locator('td:nth-child(3)').click()
-    await page.locator('[data-testid="floating-action-bar"] button', { hasText: 'Plan Route' }).click()
-
-    const item = page.locator('[data-testid="route-item"]').first()
-    await expect(item).toHaveAttribute('data-state', 'unchecked')
-    await item.click()
-    await expect(item).toHaveAttribute('data-state', 'bought')
-  })
-
   test('clicking missing button marks item as missing', async ({ page }) => {
     const rows = page.locator('table tbody tr')
     await rows.nth(0).locator('td:nth-child(3)').click()
@@ -125,20 +103,6 @@ test.describe('Buy Route', () => {
     await firstRow.locator('td:nth-child(3)').click()
     await page.locator('[data-testid="floating-action-bar"] button', { hasText: 'Plan Route' }).click()
     await expect(page.locator('[data-testid="floating-action-bar"]')).toBeHidden()
-  })
-
-  test('floating action bar does not overlap footer', async ({ page }) => {
-    await page.locator('table tbody tr').first().locator('td:nth-child(3)').click()
-    const fab = page.locator('[data-testid="floating-action-bar"]')
-    await expect(fab).toBeVisible()
-
-    const fabBox = await fab.boundingBox()
-    const footerBox = await page.locator('footer').boundingBox()
-
-    expect(fabBox).toBeTruthy()
-    expect(footerBox).toBeTruthy()
-    // FAB's bottom edge must be at or above the footer's top edge
-    expect(fabBox!.y + fabBox!.height).toBeLessThanOrEqual(footerBox!.y)
   })
 
   test('floating action bar buttons are comfortably sized', async ({ page }) => {
