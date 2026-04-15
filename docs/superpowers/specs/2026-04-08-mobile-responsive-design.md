@@ -81,7 +81,9 @@ Contains the same `navItems` list as Sidebar. Active state styling matches Sideb
 
 **Both orientations:**
 - Table container: `overflow-x-auto` (already has `overflow-y-auto`, need horizontal too)
-- Item column (first `<th>` and first `<td>`): `sticky left-0 z-10` with `bg-base-200` (header) / `bg-base-100` (body rows) to prevent see-through
+- Item `<th>` (corner cell): `sticky top-0 left-0 z-30 bg-base-200` — must be explicit on both axes, with `z-30` to sit above DaisyUI's pinned-row z-index
+- All other `<th>` cells: `bg-base-200` to prevent body content bleeding through the header when scrolling
+- Item `<td>` (body rows): `sticky left-0 z-10` with `bg-base-100` (or selection variant) to prevent see-through
 - Subtle right border on sticky column for visual separation: `border-r border-base-300`
 
 **Landscape (~700-900px):** Most columns visible without scrolling. Sticky column is insurance.
@@ -105,7 +107,7 @@ Contains the same `navItems` list as Sidebar. Active state styling matches Sideb
 
 ## Testing Considerations
 
-- Verify sticky column works with `table-pin-rows` (DaisyUI's sticky header). Both sticky header and sticky column means the top-left cell needs `z-20` to sit above both axes.
+- Verify sticky column works with `table-pin-rows` (DaisyUI's sticky header). Both sticky header and sticky column means the top-left corner cell needs `z-30` (higher than DaisyUI's `z-20` default for pinned rows) to sit above both axes. All header `<th>` cells need explicit `bg-base-200` to prevent body content from bleeding through when scrolling.
 - Test drawer open/close with keyboard (Escape to close)
 - Test ThresholdControls sliders are usable with touch (thumb-friendly targets)
 - Verify `overflow-x-auto` on the table doesn't break the existing `overflow-y-auto` vertical scroll
