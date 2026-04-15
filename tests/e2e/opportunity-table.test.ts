@@ -1,22 +1,10 @@
 import { test, expect, type Page } from '@playwright/test'
 import { opportunities, meta } from './fixtures/opportunities'
+import { mockArbitrageApi } from './fixtures/mock-arbitrage-api'
 
 // Fixture items are ordered by score desc (the API's default):
 // Alpha Draught, Beta Elixir, Gamma Ingot, Delta Cloth, Epsilon Ore
 const DEFAULT_ORDER = opportunities.map(o => o.itemName)
-
-async function mockApi(page: Page) {
-  await page.route('**/api/opportunities**', async route => {
-    await route.fulfill({
-      json: { opportunities, meta },
-    })
-  })
-  // Return empty results for XIVAPI to keep tests offline and quiet
-  await page.route('**/v2.xivapi.com/**', route => route.fulfill({ json: { rows: [] } }))
-  // Return empty results for Garland Tools to keep tests offline and quiet
-  await page.route('**/garlandtools.org/**/data.json', route => route.fulfill({ json: { locationIndex: {} } }))
-  await page.route('**/garlandtools.org/**/get.php**', route => route.fulfill({ json: { item: { vendors: [] }, partials: [] } }))
-}
 
 /** Read item names from the first column of each table body row. */
 async function getRowNames(page: Page): Promise<string[]> {
@@ -25,7 +13,7 @@ async function getRowNames(page: Page): Promise<string[]> {
 
 test.describe('OpportunityTable', () => {
   test.beforeEach(async ({ page }) => {
-    await mockApi(page)
+    await mockArbitrageApi(page)
     await page.goto('/arbitrage')
     await expect(page.locator('table')).toBeVisible()
   })

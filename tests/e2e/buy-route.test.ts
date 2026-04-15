@@ -1,20 +1,9 @@
-import { test, expect, type Page } from '@playwright/test'
-import { opportunities, meta } from './fixtures/opportunities'
-
-async function mockApi(page: Page) {
-  await page.route('**/api/opportunities**', async route => {
-    await route.fulfill({ json: { opportunities, meta } })
-  })
-  // Mock XIVAPI item search (used by name cache)
-  await page.route('**/v2.xivapi.com/**', route => route.fulfill({ json: { rows: [] } }))
-  // Return empty results for Garland Tools to keep tests offline and quiet
-  await page.route('**/garlandtools.org/**/data.json', route => route.fulfill({ json: { locationIndex: {} } }))
-  await page.route('**/garlandtools.org/**/get.php**', route => route.fulfill({ json: { item: { vendors: [] }, partials: [] } }))
-}
+import { test, expect } from '@playwright/test'
+import { mockArbitrageApi } from './fixtures/mock-arbitrage-api'
 
 test.describe('Buy Route', () => {
   test.beforeEach(async ({ page }) => {
-    await mockApi(page)
+    await mockArbitrageApi(page)
     await page.goto('/arbitrage')
     await expect(page.locator('table')).toBeVisible()
   })
