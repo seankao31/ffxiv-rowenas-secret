@@ -19,6 +19,20 @@ test.describe('Buy Route (desktop layout)', () => {
     await expect(item).toHaveAttribute('data-state', 'bought')
   })
 
+  test('modal panel is constrained to a maximum width on wide screens', async ({ page }) => {
+    const rows = page.locator('table tbody tr')
+    await rows.nth(0).locator('td:nth-child(3)').click()
+    await page.locator('[data-testid="floating-action-bar"] button', { hasText: 'Plan Route' }).click()
+
+    const panel = page.locator('[data-testid="buy-route-panel"]')
+    await expect(panel).toBeVisible()
+
+    const box = await panel.boundingBox()
+    expect(box).toBeTruthy()
+    // max-w-3xl = 768px; panel must not stretch to full viewport width (1280px)
+    expect(box!.width).toBeLessThanOrEqual(768)
+  })
+
   test('floating action bar does not overlap footer', async ({ page }) => {
     await page.locator('table tbody tr').first().locator('td:nth-child(3)').click()
     const fab = page.locator('[data-testid="floating-action-bar"]')
