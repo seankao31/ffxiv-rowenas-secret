@@ -28,8 +28,9 @@ test.describe('OpportunityTable', () => {
     expect(names).toEqual(DEFAULT_ORDER)
   })
 
-  test('click Gil/day sorts descending', async ({ page }) => {
-    await page.click('button[aria-label="Sort by expectedDailyProfit"]')
+  test('click Gil/day header text sorts descending', async ({ page }) => {
+    // Clicking the header text itself (not just the sort icon) should trigger sorting
+    await page.locator('thead th', { hasText: 'Gil/day' }).click()
     const names = await getRowNames(page)
     // expectedDailyProfit desc: 1500, 1120, 1000, 800, 500, 300
     expect(names).toEqual([
@@ -38,9 +39,9 @@ test.describe('OpportunityTable', () => {
   })
 
   test('click Gil/day twice sorts ascending', async ({ page }) => {
-    const btn = page.locator('button[aria-label="Sort by expectedDailyProfit"]')
-    await btn.click()
-    await btn.click()
+    const gilDayHeader = page.locator('th[aria-label="Sort by expectedDailyProfit"]')
+    await gilDayHeader.click()
+    await gilDayHeader.click()
     const names = await getRowNames(page)
     // expectedDailyProfit asc: 300, 500, 800, 1000, 1120, 1500
     expect(names).toEqual([
@@ -49,19 +50,19 @@ test.describe('OpportunityTable', () => {
   })
 
   test('click Gil/day three times clears sort (returns to default)', async ({ page }) => {
-    const btn = page.locator('button[aria-label="Sort by expectedDailyProfit"]')
-    await btn.click()
-    await btn.click()
-    await btn.click()
+    const gilDayHeader = page.locator('th[aria-label="Sort by expectedDailyProfit"]')
+    await gilDayHeader.click()
+    await gilDayHeader.click()
+    await gilDayHeader.click()
     const names = await getRowNames(page)
     expect(names).toEqual(DEFAULT_ORDER)
   })
 
   test('clicking a different column switches sort', async ({ page }) => {
     // Sort by Gil/day first
-    await page.click('button[aria-label="Sort by expectedDailyProfit"]')
+    await page.click('th[aria-label="Sort by expectedDailyProfit"]')
     // Then switch to Profit/unit
-    await page.click('button[aria-label="Sort by profitPerUnit"]')
+    await page.click('th[aria-label="Sort by profitPerUnit"]')
     const names = await getRowNames(page)
     // profitPerUnit desc: 560, 500, 400, 300, 200, 100
     expect(names).toEqual([
@@ -70,22 +71,25 @@ test.describe('OpportunityTable', () => {
   })
 
   test('sort icon reflects active state', async ({ page }) => {
-    const gilDayBtn = page.locator('button[aria-label="Sort by expectedDailyProfit"]')
-    const profitBtn = page.locator('button[aria-label="Sort by profitPerUnit"]')
+    const gilDayHeader = page.locator('th[aria-label="Sort by expectedDailyProfit"]')
+    const profitHeader = page.locator('th[aria-label="Sort by profitPerUnit"]')
+    // Target the sort icon SVG specifically (inside the inline-flex span, not the info icon)
+    const gilDayIcon = gilDayHeader.locator('.inline-flex svg')
+    const profitIcon = profitHeader.locator('.inline-flex svg')
 
     // Before clicking: all icons should have opacity-50 (inactive)
-    await expect(gilDayBtn.locator('svg')).toHaveClass(/opacity-50/)
-    await expect(profitBtn.locator('svg')).toHaveClass(/opacity-50/)
+    await expect(gilDayIcon).toHaveClass(/opacity-50/)
+    await expect(profitIcon).toHaveClass(/opacity-50/)
 
     // Click Gil/day: its icon becomes active (opacity-90), others stay inactive
-    await gilDayBtn.click()
-    await expect(gilDayBtn.locator('svg')).toHaveClass(/opacity-90/)
-    await expect(profitBtn.locator('svg')).toHaveClass(/opacity-50/)
+    await gilDayHeader.click()
+    await expect(gilDayIcon).toHaveClass(/opacity-90/)
+    await expect(profitIcon).toHaveClass(/opacity-50/)
 
     // Click Profit/unit: it becomes active, Gil/day goes back to inactive
-    await profitBtn.click()
-    await expect(profitBtn.locator('svg')).toHaveClass(/opacity-90/)
-    await expect(gilDayBtn.locator('svg')).toHaveClass(/opacity-50/)
+    await profitHeader.click()
+    await expect(profitIcon).toHaveClass(/opacity-90/)
+    await expect(gilDayIcon).toHaveClass(/opacity-50/)
   })
 
   test('copy button is hidden for unresolved item names', async ({ page }) => {
