@@ -6,7 +6,6 @@ describe('parseThresholds', () => {
     const result = parseThresholds({})
     expect(result).toEqual({
       price_threshold: 2.0,
-      listing_staleness_hours: 48,
       days_of_supply: 3,
       limit: 50,
       hq: false,
@@ -16,14 +15,12 @@ describe('parseThresholds', () => {
   test('parses valid string params into numbers', () => {
     const result = parseThresholds({
       price_threshold: '3.5',
-      listing_staleness_hours: '24',
       days_of_supply: '7',
       limit: '100',
       hq: 'true',
     })
     expect(result).toEqual({
       price_threshold: 3.5,
-      listing_staleness_hours: 24,
       days_of_supply: 7,
       limit: 100,
       hq: true,
@@ -40,13 +37,6 @@ describe('parseThresholds', () => {
   test('rejects non-numeric price_threshold', () => {
     expect(parseThresholds({ price_threshold: 'abc' }))
       .toEqual({ error: 'price_threshold must be between 1.0 and 10.0' })
-  })
-
-  test('rejects listing_staleness_hours outside 1–720', () => {
-    expect(parseThresholds({ listing_staleness_hours: '0' }))
-      .toEqual({ error: 'listing_staleness_hours must be between 1 and 720' })
-    expect(parseThresholds({ listing_staleness_hours: '721' }))
-      .toEqual({ error: 'listing_staleness_hours must be between 1 and 720' })
   })
 
   test('rejects days_of_supply outside 1–30', () => {
@@ -73,7 +63,6 @@ describe('parseThresholds', () => {
   test('accepts boundary values', () => {
     const result = parseThresholds({
       price_threshold: '1.0',
-      listing_staleness_hours: '720',
       days_of_supply: '30',
       limit: '200',
     })

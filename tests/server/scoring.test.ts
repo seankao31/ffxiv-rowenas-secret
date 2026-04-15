@@ -9,7 +9,6 @@ const SRC_B = 4032  // 奧汀
 
 const DEFAULT: ThresholdParams = {
   price_threshold: 2.0,
-  listing_staleness_hours: 48,
   days_of_supply: 3,
   limit: 50,
   hq: false,
@@ -18,7 +17,6 @@ const DEFAULT: ThresholdParams = {
 const NOW = Date.now()
 const FRESH = NOW - 30 * 60_000        // 30 min ago
 const STALE20H = NOW - 20 * 3_600_000  // 20 hours ago
-const TOO_OLD = NOW - 50 * 3_600_000   // 50 hours ago (beyond 48h staleness cutoff)
 
 function item(overrides: Partial<ItemData> = {}): ItemData {
   return {
@@ -67,38 +65,61 @@ describe('scoreOpportunities', () => {
     ).toHaveLength(0)
   })
 
-  test('excludes item with no home-world listings at all', () => {
+  test('item with no home listings but sale history produces opportunity with zero competitors', () => {
     const noHome = item({
       listings: [
-        // Only source-world listing — no home listing
         { pricePerUnit: 400, quantity: 3, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
       ],
+      recentHistory: [
+        { pricePerUnit: 1000, quantity: 1, timestamp: FRESH, hq: false },
+        { pricePerUnit: 900, quantity: 1, timestamp: FRESH, hq: false },
+        { pricePerUnit: 1100, quantity: 1, timestamp: FRESH, hq: false },
+      ],
+    })
+    const results = scoreOpportunities(new Map([[1, noHome]]), names, DEFAULT)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.activeCompetitorCount).toBe(0)
+    // realisticSellPrice = min(Infinity, median=1000) = 1000
+    expect(results[0]!.sellPrice).toBe(1000)
+  })
+
+  test('item with no home listings and no sale history is excluded by velocity', () => {
+    const noHome = item({
+      listings: [
+        { pricePerUnit: 400, quantity: 3, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
+      ],
+      regularSaleVelocity: 0,
     })
     expect(scoreOpportunities(new Map([[1, noHome]]), names, DEFAULT)).toHaveLength(0)
   })
 
-  test('excludes item when all home listings are too old', () => {
+  test('stale home listings still produce opportunity with low confidence', () => {
+    const STALE50H = NOW - 50 * 3_600_000
     const staleHome = item({
+      worldUploadTimes: { [HOME]: STALE50H, [SRC_B]: FRESH },
+      homeLastUploadTime: STALE50H,
       listings: [
-        { pricePerUnit: 1000, quantity: 5, worldID: HOME, worldName: '利維坦', lastReviewTime: TOO_OLD, hq: false },
+        { pricePerUnit: 1000, quantity: 5, worldID: HOME, worldName: '利維坦', lastReviewTime: STALE50H, hq: false },
         { pricePerUnit: 400, quantity: 3, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
       ],
     })
-    expect(scoreOpportunities(new Map([[1, staleHome]]), names, DEFAULT)).toHaveLength(0)
+    const results = scoreOpportunities(new Map([[1, staleHome]]), names, DEFAULT)
+    expect(results).toHaveLength(1)
+    expect(results[0]!.homeConfidence).toBeLessThan(0.001)
+    expect(results[0]!.profitPerUnit).toBe(530)
   })
 
-  test('dead listing price threshold: only counts listings within 2× cheapest as active', () => {
-    const withDead = item({
+  test('source world uses cheapest listing regardless of price spread', () => {
+    const withExpensive = item({
       listings: [
         { pricePerUnit: 1000, quantity: 5, worldID: HOME, worldName: '利維坦', lastReviewTime: FRESH, hq: false },
         { pricePerUnit: 400, quantity: 3, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
-        // Dead listing at 3× cheapest on source — outside 2× threshold, excluded from active
         { pricePerUnit: 1200, quantity: 99, worldID: SRC_B, worldName: '奧汀', lastReviewTime: FRESH, hq: false },
       ],
     })
-    const results = scoreOpportunities(new Map([[1, withDead]]), names, DEFAULT)
+    const results = scoreOpportunities(new Map([[1, withExpensive]]), names, DEFAULT)
     expect(results).toHaveLength(1)
-    expect(results[0]!.buyPrice).toBe(420)  // cheapest active price 400 * 1.05 purchase tax
+    expect(results[0]!.buyPrice).toBe(420)  // cheapest price 400 * 1.05
   })
 
   test('picks confidence-adjusted best world, not cheapest', () => {

@@ -24,7 +24,6 @@
   let error = $state<string | null>(null)
   let thresholds = $state<ThresholdState>({
     price_threshold: 2.0,
-    listing_staleness_hours: 48,
     days_of_supply: 3,
     limit: 50,
     hq: false,
