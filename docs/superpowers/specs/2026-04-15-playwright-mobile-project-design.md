@@ -33,7 +33,17 @@ Drop the "desktop layout unchanged" tests (sidebar visible, hamburger hidden) �
 
 ### Shared mock helper
 
-Both new mobile files and existing tests share similar `mockApi()` patterns. Extract a shared helper to `tests/e2e/fixtures/mock-api.ts` to avoid duplication.
+Arbitrage test files share identical `mockApi()` patterns. Extracted to `tests/e2e/fixtures/mock-arbitrage-api.ts`.
+
+### Desktop-only tests
+
+Tests that fail at mobile due to WebKit limitations or layout differences were moved to `*.desktop.test.ts`:
+
+| File | Tests | Reason |
+|---|---|---|
+| `buy-route.desktop.test.ts` | route item click, FAB overlap | Click doesn't register on WebKit; FAB overlaps footer at 390px |
+| `item-detail.desktop.test.ts` | listings scroll container | Container hidden at mobile viewport |
+| `opportunity-table.desktop.test.ts` | clipboard copy | WebKit lacks `grantPermissions` for clipboard-write |
 
 ## What runs where
 
@@ -45,9 +55,8 @@ Both new mobile files and existing tests share similar `mockApi()` patterns. Ext
 | `buy-route.test.ts` | ✓ | ✓ |
 | `item-detail.test.ts` | ✓ | ✓ |
 | `craft-api.test.ts` | ✓ | ✗ (pure API) |
+| `buy-route.desktop.test.ts` | ✓ | ✗ |
+| `item-detail.desktop.test.ts` | ✓ | ✗ |
+| `opportunity-table.desktop.test.ts` | ✓ | ✗ |
 | `nav-drawer.mobile.test.ts` | ✗ | ✓ |
 | `opportunity-table.mobile.test.ts` | ✗ | ✓ |
-
-## Viewport-sensitive tests in other files
-
-`buy-route.test.ts` and `item-detail.test.ts` contain bounding-box assertions (FAB positioning, footer overlap). These run at both viewports — if they fail at mobile, that's a real layout bug to fix, not a test issue.
