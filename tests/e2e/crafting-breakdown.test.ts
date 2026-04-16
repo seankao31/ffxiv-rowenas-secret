@@ -213,7 +213,7 @@ test.describe('Item detail page — crafting breakdown', () => {
     const buyNode = page.locator('[data-testid="buy-recipe-node"]')
     // Count vendor leaves before expand
     const beforeCount = await page.locator('[data-testid="vendor-leaf"]').count()
-    await buyNode.locator('button').click()
+    await buyNode.locator('button:has-text("▶")').click()
     await expect(buyNode.locator('text=▼')).toBeVisible()
     // After expanding, the buy-recipe node's vendor child should appear
     const afterCount = await page.locator('[data-testid="vendor-leaf"]').count()
@@ -239,5 +239,24 @@ test.describe('Item detail page — crafting breakdown', () => {
   test('tree nodes show Chinese item names from server', async ({ page }) => {
     await expect(page.getByRole('link', { name: /青銅裝飾鐵鎚/ })).toBeVisible()
     await expect(page.getByRole('link', { name: /青銅鑄塊/ })).toBeVisible()
+  })
+
+  test('item name link excludes quantity suffix', async ({ page }) => {
+    // 青銅鑄塊 has amount 3. The link's accessible name must be exactly the item
+    // name — quantity belongs outside the link so clicking ×3 does not navigate.
+    await expect(
+      page.getByRole('link', { name: '青銅鑄塊', exact: true }),
+    ).toBeVisible()
+  })
+
+  test('tree rows expose a copy item name button on desktop', async ({ page }, testInfo) => {
+    // Copy button is hidden on mobile to keep the dense row layout readable;
+    // matches the OpportunityTable convention.
+    test.skip(testInfo.project.name === 'mobile', 'copy button hidden on mobile')
+    await expect(page.locator('[data-testid="craft-node"]').first()).toBeVisible()
+    const copyButtons = page.getByRole('button', { name: 'Copy item name' })
+    // At least the root craft + buy-recipe child + vendor leaf each get one.
+    await expect(copyButtons.first()).toBeVisible()
+    expect(await copyButtons.count()).toBeGreaterThanOrEqual(3)
   })
 })
