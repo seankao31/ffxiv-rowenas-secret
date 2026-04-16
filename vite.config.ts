@@ -35,6 +35,16 @@ export default defineConfig({
       // entry resolves through the real path, which is outside the worktree root.
       allow: [resolve(__dirname, '../..')],
     },
+    watch: {
+      // Sibling worktrees under .worktrees/ contain their own tsconfig.json
+      // files. Vite triggers a full SSR module reload on any tsconfig.json
+      // change in the watched tree, re-running hooks.server.ts init() and
+      // double-starting the Universalis scanner. Anchor to this project's
+      // absolute .worktrees/ path so only sibling worktrees are ignored —
+      // a relative glob would match the active worktree's own files when
+      // running dev from within a worktree and break HMR entirely.
+      ignored: [resolve(__dirname, '.worktrees') + '/**'],
+    },
   },
   // Resolve browser exports only during test runs (Svelte's mount() requires
   // the browser build). Scoped via VITEST env var to avoid affecting SSR/dev.
