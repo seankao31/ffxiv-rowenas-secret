@@ -78,17 +78,19 @@
     <div class="w-5 h-5 rounded-sm bg-base-300 shrink-0"></div>
   {/if}
 
-  {#if isVendor}
-    <span class="text-base-content/80 text-xs flex-1 min-w-0 truncate">{displayName}</span>
-  {:else}
-    <a href="/item/{node.itemId}" class="text-primary text-xs hover:underline flex-1 min-w-0 truncate">{displayName}</a>
-  {/if}
-  {#if node.amount > 1}
-    <span class="text-base-content/80 text-xs shrink-0">×{node.amount}</span>
-  {/if}
-  <span class="hidden lg:inline-flex">
-    <CopyButton text={displayName} />
-  </span>
+  <div class="flex-1 min-w-0 flex items-center gap-1">
+    {#if isVendor}
+      <span class="text-base-content/80 text-xs min-w-0 truncate">{displayName}</span>
+    {:else}
+      <a href="/item/{node.itemId}" class="text-primary text-xs hover:underline min-w-0 truncate">{displayName}</a>
+    {/if}
+    {#if node.amount > 1}
+      <span class="text-base-content/80 text-xs shrink-0">×{node.amount}</span>
+    {/if}
+    <span class="hidden lg:inline-flex">
+      <CopyButton text={displayName} />
+    </span>
+  </div>
 
   <span class="text-[9px] px-1.5 py-px rounded shrink-0
     {isCraftNode ? 'bg-success/15 text-success' : isVendor ? 'bg-warning/15 text-warning' : 'bg-primary/15 text-primary'}">
