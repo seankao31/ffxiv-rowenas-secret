@@ -6,7 +6,7 @@
   import { toggleSort, sortOpportunities, type SortState, type SortColumn } from '$lib/client/sort.ts'
   import { resolveDisplayName, isFallbackName, subscribe, getIconUrl, fetchItemMetadata } from '$lib/client/xivapi.ts'
   import { tooltip } from '$lib/client/tooltip.ts'
-  import { fetchVendorInfo, getVendorInfo, setOnChange as setVendorOnChange } from '$lib/client/vendors.ts'
+  import { fetchVendorInfo, getVendorInfo, setOnChange as setVendorOnChange, type VendorInfo } from '$lib/client/vendors.ts'
 
   const {
     opportunities,
@@ -23,6 +23,52 @@
 
   let vendorGeneration = $state(0)
   setVendorOnChange(() => vendorGeneration++)
+
+  // Reactive vendor lookup. Must be called from a template expression ({expr} or {#if cond})
+  // in the caller — those contexts subscribe to vendorGeneration. Calling this inside
+  // {@const} within a {#snippet} body does NOT subscribe the calling {@render}, so the
+  // snippet won't re-run when vendor data arrives. See MEMORY: svelte 5 snippet reactivity.
+  const npcVendors = (itemId: number): VendorInfo[] | undefined => {
+    void vendorGeneration
+    return getVendorInfo(itemId)
+  }
+
+  // When the NPC dropdown is keyboard-focused and visible, a click outside should
+  // only dismiss the popover — not also trigger the underlying row selection.
+  //
+  // Can't just check :focus-within inside onDocumentClick — by click time the badge
+  // has already lost focus (mousedown moves focus before click fires). pointerdown
+  // fires BEFORE focus changes, so we capture the "was open" state while it's valid,
+  // then suppress the resulting click if it landed in the same row.
+  function dismissSilently(node: HTMLElement) {
+    let pressedOutsideWhileOpen = false
+
+    function onPointerDown(e: PointerEvent) {
+      pressedOutsideWhileOpen =
+        node.matches(':focus-within') && !node.contains(e.target as Node)
+    }
+
+    function onDocumentClick(e: MouseEvent) {
+      if (!pressedOutsideWhileOpen) return
+      pressedOutsideWhileOpen = false
+      // Interactive elements (links, buttons) have their own onclick stopPropagation,
+      // so <tr onclick> won't fire for them — let their handlers run. Stopping here
+      // would also suppress target handlers since we're in the capture phase.
+      const target = e.target as Element
+      if (target.closest('a, button, [role="button"]')) return
+      const row = node.closest('tr')
+      if (row?.contains(target)) e.stopPropagation()
+    }
+
+    document.addEventListener('pointerdown', onPointerDown, true)
+    document.addEventListener('click', onDocumentClick, true)
+    return {
+      destroy() {
+        document.removeEventListener('pointerdown', onPointerDown, true)
+        document.removeEventListener('click', onDocumentClick, true)
+      }
+    }
+  }
 
   $effect(() => {
     if (opportunities.length > 0) {
@@ -68,22 +114,16 @@
   <Info class="inline w-3.5 h-3.5 opacity-40 align-middle ml-1" strokeWidth={3.5} />
 {/snippet}
 
-{#snippet npcBadge(itemID: number, size: 'sm' | 'xs')}
-  {@const _ = vendorGeneration}
-  {@const vendors = getVendorInfo(itemID)}
-  {#if vendors && vendors.length > 0}
-    <!-- Stop propagation so clicking the NPC badge doesn't toggle row selection. -->
-    <div class="dropdown dropdown-hover dropdown-end" onclick={(e: MouseEvent) => e.stopPropagation()} role="presentation">
-      <div tabindex="0" role="button" class="badge badge-{size} badge-soft badge-info cursor-help">NPC</div>
-      <div tabindex="0" class="dropdown-content z-10 shadow-md bg-base-200 rounded-box p-2 w-56">
-        {#each vendors as v}
-          <div class="text-xs py-0.5">{v.npcName} — {v.zone}</div>
-        {/each}
-      </div>
+{#snippet npcBadge(vendors: VendorInfo[], size: 'sm' | 'xs')}
+  <!-- Stop propagation so clicking the NPC badge doesn't toggle row selection. -->
+  <div class="dropdown dropdown-hover dropdown-end" use:dismissSilently onclick={(e: MouseEvent) => e.stopPropagation()} role="presentation">
+    <div tabindex="0" role="button" class="badge badge-{size} badge-soft badge-info cursor-help">NPC</div>
+    <div tabindex="0" class="dropdown-content z-10 shadow-md bg-base-200 rounded-box p-2 w-56">
+      {#each vendors as v}
+        <div class="text-xs py-0.5">{v.npcName} — {v.zone}</div>
+      {/each}
     </div>
-  {:else}
-    <span class="badge badge-{size} badge-soft badge-info" onclick={(e: MouseEvent) => e.stopPropagation()} role="presentation">NPC</span>
-  {/if}
+  </div>
 {/snippet}
 
 {#snippet sortIcon(column: SortColumn)}
@@ -144,7 +184,11 @@
           <td>
             <div>
               {#if isNPC(opp.sourceWorld)}
-                {@render npcBadge(opp.itemID, 'sm')}
+                {#if npcVendors(opp.itemID)?.length}
+                  {@render npcBadge(npcVendors(opp.itemID)!, 'sm')}
+                {:else}
+                  <span class="badge badge-sm badge-soft badge-info" onclick={(e: MouseEvent) => e.stopPropagation()} role="presentation">NPC</span>
+                {/if}
               {:else}
                 {opp.sourceWorld}
               {/if}
@@ -152,7 +196,11 @@
             {#if opp.altSourceWorld}
               <div class="text-xs text-base-content/50 mt-1">
                 {#if isNPC(opp.altSourceWorld)}
-                  {@render npcBadge(opp.itemID, 'xs')}
+                  {#if npcVendors(opp.itemID)?.length}
+                    {@render npcBadge(npcVendors(opp.itemID)!, 'xs')}
+                  {:else}
+                    <span class="badge badge-xs badge-soft badge-info" onclick={(e: MouseEvent) => e.stopPropagation()} role="presentation">NPC</span>
+                  {/if}
                 {:else}
                   {opp.altSourceWorld}
                 {/if}
