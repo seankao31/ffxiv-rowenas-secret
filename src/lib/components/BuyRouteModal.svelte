@@ -197,7 +197,7 @@
               <!-- Bought state -->
               <button
                 type="button"
-                class="flex items-center w-full text-left px-5 py-2.5 lg:pl-11 gap-3 border-l-3 border-transparent opacity-45 cursor-pointer"
+                class="flex items-center w-full min-h-18 lg:min-h-16 text-left px-5 py-2.5 lg:pl-11 gap-3 border-l-3 border-transparent opacity-45 cursor-pointer"
                 data-testid="route-item"
                 data-state="bought"
                 onclick={() => toggleState(item, 'bought')}
@@ -207,9 +207,6 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <span class="text-sm line-through text-base-content/50">{displayName}</span>
-                  {#if item.isAlt && item.primaryWorld && item.primaryBuyPrice}
-                    <p class="text-xs mt-0.5 invisible" aria-hidden="true">&nbsp;</p>
-                  {/if}
                 </div>
                 <span class="text-sm text-base-content/30 tabular-nums">×{item.recommendedUnits}</span>
                 <span class="text-sm text-base-content/30 tabular-nums">{fmt(item.buyPrice)}</span>
@@ -218,7 +215,7 @@
             {:else if dismissed}
               <!-- Dismissed (linked partner bought elsewhere) -->
               <div
-                class="flex items-center px-5 py-2.5 lg:pl-11 gap-3 border-l-3 border-transparent opacity-30 cursor-not-allowed"
+                class="flex items-center min-h-18 lg:min-h-16 px-5 py-2.5 lg:pl-11 gap-3 border-l-3 border-transparent opacity-30 cursor-not-allowed"
                 data-testid="route-item"
                 data-state="dismissed"
               >
@@ -242,7 +239,7 @@
             {:else if state === 'missing'}
               <!-- Missing state -->
               <div
-                class="flex items-center px-5 py-2.5 lg:pl-11 gap-3 border-l-3 border-transparent opacity-45"
+                class="flex items-center min-h-18 lg:min-h-16 px-5 py-2.5 lg:pl-11 gap-3 border-l-3 border-transparent opacity-45"
                 data-testid="route-item"
                 data-state="missing"
               >
@@ -254,9 +251,6 @@
                     <span class="text-sm line-through text-base-content/50">{displayName}</span>
                     <span class="badge badge-xs badge-error">missing</span>
                   </div>
-                  {#if item.isAlt && item.primaryWorld && item.primaryBuyPrice}
-                    <p class="text-xs mt-0.5 invisible" aria-hidden="true">&nbsp;</p>
-                  {/if}
                 </div>
                 <span class="text-sm text-base-content/30 tabular-nums">{fmt(item.buyPrice)}</span>
                 <button
@@ -270,7 +264,7 @@
             {:else}
               <!-- Unchecked (default) state -->
               <div
-                class="flex items-center px-5 py-2.5 lg:pl-11 gap-3 border-l-3 {promoted ? 'border-warning' : 'border-transparent'} {item.isAlt && !promoted ? 'opacity-75' : ''}"
+                class="flex items-center min-h-18 lg:min-h-16 px-5 py-2.5 lg:pl-11 gap-3 border-l-3 {promoted ? 'border-warning' : 'border-transparent'} {item.isAlt && !promoted ? 'opacity-75' : ''}"
                 data-testid="route-item"
                 data-state="unchecked"
               >
