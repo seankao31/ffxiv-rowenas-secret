@@ -116,4 +116,25 @@ test.describe('Buy Route (mobile layout)', () => {
     expect(box!.width).toBeGreaterThanOrEqual(44)
     expect(box!.height).toBeGreaterThanOrEqual(44)
   })
+
+  test('floating action bar sits near the viewport bottom on mobile', async ({ page }) => {
+    // The beforeEach opens the modal; close it so the FAB is visible on the arbitrage page.
+    // On mobile the panel fills the full height so the backdrop cannot be clicked directly;
+    // use the Escape key which routes through the svelte:window onkeydown handler instead.
+    await page.keyboard.press('Escape')
+    await expect(page.locator('[data-testid="buy-route-modal"]')).toBeHidden()
+
+    // Item from beforeEach stays selected, so the FAB should already be mounted.
+    const fab = page.locator('[data-testid="floating-action-bar"]')
+    await expect(fab).toBeVisible()
+
+    const fabBox = await fab.boundingBox()
+    const viewport = page.viewportSize()
+    expect(fabBox).toBeTruthy()
+    expect(viewport).toBeTruthy()
+
+    // FAB's bottom edge must be within 32px of the viewport bottom.
+    const distanceFromBottom = viewport!.height - (fabBox!.y + fabBox!.height)
+    expect(distanceFromBottom).toBeLessThanOrEqual(32)
+  })
 })

@@ -27,7 +27,7 @@
 {#if selected.length > 0}
   <div
     data-testid="floating-action-bar"
-    class="fixed bottom-28 left-1/2 -translate-x-1/2 z-30 flex items-center gap-4 px-6 py-4 bg-base-200 border border-primary/30 rounded-lg shadow-lg"
+    class="fixed bottom-4 lg:bottom-28 left-1/2 -translate-x-1/2 z-30 flex items-center gap-4 px-6 py-4 bg-base-200 border border-primary/30 rounded-lg shadow-lg"
   >
     <span class="font-semibold text-primary">{selected.length} item{selected.length > 1 ? 's' : ''} selected</span>
     <span class="text-base-content/30">·</span>
