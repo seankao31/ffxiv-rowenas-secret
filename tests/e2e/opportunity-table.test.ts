@@ -157,6 +157,94 @@ test.describe('OpportunityTable', () => {
   })
 })
 
+test.describe('NPC popover click-outside', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/api/opportunities**', route => route.fulfill({
+      json: { opportunities, meta },
+    }))
+    await page.route('**/v2.xivapi.com/**', route => route.fulfill({ json: { rows: [] } }))
+    await page.route('**/garlandtools.org/**/data.json', route => route.fulfill({
+      json: { locationIndex: { '1': { name: "Ul'dah" } } },
+    }))
+    // Return real vendor data so the NPC badge renders as a dropdown
+    await page.route('**/garlandtools.org/**/get.php**', route => route.fulfill({
+      json: {
+        item: { id: 106, vendors: [12345] },
+        partials: [{ type: 'npc', id: '12345', obj: { n: 'Rowena', l: 1 } }],
+      },
+    }))
+
+    const vendorFetch = page.waitForResponse(
+      r => r.url().includes('garlandtools.org') && r.url().includes('get.php'),
+      { timeout: 10000 },
+    )
+    await page.goto('/arbitrage')
+    await expect(page.locator('table')).toBeVisible()
+    await vendorFetch
+
+    // Sort the table to trigger {#each} re-render — vendor data is now in cache,
+    // so the snippet will render the dropdown instead of the plain badge.
+    await page.click('th[aria-label="Sort by profitPerUnit"]')
+  })
+
+  test('NPC dropdown renders with vendor location after table re-render', async ({ page }) => {
+    const npcRow = page.locator('table tbody tr').filter({ hasText: 'Zeta Potion' })
+    await expect(npcRow.locator('.dropdown')).toBeVisible()
+    await expect(npcRow.locator('.dropdown-content')).toBeAttached()
+    await expect(npcRow.locator('.dropdown-content')).toContainText('Rowena')
+  })
+
+  test('clicking outside open NPC popover does not toggle row selection', async ({ page }) => {
+    const npcRow = page.locator('table tbody tr').filter({ hasText: 'Zeta Potion' })
+    const dropdown = npcRow.locator('.dropdown')
+    await expect(dropdown).toBeVisible()
+
+    // Focus the badge via keyboard — triggers :focus-visible which opens the dropdown
+    await dropdown.locator('[role="button"]').focus()
+    await expect(dropdown.locator('.dropdown-content')).toBeVisible()
+
+    // Click elsewhere on the same row — should ONLY dismiss the popover
+    await npcRow.locator('td').nth(4).click()
+
+    // Row must NOT be selected — click-outside must not propagate to row selection
+    await expect(npcRow).not.toHaveClass(/border-primary/)
+  })
+
+  test('clicking item link in same row still navigates after NPC popover is open', async ({ page }) => {
+    const npcRow = page.locator('table tbody tr').filter({ hasText: 'Zeta Potion' })
+    const dropdown = npcRow.locator('.dropdown')
+    await expect(dropdown).toBeVisible()
+
+    // Open the popover via keyboard focus
+    await dropdown.locator('[role="button"]').focus()
+    await expect(dropdown.locator('.dropdown-content')).toBeVisible()
+
+    // Click the item link in the same row — must still navigate to the item detail page
+    await npcRow.locator('a', { hasText: 'Zeta Potion' }).click()
+    await expect(page).toHaveURL(/\/item\/106/)
+  })
+
+  test('copy button in same row still works after NPC popover is open', async ({ page }, testInfo) => {
+    // Copy button only renders on desktop viewport (hidden on mobile via lg: breakpoint)
+    test.skip(testInfo.project.name === 'mobile', 'Copy button is hidden on mobile')
+    // Clipboard permission must be granted for readText to work
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+
+    const npcRow = page.locator('table tbody tr').filter({ hasText: 'Zeta Potion' })
+    const dropdown = npcRow.locator('.dropdown')
+    await expect(dropdown).toBeVisible()
+
+    // Open the popover via keyboard focus
+    await dropdown.locator('[role="button"]').focus()
+    await expect(dropdown.locator('.dropdown-content')).toBeVisible()
+
+    // Click the copy button in the same row — must still copy to clipboard
+    await npcRow.locator('button[aria-label="Copy item name"]').click()
+    const clipboard = await page.evaluate(() => navigator.clipboard.readText())
+    expect(clipboard).toBe('Zeta Potion')
+  })
+})
+
 test.describe('vendor-sell display', () => {
   test.beforeEach(async ({ page }) => {
     const vendorOpp = {
