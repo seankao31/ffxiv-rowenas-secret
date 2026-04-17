@@ -133,8 +133,9 @@ test.describe('Buy Route (mobile layout)', () => {
     expect(fabBox).toBeTruthy()
     expect(viewport).toBeTruthy()
 
-    // FAB's bottom edge must be within 32px of the viewport bottom.
+    // FAB's bottom edge must be within 32px of the viewport bottom and fully on-screen.
     const distanceFromBottom = viewport!.height - (fabBox!.y + fabBox!.height)
+    expect(distanceFromBottom).toBeGreaterThanOrEqual(0)
     expect(distanceFromBottom).toBeLessThanOrEqual(32)
   })
 
@@ -157,5 +158,24 @@ test.describe('Buy Route (mobile layout)', () => {
     expect(profitText).toMatch(/\d+(?:\.\d+)?[KM]?\s*gil/)
     // Must NOT include the desktop "Est. profit:" prefix (that's hidden on mobile).
     expect(profitText).not.toContain('Est. profit')
+  })
+
+  test('floating action bar stays near the viewport bottom in landscape', async ({ page }) => {
+    // iPhone 14 in landscape: 812×375.
+    await page.setViewportSize({ width: 812, height: 375 })
+
+    // On mobile the panel fills the full height so the backdrop cannot be clicked directly;
+    // use the Escape key which routes through the svelte:window onkeydown handler instead.
+    await page.keyboard.press('Escape')
+    await expect(page.locator('[data-testid="buy-route-modal"]')).toBeHidden()
+
+    const fab = page.locator('[data-testid="floating-action-bar"]')
+    await expect(fab).toBeVisible()
+
+    const fabBox = await fab.boundingBox()
+    expect(fabBox).toBeTruthy()
+    const distanceFromBottom = 375 - (fabBox!.y + fabBox!.height)
+    expect(distanceFromBottom).toBeGreaterThanOrEqual(0)
+    expect(distanceFromBottom).toBeLessThanOrEqual(32)
   })
 })
