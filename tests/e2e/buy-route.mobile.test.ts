@@ -116,4 +116,66 @@ test.describe('Buy Route (mobile layout)', () => {
     expect(box!.width).toBeGreaterThanOrEqual(44)
     expect(box!.height).toBeGreaterThanOrEqual(44)
   })
+
+  test('floating action bar sits near the viewport bottom on mobile', async ({ page }) => {
+    // The beforeEach opens the modal; close it so the FAB is visible on the arbitrage page.
+    // On mobile the panel fills the full height so the backdrop cannot be clicked directly;
+    // use the Escape key which routes through the svelte:window onkeydown handler instead.
+    await page.keyboard.press('Escape')
+    await expect(page.locator('[data-testid="buy-route-modal"]')).toBeHidden()
+
+    // Item from beforeEach stays selected, so the FAB should already be mounted.
+    const fab = page.locator('[data-testid="floating-action-bar"]')
+    await expect(fab).toBeVisible()
+
+    const fabBox = await fab.boundingBox()
+    const viewport = page.viewportSize()
+    expect(fabBox).toBeTruthy()
+    expect(viewport).toBeTruthy()
+
+    // FAB's bottom edge must be within 32px of the viewport bottom and fully on-screen.
+    const distanceFromBottom = viewport!.height - (fabBox!.y + fabBox!.height)
+    expect(distanceFromBottom).toBeGreaterThanOrEqual(0)
+    expect(distanceFromBottom).toBeLessThanOrEqual(32)
+  })
+
+  test('floating action bar uses compact profit format on mobile', async ({ page }) => {
+    // The beforeEach opens the modal; close it so the FAB is visible on the arbitrage page.
+    // On mobile the panel fills the full height so the backdrop cannot be clicked directly;
+    // use the Escape key which routes through the svelte:window onkeydown handler instead.
+    await page.keyboard.press('Escape')
+    await expect(page.locator('[data-testid="buy-route-modal"]')).toBeHidden()
+
+    const fab = page.locator('[data-testid="floating-action-bar"]')
+    await expect(fab).toBeVisible()
+
+    // Grab only the visible profit text on mobile (excludes lg:-only descendants).
+    const profitText = (await fab.innerText()).trim()
+
+    // Mobile format: "N items · X[.Y]K gil" or "N items · X gil" for <1000.
+    // Regex tolerates both the compact (K/M) and raw forms since test fixtures
+    // may not reach 1K.
+    expect(profitText).toMatch(/\d+(?:\.\d+)?[KM]?\s*gil/)
+    // Must NOT include the desktop "Est. profit:" prefix (that's hidden on mobile).
+    expect(profitText).not.toContain('Est. profit')
+  })
+
+  test('floating action bar stays near the viewport bottom in landscape', async ({ page }) => {
+    // iPhone 14 in landscape: 812×375.
+    await page.setViewportSize({ width: 812, height: 375 })
+
+    // On mobile the panel fills the full height so the backdrop cannot be clicked directly;
+    // use the Escape key which routes through the svelte:window onkeydown handler instead.
+    await page.keyboard.press('Escape')
+    await expect(page.locator('[data-testid="buy-route-modal"]')).toBeHidden()
+
+    const fab = page.locator('[data-testid="floating-action-bar"]')
+    await expect(fab).toBeVisible()
+
+    const fabBox = await fab.boundingBox()
+    expect(fabBox).toBeTruthy()
+    const distanceFromBottom = 375 - (fabBox!.y + fabBox!.height)
+    expect(distanceFromBottom).toBeGreaterThanOrEqual(0)
+    expect(distanceFromBottom).toBeLessThanOrEqual(32)
+  })
 })
