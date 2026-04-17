@@ -50,7 +50,48 @@ GA4 is integrated via `gtag.js`. When adding new pages or changing routes, ensur
 
 ## Git workflow
 
-- **Rebase before merge.** When integrating a feature branch into main, rebase the branch onto main first so the merge is a fast-forward. Keep history linear.
+**Branches:**
+
+- `main` — squashed commits, one per shipped feature. Tagged `v*` for prod deploy.
+- `dev` — fast-forward merges from feature branches; full granular history.
+- `feat/<ticket>-<slug>` — temporary; lives until the feature ships to main.
+
+`main` and `dev` live in **disjoint SHA universes**. A feature exists once on `dev` as N granular commits and once on `main` as a single squash commit; git sees them as unrelated ancestors. This is intentional. **Never** `git merge dev` into `main` or vice versa.
+
+**Per-feature lifecycle:**
+
+1. Create worktree off `dev` tip:
+   ```sh
+   git worktree add .worktrees/<ticket> -b feat/<ticket>-<slug> dev
+   ```
+2. Work and commit freely on the feature branch.
+3. When done, rebase `feat/<ticket>-<slug>` onto current `dev` tip, then on `dev`:
+   ```sh
+   git merge --ff-only feat/<ticket>-<slug>
+   git push
+   ```
+4. Tag the merged tip as a SHA anchor (survives branch deletion):
+   ```sh
+   git tag feat-<ticket>-merged feat/<ticket>-<slug>
+   git push --tags
+   ```
+5. Bake on `dev` alongside other in-flight features. (When Phase 2 staging is added, `dev` tip will auto-deploy to `staging.ffxivrowena.com`.)
+6. When ready to ship, on `main`:
+   ```sh
+   git merge --squash feat/<ticket>-<slug>
+   git commit  # Conventional Commits subject + Ref: trailer
+   git push
+   ```
+7. Tag for prod deploy:
+   ```sh
+   git tag v0.x.y
+   git push --tags
+   ```
+8. Delete the feature branch and worktree. The `feat-<ticket>-merged` tag remains.
+
+**Tags are always manual.** No workflow tags on your behalf.
+
+**Full design:** `docs/superpowers/specs/2026-04-17-git-workflow-and-staging-design.md`.
 
 ### Commit messages
 
