@@ -29,7 +29,7 @@
 {#if selected.length > 0}
   <div
     data-testid="floating-action-bar"
-    class="fixed bottom-4 lg:bottom-28 left-1/2 -translate-x-1/2 z-30 flex items-center gap-4 px-6 py-4 bg-base-200 border border-primary/30 rounded-lg shadow-lg"
+    class="fixed bottom-4 lg:bottom-28 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 lg:gap-4 px-3 py-2 lg:px-6 lg:py-4 bg-base-200 border border-primary/30 rounded-lg shadow-lg"
   >
     <span class="font-semibold text-primary">{selected.length} item{selected.length > 1 ? 's' : ''} <span class="hidden lg:inline">selected</span></span>
     <span class="text-base-content/30">·</span>
@@ -37,12 +37,12 @@
     <span class="lg:hidden text-base-content/60"><span class="text-success">{fmtCompact(estimatedProfit)} gil</span></span>
     <button
       type="button"
-      class="btn btn-ghost"
+      class="btn btn-sm lg:btn-md btn-ghost"
       onclick={onclear}
     >Clear</button>
     <button
       type="button"
-      class="btn btn-primary"
+      class="btn btn-sm lg:btn-md btn-primary"
       onclick={onplanroute}
     >Plan Route</button>
   </div>

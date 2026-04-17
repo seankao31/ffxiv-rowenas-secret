@@ -222,4 +222,15 @@ test.describe('Buy Route (desktop layout)', () => {
     // FAB's bottom edge must be at or above the footer's top edge
     expect(fabBox!.y + fabBox!.height).toBeLessThanOrEqual(footerBox!.y)
   })
+
+  test('floating action bar buttons are comfortably sized', async ({ page }) => {
+    await page.locator('table tbody tr').first().locator('td:nth-child(3)').click()
+    const planRouteBtn = page.locator('[data-testid="floating-action-bar"] button', { hasText: 'Plan Route' })
+    await expect(planRouteBtn).toBeVisible()
+
+    const btnBox = await planRouteBtn.boundingBox()
+    expect(btnBox).toBeTruthy()
+    // Default DaisyUI button is 40px tall — btn-sm is only 32px
+    expect(btnBox!.height).toBeGreaterThanOrEqual(40)
+  })
 })
