@@ -125,6 +125,25 @@ test.describe('Item detail page', () => {
     await expect(page.locator('text=400')).toBeVisible()
   })
 
+  test('unknown item ID renders 404 error page', async ({ page }) => {
+    // Mocks from beforeEach are still active; unknown ID won't trigger market
+    // fetches anyway because the server load rejects before the component mounts.
+    await page.goto('/item/9999999')
+
+    // Root +error.svelte renders status code and message.
+    await expect(page.locator('text=404')).toBeVisible()
+    await expect(page.locator('text=Item not found')).toBeVisible()
+
+    // "Back to dashboard" link points at the app root.
+    const backLink = page.getByRole('link', { name: /back to dashboard/i })
+    await expect(backLink).toBeVisible()
+    await expect(backLink).toHaveAttribute('href', '/')
+
+    // None of the normal item-page elements render.
+    await expect(page.locator('h2', { hasText: 'Cross-World Listings' })).toHaveCount(0)
+    await expect(page.locator('[role="tablist"]')).toHaveCount(0)
+  })
+
   test('listings table shows data from Universalis', async ({ page }) => {
     const listingsCard = page.locator('.card', { has: page.locator('h2', { hasText: 'Cross-World Listings' }) })
     const table = listingsCard.locator('table')
