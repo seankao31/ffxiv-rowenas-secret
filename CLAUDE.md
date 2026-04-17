@@ -38,7 +38,7 @@ Unit tests alone are not sufficient for UI work.
 
 ### Running e2e tests
 
-Run `npx playwright test` — Playwright manages its own dev server with dynamic port allocation (see `playwright.config.ts`). **NEVER start a dev server yourself for e2e tests, and NEVER kill processes on ports.** The user may have their own dev server running.
+Run `npx playwright test` — Playwright manages its own dev server with dynamic port allocation (see `playwright.config.ts`). The config captures vite's chosen port via a named regex group (`playwright_test_base_url`) and auto-assigns it to `use.baseURL`, so tests use relative paths like `page.goto('/route')`. **NEVER start a dev server yourself for e2e tests, NEVER kill processes on ports, and NEVER hardcode a port or pass `--base-url`.** The user may have their own dev server running.
 
 ## UI changes and responsive design
 
