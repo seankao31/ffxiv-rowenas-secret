@@ -72,7 +72,7 @@ Implementable today, no infra change beyond the tier bump:
 1. **Create `dev` branch** from current `main` tip; push.
 2. **GitHub branch protection** on `main` and `dev` (deletion off, force-push off).
 3. **Update `CLAUDE.md`** "Git workflow" section to describe the new flow (FF to dev, squash to main, tag for prod).
-4. **Bump Lightsail instance to the 1 GB tier.** Justified independently by current measurements: the existing single container's RSS high-water mark is 260 MiB, the box reports 304 MiB swap usage, and `available` memory is 89 MiB — i.e. prod is already swap-thrashing on the 512 MB tier. The tier bump is a prod-health fix that also positions the box one step closer to hosting a future staging container.
+4. **Bump Lightsail instance to the 2 GB tier.** Justified independently by current measurements: the existing single container's RSS high-water mark is 260 MiB, the box reports 304 MiB swap usage, and `available` memory is 89 MiB — i.e. prod is already swap-thrashing on the 512 MB tier. The 2 GB tier (originally scoped as a Phase 2 prerequisite) is chosen here directly to avoid a second IP-swap outage later; it also gives genuine headroom for the future staging container.
 5. **Update existing `.github/workflows/ci.yml` triggers** to also run on pushes/PRs to `dev` (currently scoped to `main`).
 6. **Existing `.github/workflows/deploy.yml` is unchanged.** It triggers on `v*` tags, which works identically regardless of which branch carries the tagged commit (it'll be `main` in the new model).
 
@@ -87,7 +87,7 @@ Not implemented now. Captured here so the future flip is mechanical.
 
 ### Prerequisites
 
-- **Tier bump to 2 GB.** Worst-case two-container peak is ~710 MiB (260 MiB × 2 + ~180 MiB OS + Caddy); the 1 GB tier (~870 MiB usable) is workable but tight, the 2 GB tier (~1.8 GiB usable) gives genuine headroom.
+- **Tier bump to 2 GB** — already completed in Phase 1. Worst-case two-container peak is ~710 MiB (260 MiB × 2 + ~180 MiB OS + Caddy); the 2 GB tier (~1.8 GiB usable) gives genuine headroom.
 - **DNS:** add an A record `staging.ffxivrowena.com` → Lightsail static IP (Porkbun DNS panel).
 
 ### Code/config changes
