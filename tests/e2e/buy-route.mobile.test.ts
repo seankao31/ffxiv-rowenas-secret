@@ -137,4 +137,25 @@ test.describe('Buy Route (mobile layout)', () => {
     const distanceFromBottom = viewport!.height - (fabBox!.y + fabBox!.height)
     expect(distanceFromBottom).toBeLessThanOrEqual(32)
   })
+
+  test('floating action bar uses compact profit format on mobile', async ({ page }) => {
+    // The beforeEach opens the modal; close it so the FAB is visible on the arbitrage page.
+    // On mobile the panel fills the full height so the backdrop cannot be clicked directly;
+    // use the Escape key which routes through the svelte:window onkeydown handler instead.
+    await page.keyboard.press('Escape')
+    await expect(page.locator('[data-testid="buy-route-modal"]')).toBeHidden()
+
+    const fab = page.locator('[data-testid="floating-action-bar"]')
+    await expect(fab).toBeVisible()
+
+    // Grab only the visible profit text on mobile (excludes lg:-only descendants).
+    const profitText = (await fab.innerText()).trim()
+
+    // Mobile format: "N items · X[.Y]K gil" or "N items · X gil" for <1000.
+    // Regex tolerates both the compact (K/M) and raw forms since test fixtures
+    // may not reach 1K.
+    expect(profitText).toMatch(/\d+(?:\.\d+)?[KM]?\s*gil/)
+    // Must NOT include the desktop "Est. profit:" prefix (that's hidden on mobile).
+    expect(profitText).not.toContain('Est. profit')
+  })
 })
