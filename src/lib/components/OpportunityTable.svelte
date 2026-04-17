@@ -143,8 +143,13 @@
 <div data-testid="table-container" class="flex-1 overflow-auto min-h-0">
   <table class="table table-pin-rows w-max lg:w-full">
     <thead>
-      <tr>
-        <th class="sticky top-0 left-0 z-30 bg-base-200">Item</th>
+      <!-- DaisyUI's table-pin-rows puts position:sticky + z-index:1 on this tr,
+           creating a stacking context that traps descendant z-indexes. Raise it
+           above the sticky body column (z-10) so the header wins during scroll. -->
+      <tr class="z-20">
+        <!-- pin-rows pins the tr vertically; corner also needs its own sticky
+             + left-0 to pin at x=0 during horizontal scroll. -->
+        <th class="sticky left-0 z-30 bg-base-200">Item</th>
         <th class="bg-base-200">Buy from</th>
         <th class="bg-base-200">Buy</th>
         <th class="bg-base-200">Sell <span {@attach tooltip("Estimated sell price: the lower of the cheapest listing and the median recent sale. Second line (if shown) is the current cheapest listing on the market board.")}>{@render infoIcon()}</span></th>
@@ -163,7 +168,10 @@
           onclick={() => ontoggle(opp.itemID)}
         >
           <!-- Item -->
-          <td class="sticky left-0 z-10 border-r border-base-300 {selectedIds.has(opp.itemID) ? 'bg-primary/10 group-hover/row:bg-primary/20' : 'bg-base-100 group-hover/row:bg-base-300'}">
+          <!-- Selected-state backgrounds must be opaque so other columns don't
+               bleed through on horizontal scroll. color-mix composes the
+               primary tint into an opaque color matching bg-primary/10|/20. -->
+          <td class="sticky left-0 z-10 border-r border-base-300 {selectedIds.has(opp.itemID) ? 'bg-[color-mix(in_oklab,var(--color-primary)_10%,var(--color-base-100))] group-hover/row:bg-[color-mix(in_oklab,var(--color-primary)_20%,var(--color-base-100))]' : 'bg-base-100 group-hover/row:bg-base-300'}">
             <div class="flex items-center gap-1.5">
               {#if icon}
                 <img src={icon} alt="" width="32" height="32" class="flex-shrink-0 hidden lg:inline-block"

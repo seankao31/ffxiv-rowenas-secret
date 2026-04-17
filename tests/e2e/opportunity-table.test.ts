@@ -155,6 +155,66 @@ test.describe('OpportunityTable', () => {
     // Selection-aware hover should be present instead
     expect(classes).toContain('hover:bg-primary')
   })
+
+  test('Item column stays pinned at the container left edge during horizontal scroll', async ({ page }) => {
+    // Both the body sticky <td> and the corner <th> must stay at x = container.left
+    // regardless of horizontal scroll. Regression test for ENG-154 (the corner <th>
+    // lost its `sticky` class while the body <td> kept it, causing the header to
+    // scroll away while the body column remained pinned).
+    const container = page.locator('[data-testid=table-container]')
+
+    const before = await container.evaluate((c, refs) => ({
+      containerLeft: c.getBoundingClientRect().left,
+      cornerLeft: document.querySelector(refs.corner)!.getBoundingClientRect().left,
+      bodyLeft: document.querySelector(refs.body)!.getBoundingClientRect().left,
+    }), { corner: 'thead th:first-child', body: 'tbody tr:first-child td:first-child' })
+
+    await container.evaluate(c => { c.scrollLeft = 150 })
+
+    const after = await container.evaluate((c, refs) => ({
+      scrollLeft: c.scrollLeft,
+      cornerLeft: document.querySelector(refs.corner)!.getBoundingClientRect().left,
+      bodyLeft: document.querySelector(refs.body)!.getBoundingClientRect().left,
+    }), { corner: 'thead th:first-child', body: 'tbody tr:first-child td:first-child' })
+
+    expect(after.scrollLeft).toBeGreaterThan(0) // scroll actually happened
+    // Both corner header and body's first column must remain at the container's
+    // left edge — if either drifts with scroll, the sticky column is broken.
+    expect(after.cornerLeft).toBeCloseTo(before.cornerLeft, 0)
+    expect(after.bodyLeft).toBeCloseTo(before.bodyLeft, 0)
+  })
+
+  test('selected Item column hides other columns during horizontal scroll', async ({ page }) => {
+    // After selecting a row and scrolling horizontally, a pixel near the right
+    // edge of the sticky Item <td> (where an adjacent column would otherwise
+    // render) must resolve to the sticky cell itself — proving z-stacking —
+    // and that cell's computed background must be fully opaque so content
+    // behind it cannot visually bleed through. Together these cover both
+    // failure modes from ENG-154.
+    const row = page.locator('table tbody tr').first()
+    await row.click()
+
+    const container = page.locator('[data-testid=table-container]')
+    await container.evaluate(c => { c.scrollLeft = 200 })
+
+    const result = await row.locator('td.sticky').evaluate(td => {
+      const r = td.getBoundingClientRect()
+      // Sample just inside the sticky cell's right edge, where the adjacent
+      // Buy-from column would land after scrolling.
+      const hit = document.elementFromPoint(r.right - 4, r.top + r.height / 2)
+      const bg = getComputedStyle(td).backgroundColor
+      const alpha = bg.match(/\/\s*([\d.]+)\s*\)/)?.[1]
+      return {
+        topIsSticky: hit === td || (hit ? td.contains(hit) : false),
+        bgAlpha: alpha ? parseFloat(alpha) : 1,
+      }
+    })
+
+    expect(result.topIsSticky).toBe(true)
+    // Opacity is the one property we can't observe purely through DOM hit
+    // testing; assert the computed alpha as a proxy for "no bleed through".
+    expect(result.bgAlpha).toBe(1)
+  })
 })
 
 test.describe('NPC popover click-outside', () => {
