@@ -268,12 +268,12 @@
                 data-testid="route-item"
                 data-state="unchecked"
               >
+                <!-- flex-wrap sm:flex-nowrap: sm: not lg: — landscape mobile (≥640px) has
+                     enough width for single-line rows. ENG-158's min-h floor keeps row
+                     height stable when names wrap on portrait. -->
                 <button
                   type="button"
                   class="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:bg-base-200/50 -my-2.5 py-2.5 -ml-5 pl-5 lg:-ml-11 lg:pl-11 flex-wrap sm:flex-nowrap"
-                  <!-- sm: not lg: — landscape mobile (≥640px) has enough width for single-line rows.
-                       ENG-158's min-h floor keeps row height stable when names wrap on portrait. -->
-
                   onclick={() => toggleState(item, 'bought')}
                 >
                   <div class="w-5 h-5 rounded border-2 border-base-content/20 shrink-0"></div>
