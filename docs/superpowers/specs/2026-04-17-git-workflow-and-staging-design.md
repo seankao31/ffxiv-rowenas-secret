@@ -72,10 +72,9 @@ Implementable today, no infra change beyond the tier bump:
 1. **Create `dev` branch** from current `main` tip; push.
 2. **GitHub branch protection** on `main` and `dev` (deletion off, force-push off).
 3. **Update `CLAUDE.md`** "Git workflow" section to describe the new flow (FF to dev, squash to main, tag for prod).
-4. **Update `docs/deployment.md`** to note the new branching model in the deploy section.
-5. **Bump Lightsail instance to the 1 GB tier.** Justified independently by current measurements: the existing single container's RSS high-water mark is 260 MiB, the box reports 304 MiB swap usage, and `available` memory is 89 MiB — i.e. prod is already swap-thrashing on the 512 MB tier. The tier bump is a prod-health fix that also positions the box one step closer to hosting a future staging container.
-6. **Update existing `.github/workflows/ci.yml` triggers** to also run on pushes/PRs to `dev` (currently scoped to `main`).
-7. **Existing `.github/workflows/deploy.yml` is unchanged.** It triggers on `v*` tags, which works identically regardless of which branch carries the tagged commit (it'll be `main` in the new model).
+4. **Bump Lightsail instance to the 1 GB tier.** Justified independently by current measurements: the existing single container's RSS high-water mark is 260 MiB, the box reports 304 MiB swap usage, and `available` memory is 89 MiB — i.e. prod is already swap-thrashing on the 512 MB tier. The tier bump is a prod-health fix that also positions the box one step closer to hosting a future staging container.
+5. **Update existing `.github/workflows/ci.yml` triggers** to also run on pushes/PRs to `dev` (currently scoped to `main`).
+6. **Existing `.github/workflows/deploy.yml` is unchanged.** It triggers on `v*` tags, which works identically regardless of which branch carries the tagged commit (it'll be `main` in the new model).
 
 ### Verification (Phase 1)
 
@@ -166,7 +165,6 @@ None blocking implementation. Items below are resolved by defaults captured abov
 - Create `dev` branch, push.
 - GitHub branch protection on `main` + `dev`.
 - `CLAUDE.md` — update Git workflow section.
-- `docs/deployment.md` — note new branching in deploy section.
 - `.github/workflows/ci.yml` — add `dev` to push/PR triggers.
 - Lightsail console — snapshot, resize to 1 GB, restore, swap static IP.
 
