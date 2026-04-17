@@ -76,9 +76,10 @@ GA4 is integrated via `gtag.js`. When adding new pages or changing routes, ensur
    git push --tags
    ```
 5. Bake on `dev` alongside other in-flight features. (When Phase 2 staging is added, `dev` tip will auto-deploy to `staging.ffxivrowena.com`.)
-6. When ready to ship, on `main`:
+6. When ready to ship, on `main`, squash **only this feature's** commits. `git merge --squash feat/<ticket>-<slug>` would drag in any other in-flight dev work that hasn't shipped yet, because `main` and `dev` have no common recent ancestor. Use a range cherry-pick instead:
    ```sh
-   git merge --squash feat/<ticket>-<slug>
+   git cherry-pick --no-commit feat-<ticket>-merged~N..feat-<ticket>-merged
+   # N = number of granular commits in this feature (e.g. `git log --oneline feat-<ticket>-merged | head -N` to count)
    git commit  # Conventional Commits subject + Ref: trailer
    git push
    ```

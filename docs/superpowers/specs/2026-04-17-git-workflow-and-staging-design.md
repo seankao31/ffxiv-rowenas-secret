@@ -45,7 +45,7 @@ Three classes of branches:
 3. **Promote to dev** — rebase `feat/eng-XXX` onto current `dev` tip, then on `dev`: `git merge --ff-only feat/eng-XXX`. Push.
 4. **Mark merged** — `git tag feat-eng-XXX-merged feat/eng-XXX` as a safety anchor (preserves the SHA if the branch is ever deleted accidentally).
 5. **Bake** — feature is now on `dev`. Continue working on other features in parallel; they all bake together on `dev`. (When Phase 2 staging exists, `dev`'s tip auto-deploys to `staging.ffxivrowena.com`.)
-6. **Promote to main** — when satisfied, on `main`: `git merge --squash feat/eng-XXX`, then `git commit` with a Conventional Commits subject (e.g. `feat(ui): add cross-world listings filter`) and a `Ref: ENG-XXX` trailer. Push.
+6. **Promote to main** — when satisfied, on `main`, extract just this feature's commits via a range cherry-pick: `git cherry-pick --no-commit feat-eng-XXX-merged~N..feat-eng-XXX-merged` (where `N` is the count of this feature's granular commits), then `git commit` with a Conventional Commits subject (e.g. `feat(ui): add cross-world listings filter`) and a `Ref: ENG-XXX` trailer. Push. (Why cherry-pick and not `git merge --squash feat/eng-XXX`: because `main` and `dev` live in disjoint SHA universes, their merge-base is the pre-`dev`-split commit. A `--squash` of `feat/eng-XXX` would therefore stage every other in-flight dev commit too, silently shipping unrelated work on any out-of-order promotion. The range cherry-pick scopes the squash to this feature's commits only.)
 7. **Tag for prod** — `git tag v0.x.y && git push --tags`. The `v*` tag triggers the prod deploy workflow.
 8. **Clean up** — delete the feature branch and worktree. The `feat-eng-XXX-merged` tag remains as a permanent anchor to the granular history.
 
