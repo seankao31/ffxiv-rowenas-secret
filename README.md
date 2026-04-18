@@ -43,3 +43,12 @@ bun run test:e2e    # E2E tests (Playwright, requires Chromium)
 ## Deployment
 
 The app is containerized via Docker. See the `Dockerfile` and `.github/workflows/` for details.
+
+## Contributing
+
+Branching model, feature-shipping recipe, and useful git commands are in [`docs/git-workflow.md`](docs/git-workflow.md). The short version:
+
+- Feature work happens on `feat/<ticket>-<slug>` branches off `dev`.
+- `dev` fast-forwards granular feature history; `main` tracks one squash commit per shipped feature.
+- Ship to `main` with `./scripts/ship-to-main.sh <ticket> "<subject>"`.
+- Use `git log main --first-parent` to read the release log — plain `git log main` is noisy because each main squash has a second parent pointing into dev.
