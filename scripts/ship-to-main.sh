@@ -26,10 +26,14 @@ subject="$2"
 [ -z "$(git status --porcelain -uno)" ] || { echo "error: working tree has uncommitted changes" >&2; exit 1; }
 
 # Locate the dev-side merge commit for this feature. The default message for
-# `git merge --no-ff feat/<ticket>-<slug>` is "Merge branch 'feat/<ticket>-<slug>'",
-# so grepping dev's merges for "feat/<ticket>-" pinpoints the boundary commit.
-# The trailing dash is load-bearing: it prevents ENG-19 from matching ENG-190.
-matches=$(git log dev --merges --grep="feat/${ticket}-" --format=%H)
+# `git merge --no-ff feat/<ticket>-<slug>` is "Merge branch 'feat/<ticket>-<slug>'".
+# The pattern is anchored at the start of the message and includes a trailing
+# dash so:
+#   - bodies that happen to mention a feat/ branch don't false-match
+#   - ticket ENG-19 doesn't false-match a merge of feat/ENG-190-<slug>
+# Operators must use the default merge message — don't pass `-m` to
+# `git merge --no-ff`.
+matches=$(git log dev --merges --extended-regexp --grep="^Merge branch 'feat/${ticket}-" --format=%H)
 match_count=$(printf '%s' "$matches" | grep -c . || true)
 
 if [ "$match_count" -eq 0 ]; then

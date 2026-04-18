@@ -52,9 +52,11 @@ When the feature is done, rebase onto current `dev` tip, then merge with `--no-f
 git switch feat/<ticket>-<slug>
 git rebase dev
 git switch dev
-git merge --no-ff feat/<ticket>-<slug>
+git merge --no-ff feat/<ticket>-<slug>    # accept the default message
 git push
 ```
+
+Don't pass `-m "..."` to `git merge`. The ship-to-main script discovers the merge by grepping `dev --merges` for the default subject `Merge branch 'feat/<ticket>-<slug>'`; an overridden message will go unmatched and the feature won't be shippable.
 
 The resulting merge commit on `dev` brackets the feature: its first parent is the pre-merge `dev` tip (the feature's base) and its second parent is the feature tip. The merge commit survives deletion of the feature branch and is the durable anchor for the feature's commit range.
 
@@ -72,10 +74,11 @@ git switch main
 git push
 ```
 
-The script locates the dev merge commit for the ticket by grepping `dev --merges` for `feat/<ticket>-` (the trailing dash prevents `ENG-19` from matching `ENG-190`), then runs the equivalent of:
+The script locates the dev merge commit for the ticket by grepping `dev --merges` for the default merge subject, anchored at the start and with a trailing dash (the anchor rejects body mentions; the dash prevents `ENG-19` from matching `ENG-190`). It then runs the equivalent of:
 
 ```sh
-MERGE=$(git log dev --merges --grep="feat/<ticket>-" --format=%H)
+MERGE=$(git log dev --merges --extended-regexp \
+         --grep="^Merge branch 'feat/<ticket>-" --format=%H)
 git cherry-pick --no-commit -m 1 "$MERGE"
 TREE=$(git write-tree)
 COMMIT=$(printf 'feat(scope): subject\n\nRef: ENG-XX\n' \
