@@ -76,14 +76,17 @@ The script locates the dev merge commit for the ticket by grepping `dev --merges
 
 ```sh
 MERGE=$(git log dev --merges --grep="feat/<ticket>-" --format=%H)
-git cherry-pick --no-commit "$MERGE^1..$MERGE^2"
+git cherry-pick --no-commit -m 1 "$MERGE"
 TREE=$(git write-tree)
 COMMIT=$(printf 'feat(scope): subject\n\nRef: ENG-XX\n' \
   | git commit-tree "$TREE" -p HEAD -p "$MERGE")
 git reset --hard "$COMMIT"
 ```
 
-The key line is the `git commit-tree -p HEAD -p "$MERGE"` — two `-p` flags make it a 2-parent commit, and parent 2 points at dev's merge commit so the graph edge leads directly to the feature's boundary marker on dev.
+Two key lines:
+
+- `git cherry-pick -m 1 "$MERGE"` replays the merge's net effect (the diff from `$MERGE^1` to `$MERGE`) as a single patch, so any conflict resolution baked into the merge commit's tree is preserved. A range cherry-pick of `$MERGE^1..$MERGE^2` would drop the resolution, since resolution edits live only in the merge's tree, not in the feature branch's commits.
+- `git commit-tree -p HEAD -p "$MERGE"` uses two `-p` flags to make a 2-parent commit. Parent 2 points at dev's merge commit so the graph edge leads directly to the feature's boundary marker on dev — which means `main^2` recovers the dev merge, `main^2^1` recovers the feature's base, and `main^2^2` recovers the feature tip.
 
 ### 5. Clean up
 

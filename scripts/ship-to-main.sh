@@ -48,15 +48,16 @@ merge_commit="$matches"
 parent_count=$(git rev-list --parents -n 1 "$merge_commit" | awk '{print NF-1}')
 [ "$parent_count" -eq 2 ] || { echo "error: $merge_commit is not a 2-parent merge (has $parent_count parents)" >&2; exit 1; }
 
-base=$(git rev-parse "$merge_commit^1")      # dev tip before the feature merged
-feat_tip=$(git rev-parse "$merge_commit^2")  # feature branch tip
-
 echo "Found dev merge commit $(git rev-parse --short "$merge_commit")"
-echo "  base (pre-merge dev): $(git rev-parse --short "$base")"
-echo "  feat tip:             $(git rev-parse --short "$feat_tip")"
+echo "  base (pre-merge dev): $(git rev-parse --short "$merge_commit^1")"
+echo "  feat tip:             $(git rev-parse --short "$merge_commit^2")"
 echo
-echo "Cherry-picking feature range $base..$feat_tip into staging"
-git cherry-pick --no-commit "$base..$feat_tip"
+# Replay the merge's net effect on main. Using 'cherry-pick -m 1 <merge>'
+# applies the full M^1→M diff as a single patch, so any conflict resolution
+# baked into the merge commit's tree comes along. A range cherry-pick of
+# M^1..M^2 would drop the resolution since it lives only in M's tree.
+echo "Cherry-picking dev merge effect (mainline = parent 1) into staging"
+git cherry-pick --no-commit -m 1 "$merge_commit"
 
 tree=$(git write-tree)
 main_parent=$(git rev-parse HEAD)
