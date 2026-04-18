@@ -7,26 +7,29 @@ This repo uses a two-branch model so that `main` reads as a clean release log wh
 | Branch | Role |
 |---|---|
 | `main` | One commit per shipped feature. Tagged `v*` for prod. |
-| `dev` | Fast-forward merges of feature branches — full granular history. |
+| `dev` | `--no-ff` merges of feature branches — one merge commit per feature, granular history preserved on the feature side. |
 | `feat/<ticket>-<slug>` | Temporary feature branch. Lives until the feature ships to `main`. |
 
 ## Topology
 
-Every squash commit on `main` is a **2-parent merge commit**:
+Both `main` and `dev` use **2-parent merge commits** at feature boundaries:
 
-- **Parent 1** — the previous squash on `main` (the first-parent chain is the release log)
-- **Parent 2** — the feature's ship-point SHA on `dev` (the graph edge that makes `git log --all --graph` show which dev history each release pulled in)
-- **Tree** — the cumulative file state after applying the feature's changes to the previous release
+- **`main` squash commit** — parent 1 is the previous squash on main; parent 2 is the dev-side merge commit for that feature. The tree is the cumulative file state after applying the feature's changes to the previous release.
+- **`dev` merge commit** — parent 1 is the pre-merge `dev` tip (the feature's base); parent 2 is the feature branch tip. The tree is the fully merged state.
 
-Since parent 2's tree is not literally merged in (we cherry-pick only the feature's own commits, not the full dev delta), this is a "squash" in content terms but a "merge" in graph terms. You get both a tidy release log and a visible dev↔main relationship.
+Since main's parent 2 tree is not literally merged in (we cherry-pick only the feature's own commits, not the full dev delta), a main ship is a "squash" in content terms but a "merge" in graph terms. Dev's `--no-ff` merges, in contrast, are real content merges — the merge commit's tree equals the feature tip.
+
+The symmetric result: `--first-parent` on either branch gives you a clean feature-level log.
 
 ```
 main:   S1 ──── S2 ──── S3 ──── S4 ──── S5       (first-parent chain = release log)
               ↙        ↙      ↙      ↙
-dev:   A─B─C─D────E────F──G──H────I──J──K        (every granular commit preserved)
+dev:   A─────M1─────M2─────M3─────M4─────M5      (first-parent chain = feature log)
+          ↖      ↖      ↖      ↖      ↖
+           B-C    D-E    F-G-H  I-J    K         (--no-ff merges preserve per-feature commits)
 ```
 
-Each `S` pulls in exactly one feature from dev; any unshipped dev work stays on dev until its own squash lands on `main`.
+Each `S` on main pulls in exactly one feature via the matching dev merge commit `M`; any unshipped dev work stays on dev until its own squash lands on `main`.
 
 ## Shipping a feature
 
@@ -41,26 +44,23 @@ cd .worktrees/<ticket>
 
 Commit freely on the feature branch. Tests, fixups, experiments — all fine, `dev` preserves it.
 
-### 2. Fast-forward to dev
+### 2. Merge to dev with --no-ff
 
-When the feature is done, rebase onto current `dev` tip, tag the base, then fast-forward merge:
+When the feature is done, rebase onto current `dev` tip, then merge with `--no-ff`:
 
 ```sh
 git switch feat/<ticket>-<slug>
 git rebase dev
-git tag feat-<ticket>-base dev      # dev tip == feature's base, captured before FF
 git switch dev
-git merge --ff-only feat/<ticket>-<slug>
+git merge --no-ff feat/<ticket>-<slug>
 git push
-git tag feat-<ticket>-merged feat/<ticket>-<slug>
-git push --tags
 ```
 
-The `feat-<ticket>-base` and `feat-<ticket>-merged` tags bracket the feature's commits on `dev` for the later ship step. They survive deletion of the feature branch.
+The resulting merge commit on `dev` brackets the feature: its first parent is the pre-merge `dev` tip (the feature's base) and its second parent is the feature tip. The merge commit survives deletion of the feature branch and is the durable anchor for the feature's commit range.
 
 ### 3. Bake on dev
 
-Features can sit on `dev` alongside each other while they bake. Ship order on `main` doesn't have to match FF order on `dev`.
+Features can sit on `dev` alongside each other while they bake. Ship order on `main` doesn't have to match merge order on `dev`.
 
 ### 4. Ship to main
 
@@ -68,21 +68,22 @@ Use the helper script, which constructs the 2-parent squash:
 
 ```sh
 git switch main
-./scripts/ship-to-main.sh <ticket>-<slug> "feat(scope): short subject" ENG-<ticket>
+./scripts/ship-to-main.sh <ticket> "feat(scope): short subject"
 git push
 ```
 
-The script runs the equivalent of:
+The script locates the dev merge commit for the ticket by grepping `dev --merges` for `feat/<ticket>-` (the trailing dash prevents `ENG-19` from matching `ENG-190`), then runs the equivalent of:
 
 ```sh
-git cherry-pick --no-commit feat-<ticket>-base..feat-<ticket>-merged
+MERGE=$(git log dev --merges --grep="feat/<ticket>-" --format=%H)
+git cherry-pick --no-commit "$MERGE^1..$MERGE^2"
 TREE=$(git write-tree)
 COMMIT=$(printf 'feat(scope): subject\n\nRef: ENG-XX\n' \
-  | git commit-tree "$TREE" -p HEAD -p feat-<ticket>-merged)
+  | git commit-tree "$TREE" -p HEAD -p "$MERGE")
 git reset --hard "$COMMIT"
 ```
 
-The key line is the `git commit-tree -p HEAD -p feat-<ticket>-merged` — two `-p` flags make it a 2-parent commit.
+The key line is the `git commit-tree -p HEAD -p "$MERGE"` — two `-p` flags make it a 2-parent commit, and parent 2 points at dev's merge commit so the graph edge leads directly to the feature's boundary marker on dev.
 
 ### 5. Clean up
 
@@ -91,7 +92,7 @@ git branch -D feat/<ticket>-<slug>
 git worktree remove .worktrees/<ticket>
 ```
 
-The `feat-<ticket>-base` and `feat-<ticket>-merged` tags stay.
+The merge commit on `dev` remains as the feature's permanent anchor.
 
 ## Releasing
 
@@ -120,21 +121,23 @@ The `v*` tag on `main` triggers the deploy workflow in `.github/workflows/`.
 
 ## Reading the log
 
-The dual topology means `git log main` alone is noisy — it walks every reachable commit, including every dev commit pulled in as a second parent (~500 commits at a time). Use one of these instead:
+The dual topology means plain `git log main` or `git log dev` walks every reachable commit (including all feature-side commits pulled in as second parents). Use `--first-parent` to skip the second-parent branches:
 
 | What you want to see | Command |
 |---|---|
-| The release log (one line per shipped feature) | `git log main --first-parent` |
-| The release log, decorated | `git log main --first-parent --oneline --decorate` |
+| Release log (one line per shipped feature on main) | `git log main --first-parent` |
+| Release log, decorated | `git log main --first-parent --oneline --decorate` |
+| Dev feature log (one line per feature merged to dev, plus release bumps) | `git log dev --first-parent` |
 | Same, but only what's on main and not on dev | `git log dev..main` |
 | Full graph with dev↔main relationships | `git log --all --graph --oneline --decorate` |
-| Just the dev line | `git log dev` |
+| Every commit on dev including per-feature commits | `git log dev` |
 
 Add these aliases if you want shorter commands:
 
 ```sh
 git config --global alias.main-log "log main --first-parent --oneline --decorate"
-git config --global alias.graph "log --all --graph --oneline --decorate"
+git config --global alias.dev-log  "log dev  --first-parent --oneline --decorate"
+git config --global alias.graph    "log --all --graph --oneline --decorate"
 ```
 
 ## Tags
@@ -142,17 +145,18 @@ git config --global alias.graph "log --all --graph --oneline --decorate"
 | Tag | Purpose | When |
 |---|---|---|
 | `v0.x.y` | Prod deploy marker | Per release on `main` |
-| `feat-<ticket>-base` | dev tip at feature fork point | Before FF'ing feature to dev |
-| `feat-<ticket>-merged` | SHA of feature's last commit | After FF'ing feature to dev |
 
-All tags are manual. No automation adds tags on your behalf.
+`v*` tags are created by `scripts/release.sh`. Feature boundaries are now encoded in dev's `--no-ff` merge commits, so no per-feature tags are created.
+
+Historical `feat-ENG-{189,190,191}-{base,merged}` tag pairs remain as artifacts of the pre-`--no-ff` era. They cost nothing and are left in place; tooling no longer reads them.
 
 ## Rules of thumb
 
 - **Never rewrite `dev` or `main`.** Both are the source of truth.
 - **Never `git merge dev` into `main` or vice versa.** It's a no-op (dev is reachable from main), but the intent is wrong — use `ship-to-main.sh` for the real workflow.
 - **Never add commits directly to `main` without going through a feature branch.** Even docs or small tweaks should ship via `feat/<ticket>`.
-- **Feature branches are ephemeral.** The `feat-*` tag pair is the durable anchor.
+- **Feature branches are ephemeral.** The `--no-ff` merge commit on dev is the durable anchor.
+- **Always use `--no-ff` when merging feature branches to dev.** A bare `git merge feat/<ticket>` would fast-forward and erase the feature boundary.
 
 ## Commit messages
 
