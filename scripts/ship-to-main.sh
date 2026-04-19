@@ -8,11 +8,11 @@ set -euo pipefail
 #
 # Requires:
 #   - Current branch is main, working tree clean
-#   - Tags feat-<ticket>-base and feat-<ticket>-merged exist
+#   - Exactly one --no-ff merge commit on dev whose message references feat/<ticket>
 
 usage() {
   echo "Usage: $0 <ticket> <subject>" >&2
-  echo "  ticket:  Linear ticket (e.g. ENG-85). Tags feat-<ticket>-{base,merged} must exist." >&2
+  echo "  ticket:  Linear ticket (e.g. ENG-85). Must match exactly one --no-ff merge on dev." >&2
   echo "  subject: Conventional Commits subject (e.g. \"feat(ui): add X\")" >&2
   exit 1
 }
@@ -22,29 +22,58 @@ usage() {
 ticket="$1"
 subject="$2"
 
-base_tag="feat-${ticket}-base"
-merged_tag="feat-${ticket}-merged"
-
 [ "$(git rev-parse --abbrev-ref HEAD)" = "main" ] || { echo "error: must run from main" >&2; exit 1; }
 [ -z "$(git status --porcelain -uno)" ] || { echo "error: working tree has uncommitted changes" >&2; exit 1; }
-git rev-parse --verify "$base_tag^{commit}" >/dev/null 2>&1 || { echo "error: tag $base_tag not found" >&2; exit 1; }
-git rev-parse --verify "$merged_tag^{commit}" >/dev/null 2>&1 || { echo "error: tag $merged_tag not found" >&2; exit 1; }
 
-echo "Cherry-picking $base_tag..$merged_tag into staging"
-git cherry-pick --no-commit "$base_tag..$merged_tag"
+# Locate the dev-side merge commit for this feature. The default message for
+# `git merge --no-ff feat/<ticket>-<slug>` is "Merge branch 'feat/<ticket>-<slug>'".
+# The pattern is anchored at the start of the message and includes a trailing
+# dash so:
+#   - bodies that happen to mention a feat/ branch don't false-match
+#   - ticket ENG-19 doesn't false-match a merge of feat/ENG-190-<slug>
+# Operators must use the default merge message — don't pass `-m` to
+# `git merge --no-ff`.
+matches=$(git log dev --merges --extended-regexp --grep="^Merge branch 'feat/${ticket}-" --format=%H)
+match_count=$(printf '%s' "$matches" | grep -c . || true)
+
+if [ "$match_count" -eq 0 ]; then
+  echo "error: no --no-ff merge commit on dev matches feat/$ticket" >&2
+  echo "       Did you run 'git merge --no-ff feat/$ticket-<slug>' on dev?" >&2
+  exit 1
+elif [ "$match_count" -gt 1 ]; then
+  echo "error: multiple merge commits on dev match feat/$ticket — cannot disambiguate:" >&2
+  printf '%s\n' "$matches" | xargs -n1 -I{} git log -1 --format='  %h %s' {} >&2
+  exit 1
+fi
+
+merge_commit="$matches"
+
+# Defensive: confirm it's a 2-parent merge before using parent shorthand
+parent_count=$(git rev-list --parents -n 1 "$merge_commit" | awk '{print NF-1}')
+[ "$parent_count" -eq 2 ] || { echo "error: $merge_commit is not a 2-parent merge (has $parent_count parents)" >&2; exit 1; }
+
+echo "Found dev merge commit $(git rev-parse --short "$merge_commit")"
+echo "  base (pre-merge dev): $(git rev-parse --short "$merge_commit^1")"
+echo "  feat tip:             $(git rev-parse --short "$merge_commit^2")"
+echo
+# Replay the merge's net effect on main. Using 'cherry-pick -m 1 <merge>'
+# applies the full M^1→M diff as a single patch, so any conflict resolution
+# baked into the merge commit's tree comes along. A range cherry-pick of
+# M^1..M^2 would drop the resolution since it lives only in M's tree.
+echo "Cherry-picking dev merge effect (mainline = parent 1) into staging"
+git cherry-pick --no-commit -m 1 "$merge_commit"
 
 tree=$(git write-tree)
 main_parent=$(git rev-parse HEAD)
-feat_parent=$(git rev-parse "$merged_tag")
 
 msg=$(printf '%s\n\nRef: %s\n' "$subject" "$ticket")
 
 echo "Building 2-parent squash commit"
 echo "  tree:    $tree"
 echo "  parent1: $main_parent (main)"
-echo "  parent2: $feat_parent ($merged_tag)"
+echo "  parent2: $merge_commit (dev merge)"
 
-new=$(printf '%s\n' "$msg" | git commit-tree "$tree" -p "$main_parent" -p "$feat_parent")
+new=$(printf '%s\n' "$msg" | git commit-tree "$tree" -p "$main_parent" -p "$merge_commit")
 
 git reset --hard "$new"
 
@@ -54,4 +83,4 @@ echo "  $subject"
 echo
 echo "Next:"
 echo "  git push"
-echo "  git tag v0.x.y && git push --tags   # to deploy"
+echo "  # then release with: ./scripts/release.sh [-M | -m | -p | X.Y.Z]"

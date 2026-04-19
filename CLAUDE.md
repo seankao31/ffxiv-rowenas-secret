@@ -55,9 +55,9 @@ Full reference — branching model, 2-parent squash topology, shipping recipe, u
 Quick rules:
 
 - `main` — one squash commit per shipped feature (the first-parent chain is the release log). Tagged `v*` for prod.
-- `dev` — fast-forward merges from feature branches; granular history preserved.
-- `feat/<ticket>-<slug>` — ephemeral feature branch. Tag pair `feat-<ticket>-{base,merged}` is the durable anchor.
-- Ship with `./scripts/ship-to-main.sh <ticket> "<subject>"` — constructs the 2-parent squash commit.
+- `dev` — `--no-ff` merges from feature branches; one merge commit per feature, granular history preserved on the feature side.
+- `feat/<ticket>-<slug>` — ephemeral feature branch. The `--no-ff` merge commit on dev is the durable anchor.
+- Ship with `./scripts/ship-to-main.sh <ticket> "<subject>"` — finds dev's merge commit for the ticket and constructs the 2-parent squash on main.
 - Release with `./scripts/release.sh [-M | -m | -p | X.Y.Z]` — bumps version on dev, ships to main, tags `vX.Y.Z`, pushes everything.
 - Never rewrite `dev` or `main`. Never commit to `main` outside the feature-ship or release workflow.
-- Inspect `main` with `git log main --first-parent` (plain `git log main` walks every dev commit pulled in as a second parent).
+- Inspect with `git log main --first-parent` (release log) or `git log dev --first-parent` (feature log). Plain `git log` on either branch walks every commit pulled in as a second parent.
