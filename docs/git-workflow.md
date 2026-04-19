@@ -97,13 +97,13 @@ The `feat-<ticket>-base` and `feat-<ticket>-merged` tags stay.
 
 Shipping a feature doesn't deploy it — only tagging a `v*` on `main` does. Releases bundle one or more shipped features into a single version bump + deploy.
 
-Use `./release.sh`:
+Use `./scripts/release.sh`:
 
 ```sh
-./release.sh -p           # patch bump (0.9.0 → 0.9.1)
-./release.sh -m           # minor bump (0.9.0 → 0.10.0)
-./release.sh -M           # major bump (0.9.0 → 1.0.0)
-./release.sh 1.2.3        # explicit version
+./scripts/release.sh -p           # patch bump (0.9.0 → 0.9.1)
+./scripts/release.sh -m           # minor bump (0.9.0 → 0.10.0)
+./scripts/release.sh -M           # major bump (0.9.0 → 1.0.0)
+./scripts/release.sh 1.2.3        # explicit version
 ```
 
 What it does end-to-end:

@@ -51,5 +51,5 @@ Branching model, feature-shipping recipe, and useful git commands are in [`docs/
 - Feature work happens on `feat/<ticket>-<slug>` branches off `dev`.
 - `dev` fast-forwards granular feature history; `main` tracks one squash commit per shipped feature.
 - Ship to `main` with `./scripts/ship-to-main.sh <ticket> "<subject>"`.
-- Release to prod with `./release.sh [-M | -m | -p | X.Y.Z]` — bumps the version, ships to main, tags, pushes.
+- Release to prod with `./scripts/release.sh [-M | -m | -p | X.Y.Z]` — bumps the version, ships to main, tags, pushes.
 - Use `git log main --first-parent` to read the release log — plain `git log main` is noisy because each main squash has a second parent pointing into dev.
