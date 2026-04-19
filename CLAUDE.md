@@ -58,6 +58,6 @@ Quick rules:
 - `dev` — fast-forward merges from feature branches; granular history preserved.
 - `feat/<ticket>-<slug>` — ephemeral feature branch. Tag pair `feat-<ticket>-{base,merged}` is the durable anchor.
 - Ship with `./scripts/ship-to-main.sh <ticket> "<subject>"` — constructs the 2-parent squash commit.
-- Release with `./release.sh [-M | -m | -p | X.Y.Z]` — bumps version on dev, ships to main, tags `vX.Y.Z`, pushes everything.
+- Release with `./scripts/release.sh [-M | -m | -p | X.Y.Z]` — bumps version on dev, ships to main, tags `vX.Y.Z`, pushes everything.
 - Never rewrite `dev` or `main`. Never commit to `main` outside the feature-ship or release workflow.
 - Inspect `main` with `git log main --first-parent` (plain `git log main` walks every dev commit pulled in as a second parent).

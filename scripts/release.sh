@@ -17,7 +17,7 @@ CURRENT=$(sed -n 's/.*"version": "\(.*\)".*/\1/p' package.json)
 IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
 
 usage() {
-  echo "Usage: ./release.sh [-M | -m | -p | X.Y.Z]"
+  echo "Usage: ./scripts/release.sh [-M | -m | -p | X.Y.Z]"
   echo "  -M     major  ($CURRENT → $((MAJOR + 1)).0.0)"
   echo "  -m     minor  ($CURRENT → $MAJOR.$((MINOR + 1)).0)"
   echo "  -p     patch  ($CURRENT → $MAJOR.$MINOR.$((PATCH + 1)))"
@@ -41,7 +41,7 @@ esac
 echo "Releasing: $CURRENT → $VERSION"
 
 # Pre-flight checks
-[ -z "$(git status --porcelain)" ] || { echo "error: working tree is dirty — commit or stash changes first" >&2; exit 1; }
+[ -z "$(git status --porcelain -uno)" ] || { echo "error: working tree has uncommitted changes — commit or stash first" >&2; exit 1; }
 if git rev-parse "v$VERSION" >/dev/null 2>&1; then
   echo "error: tag v$VERSION already exists" >&2
   exit 1

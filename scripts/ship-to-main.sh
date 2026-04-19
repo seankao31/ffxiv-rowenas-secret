@@ -26,7 +26,7 @@ base_tag="feat-${ticket}-base"
 merged_tag="feat-${ticket}-merged"
 
 [ "$(git rev-parse --abbrev-ref HEAD)" = "main" ] || { echo "error: must run from main" >&2; exit 1; }
-[ -z "$(git status --porcelain)" ] || { echo "error: working tree dirty" >&2; exit 1; }
+[ -z "$(git status --porcelain -uno)" ] || { echo "error: working tree has uncommitted changes" >&2; exit 1; }
 git rev-parse --verify "$base_tag^{commit}" >/dev/null 2>&1 || { echo "error: tag $base_tag not found" >&2; exit 1; }
 git rev-parse --verify "$merged_tag^{commit}" >/dev/null 2>&1 || { echo "error: tag $merged_tag not found" >&2; exit 1; }
 
