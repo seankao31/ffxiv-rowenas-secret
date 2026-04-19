@@ -1,5 +1,7 @@
 # Git workflow + staging environment
 
+> **Update (2026-04-18):** Post-implementation, the `main`/`dev` topology evolved from "disjoint SHA universes" to **2-parent squash commits** — each squash on `main` has the previous `main` squash as its first parent and the feature's `dev` ship-point as its second parent, so `git log --all --graph` visualizes the `dev`↔`main` relationship. Content semantics (one squash per feature, `main` tree matches `dev` tree at each ship-point) are unchanged. Current-state docs: [`docs/git-workflow.md`](../../git-workflow.md). This spec is kept as the original design record.
+
 ## Context
 
 Today the project ships from a single `main` branch. Feature branches are rebased onto `main` and fast-forward merged, so `main` accumulates every granular commit (fixups, typos, work-in-progress) from every feature. Sean wants:
