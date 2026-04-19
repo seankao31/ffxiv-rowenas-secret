@@ -152,9 +152,7 @@ git config --global alias.graph    "log --all --graph --oneline --decorate"
 |---|---|---|
 | `v0.x.y` | Prod deploy marker | Per release on `main` |
 
-`v*` tags are created by `scripts/release.sh`. Feature boundaries are now encoded in dev's `--no-ff` merge commits, so no per-feature tags are created.
-
-Historical `feat-ENG-{189,190,191}-{base,merged}` tag pairs remain as artifacts of the pre-`--no-ff` era. They cost nothing and are left in place; tooling no longer reads them.
+`v*` tags are created by `scripts/release.sh`. Feature boundaries are encoded in dev's `--no-ff` merge commits, so no per-feature tags are created.
 
 ## Rules of thumb
 
