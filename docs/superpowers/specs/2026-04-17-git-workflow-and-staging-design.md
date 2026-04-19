@@ -1,6 +1,8 @@
 # Git workflow + staging environment
 
 > **Update (2026-04-18):** Post-implementation, the `main`/`dev` topology evolved from "disjoint SHA universes" to **2-parent squash commits** — each squash on `main` has the previous `main` squash as its first parent and the feature's `dev` ship-point as its second parent, so `git log --all --graph` visualizes the `dev`↔`main` relationship. Content semantics (one squash per feature, `main` tree matches `dev` tree at each ship-point) are unchanged. Current-state docs: [`docs/git-workflow.md`](../../git-workflow.md). This spec is kept as the original design record.
+>
+> **Update (2026-04-18, ENG-192):** Dev now uses `--no-ff` merges for feature branches instead of fast-forward. The merge commit on `dev` encodes the feature boundary in the graph, replacing the `feat-<ticket>-{base,merged}` tag pair — `ship-to-main.sh` derives the cherry-pick range from the merge commit's parents (via `git cherry-pick -m 1`) and `git log dev --first-parent` gives a clean feature-level log mirroring `main --first-parent`. Existing `feat-ENG-{189,190,191}-{base,merged}` tag pairs remain as artifacts of the pre-`--no-ff` era.
 
 ## Context
 
