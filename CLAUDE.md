@@ -50,74 +50,13 @@ GA4 is integrated via `gtag.js`. When adding new pages or changing routes, ensur
 
 ## Git workflow
 
-**Branches:**
+Full reference — branching model, 2-parent squash topology, shipping recipe, useful commands, and commit-message rules — lives in [`docs/git-workflow.md`](docs/git-workflow.md). Read it before any non-trivial git work.
 
-- `main` — squashed commits, one per shipped feature. Tagged `v*` for prod deploy.
-- `dev` — fast-forward merges from feature branches; full granular history.
-- `feat/<ticket>-<slug>` — temporary; lives until the feature ships to main.
+Quick rules:
 
-`main` and `dev` live in **disjoint SHA universes**. A feature exists once on `dev` as N granular commits and once on `main` as a single squash commit; git sees them as unrelated ancestors. This is intentional. **Never** `git merge dev` into `main` or vice versa.
-
-**Per-feature lifecycle:**
-
-1. Create worktree off `dev` tip:
-   ```sh
-   git worktree add .worktrees/<ticket> -b feat/<ticket>-<slug> dev
-   ```
-2. Work and commit freely on the feature branch.
-3. When done, rebase `feat/<ticket>-<slug>` onto current `dev` tip, capture the base, then FF-merge to `dev`:
-   ```sh
-   git switch feat/<ticket>-<slug>
-   git rebase dev
-   git tag feat-<ticket>-base dev   # dev tip == feature's base, captured before FF
-   git switch dev
-   git merge --ff-only feat/<ticket>-<slug>
-   git push
-   ```
-4. Tag the merged tip as a SHA anchor (survives branch deletion):
-   ```sh
-   git tag feat-<ticket>-merged feat/<ticket>-<slug>
-   git push --tags
-   ```
-5. Bake on `dev` alongside other in-flight features. (When Phase 2 staging is added, `dev` tip will auto-deploy to `staging.ffxivrowena.com`.)
-6. When ready to ship, on `main`, squash **only this feature's** commits. `git merge --squash feat/<ticket>-<slug>` would drag in any other in-flight dev work that hasn't shipped yet, because `main` and `dev` have no common recent ancestor. Use the tag pair as a deterministic range:
-   ```sh
-   git switch main
-   git cherry-pick --no-commit feat-<ticket>-base..feat-<ticket>-merged
-   git commit  # Conventional Commits subject + Ref: trailer
-   git push
-   ```
-7. Tag for prod deploy:
-   ```sh
-   git tag v0.x.y
-   git push --tags
-   ```
-8. Delete the feature branch and worktree. The `feat-<ticket>-base` and `feat-<ticket>-merged` tags remain.
-
-**Tags are always manual.** No workflow tags on your behalf.
-
-**Full design:** `docs/superpowers/specs/2026-04-17-git-workflow-and-staging-design.md`.
-
-### Commit messages
-
-Use [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope>): <subject>`
-
-**Scopes** are coarse, stable, and map to architectural boundaries — not features or tickets:
-
-| Scope | Area |
-|-------|------|
-| `server` | `src/lib/server/`, `src/routes/api/` — scanning, scoring, caching, recipes, crafting |
-| `ui` | `src/lib/client/`, `src/lib/components/`, `src/routes/` (pages) — Svelte components, client logic |
-| `e2e` | `tests/e2e/` — Playwright tests |
-| `infra` | Docker, CI/CD, Caddy, deploy scripts |
-| _(omit)_ | Docs-only, config, or multi-area changes |
-
-Unit tests follow their source scope (`tests/server/` → `server`, `tests/client/` → `ui`).
-
-**Linear ticket references** go in a `Ref:` trailer, not in the scope or subject:
-
-```
-feat(ui): add side radio picker to SetupView
-
-Ref: ENG-85
-```
+- `main` — one squash commit per shipped feature (the first-parent chain is the release log). Tagged `v*` for prod.
+- `dev` — fast-forward merges from feature branches; granular history preserved.
+- `feat/<ticket>-<slug>` — ephemeral feature branch. Tag pair `feat-<ticket>-{base,merged}` is the durable anchor.
+- Ship with `./scripts/ship-to-main.sh <ticket> "<subject>"` — constructs the 2-parent squash commit.
+- Never rewrite `dev` or `main`. Never commit to `main` outside the feature-ship workflow.
+- Inspect `main` with `git log main --first-parent` (plain `git log main` walks every dev commit pulled in as a second parent).
