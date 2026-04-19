@@ -84,16 +84,7 @@ git reset --hard "$COMMIT"
 
 The key line is the `git commit-tree -p HEAD -p feat-<ticket>-merged` — two `-p` flags make it a 2-parent commit.
 
-### 5. Tag for prod
-
-```sh
-git tag v0.x.y
-git push --tags
-```
-
-The `v*` tag triggers the deploy workflow.
-
-### 6. Clean up
+### 5. Clean up
 
 ```sh
 git branch -D feat/<ticket>-<slug>
@@ -101,6 +92,31 @@ git worktree remove .worktrees/<ticket>
 ```
 
 The `feat-<ticket>-base` and `feat-<ticket>-merged` tags stay.
+
+## Releasing
+
+Shipping a feature doesn't deploy it — only tagging a `v*` on `main` does. Releases bundle one or more shipped features into a single version bump + deploy.
+
+Use `./release.sh`:
+
+```sh
+./release.sh -p           # patch bump (0.9.0 → 0.9.1)
+./release.sh -m           # minor bump (0.9.0 → 0.10.0)
+./release.sh -M           # major bump (0.9.0 → 1.0.0)
+./release.sh 1.2.3        # explicit version
+```
+
+What it does end-to-end:
+
+1. Bumps `package.json` version and regenerates `bun.lock` on `dev`
+2. Commits the bump on `dev` as `chore: bump version to X.Y.Z`
+3. Ships that bump to `main` as a 2-parent squash (same plumbing as `scripts/ship-to-main.sh`)
+4. Tags `vX.Y.Z` on the `main` squash commit
+5. Pushes `dev`, `main`, and the tag
+
+All local work finishes before any `git push`, so a failure partway through leaves `origin` untouched. Recovery: `git reset --hard origin/dev` and `git reset --hard origin/main`, then rerun.
+
+The `v*` tag on `main` triggers the deploy workflow in `.github/workflows/`.
 
 ## Reading the log
 
