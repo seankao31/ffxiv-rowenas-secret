@@ -50,14 +50,13 @@ GA4 is integrated via `gtag.js`. When adding new pages or changing routes, ensur
 
 ## Git workflow
 
-Full reference — branching model, 2-parent squash topology, shipping recipe, useful commands, and commit-message rules — lives in [`docs/git-workflow.md`](docs/git-workflow.md). Read it before any non-trivial git work.
+Full reference — branching model, merge topology, commit-message rules, and the release recipe — lives in [`docs/git-workflow.md`](docs/git-workflow.md). Read it before any non-trivial git work.
 
 Quick rules:
 
-- `main` — one squash commit per shipped feature (the first-parent chain is the release log). Tagged `v*` for prod.
-- `dev` — `--no-ff` merges from feature branches; one merge commit per feature, granular history preserved on the feature side.
-- `feat/<ticket>-<slug>` — ephemeral feature branch. The `--no-ff` merge commit on dev is the durable anchor.
-- Ship with `./scripts/ship-to-main.sh <ticket> "<subject>"` — finds dev's merge commit for the ticket and constructs the 2-parent squash on main.
-- Release with `./scripts/release.sh [-M | -m | -p | X.Y.Z]` — bumps version on dev, ships to main, tags `vX.Y.Z`, pushes everything.
-- Never rewrite `dev` or `main`. Never commit to `main` outside the feature-ship or release workflow.
-- Inspect with `git log main --first-parent` (release log) or `git log dev --first-parent` (feature log). Plain `git log` on either branch walks every commit pulled in as a second parent.
+- `main` — all features land here via `--no-ff` merges. Tagged `v*` for prod. `main --first-parent` is the release log.
+- `feat/<ticket>-<slug>` — ephemeral feature branch off main; lives until merged back.
+- Merge to `main` with `--no-ff` and a handcrafted merge commit subject describing what the branch does.
+- Release with `./scripts/release.sh [-M | -m | -p | X.Y.Z]` — bumps version, tags `vX.Y.Z` on main HEAD, pushes.
+- Never rewrite `main`. Never push directly to `main` outside a feature merge or release.
+- Inspect with `git log main --first-parent` (release log). Plain `git log main` walks all commits in second-parent branches.
