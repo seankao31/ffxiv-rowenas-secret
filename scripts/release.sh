@@ -2,16 +2,11 @@
 set -euo pipefail
 
 # Release a new version end-to-end:
-#   1. Bump package.json + bun.lock on dev
-#   2. Ship the bump to main as a 2-parent squash commit
-#   3. Tag vX.Y.Z on the main squash
-#   4. Push dev, main, and tags
+#   1. Bump package.json + bun.lock on main
+#   2. Commit, tag vX.Y.Z, push
 #
 # All local work completes before any push, so a failure partway through
-# leaves origin untouched. Recovery: reset local dev and main to origin,
-# then rerun.
-#
-# See docs/git-workflow.md for the topology this orchestrates.
+# leaves origin untouched. Recovery: git reset --hard origin/main, then rerun.
 
 CURRENT=$(sed -n 's/.*"version": "\(.*\)".*/\1/p' package.json)
 IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
@@ -40,7 +35,7 @@ esac
 
 echo "Releasing: $CURRENT → $VERSION"
 
-# Pre-flight checks
+[ "$(git rev-parse --abbrev-ref HEAD)" = "main" ] || { echo "error: must run from main" >&2; exit 1; }
 [ -z "$(git status --porcelain -uno)" ] || { echo "error: working tree has uncommitted changes — commit or stash first" >&2; exit 1; }
 if git rev-parse "v$VERSION" >/dev/null 2>&1; then
   echo "error: tag v$VERSION already exists" >&2
@@ -49,13 +44,7 @@ fi
 
 echo "Fetching origin"
 git fetch origin
-
-# ---- Step 1: bump on dev (local only) ----
-echo "Switching to dev and fast-forwarding to origin/dev"
-git switch dev
-git merge --ff-only origin/dev
-
-BASE_SHA=$(git rev-parse HEAD)
+git merge --ff-only origin/main
 
 echo "Bumping package.json and regenerating bun.lock"
 sed -i '' "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
@@ -63,35 +52,12 @@ bun install
 
 git add package.json bun.lock
 git commit -m "chore: bump version to $VERSION"
-MERGED_SHA=$(git rev-parse HEAD)
 
-echo "Dev now at $MERGED_SHA (local only)"
-
-# ---- Step 2: ship to main as 2-parent squash (local only) ----
-echo "Switching to main and fast-forwarding to origin/main"
-git switch main
-git merge --ff-only origin/main
-
-echo "Cherry-picking bump into staging"
-git cherry-pick --no-commit "$BASE_SHA..$MERGED_SHA"
-
-TREE=$(git write-tree)
-MAIN_PARENT=$(git rev-parse HEAD)
-MSG=$(printf 'chore: bump version to %s\n' "$VERSION")
-
-echo "Building 2-parent squash commit"
-SHIPPED=$(printf '%s\n' "$MSG" | git commit-tree "$TREE" -p "$MAIN_PARENT" -p "$MERGED_SHA")
-git reset --hard "$SHIPPED"
-
-echo "Main now at $SHIPPED (local only)"
-
-# ---- Step 3: tag the main squash ----
 git tag "v$VERSION"
 echo "Tagged v$VERSION"
 
-# ---- Step 4: push everything ----
-echo "Pushing dev, main, and tags"
-git push --atomic origin dev main
+echo "Pushing main and tag"
+git push origin main
 git push origin "v$VERSION"
 
 echo "Released v$VERSION"
