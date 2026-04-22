@@ -68,27 +68,53 @@ The merge commit on `main` is the permanent anchor for the feature's commit rang
 
 ## Releasing
 
-Shipping a feature doesn't deploy it — only tagging a `v*` on `main` does. Releases bundle one or more shipped features into a single version bump + deploy.
+Shipping a feature doesn't deploy it — only tagging a `v*` on `main` does. Releases bundle one or more shipped features into a single tag + version bump + deploy.
+
+`package.json` always represents the **version currently in development** — the value is ahead of the latest tag, not matching it. A release tags what's already in `package.json`, then bumps `package.json` for the next cycle.
 
 Use `./scripts/release.sh`:
 
 ```sh
-./scripts/release.sh -p           # patch bump (0.9.0 → 0.9.1)
-./scripts/release.sh -m           # minor bump (0.9.0 → 0.10.0)
-./scripts/release.sh -M           # major bump (0.9.0 → 1.0.0)
-./scripts/release.sh 1.2.3        # explicit version
+./scripts/release.sh -p           # tag current, bump patch for next in-dev
+./scripts/release.sh -m           # tag current, bump minor for next in-dev
+./scripts/release.sh -M           # tag current, bump major for next in-dev
+./scripts/release.sh 1.2.3        # tag current, set next in-dev to 1.2.3
 ```
 
-What it does end-to-end:
+What it does end-to-end (given `package.json = 0.10.0` and argument `-m`):
 
-1. Bumps `package.json` version and regenerates `bun.lock` directly on `main`
-2. Commits the bump as `chore: bump version to X.Y.Z`
-3. Tags `vX.Y.Z` on that commit
-4. Pushes `main` and the tag
+1. Tags `v0.10.0` on the current HEAD
+2. Bumps `package.json` version to `0.11.0` and refreshes `bun.lock`
+3. Commits the bump as `chore: bump version to 0.11.0`
+4. Pushes the current branch and the tag
 
-All local work finishes before any `git push`, so a failure partway through leaves `origin` untouched. Recovery: `git reset --hard origin/main`, then rerun.
+All local work finishes before any `git push`, so a failure partway through leaves `origin` untouched. Recovery: `git reset --hard origin/<branch>`, then rerun.
 
 The `v*` tag on `main` triggers the deploy workflow in `.github/workflows/`.
+
+### Hotfixes
+
+A hotfix branch is a release lineage off an older tag — it doesn't merge back to `main`. Main continues its own lineage toward the next minor/major; the hotfix branch exists only to cut patches on the already-released line.
+
+```sh
+# Assume main is at 0.11.0-in-dev and we need a hotfix for v0.10.0.
+git switch -c hotfix/0.10.x v0.10.0
+
+# First commit on the branch sets the in-dev target for the hotfix lineage.
+sed -i '' 's/"version": ".*"/"version": "0.10.1"/' package.json
+bun install
+git add package.json bun.lock
+git commit -m "chore: bump version to 0.10.1"
+
+# Fix commits go here.
+# ...
+
+# Release — same script, different branch.
+./scripts/release.sh -p    # tags v0.10.1, bumps package.json to 0.10.2
+git push -u origin hotfix/0.10.x
+```
+
+`release.sh` doesn't require `main` — it pushes whatever branch you're on. The fix itself usually gets cherry-picked or re-implemented on `main` separately, since main's code has diverged.
 
 ## Reading the log
 

@@ -57,6 +57,6 @@ Quick rules:
 - `main` — all features land here via `--no-ff` merges. Tagged `v*` for prod. `main --first-parent` is the release log.
 - `feat/<ticket>-<slug>` — ephemeral feature branch off main; lives until merged back.
 - Merge to `main` with `--no-ff` and a handcrafted merge commit subject describing what the branch does.
-- Release with `./scripts/release.sh [-M | -m | -p | X.Y.Z]` — bumps version, tags `vX.Y.Z` on main HEAD, pushes.
+- Release with `./scripts/release.sh [-M | -m | -p | X.Y.Z]` — tags current `package.json` version on HEAD, then bumps `package.json` to the next in-dev version, and pushes. `package.json` always represents work-in-progress, not the last release.
 - Never rewrite `main`. Never push directly to `main` outside a feature merge or release.
 - Inspect with `git log main --first-parent` (release log). Plain `git log main` walks all commits in second-parent branches.
